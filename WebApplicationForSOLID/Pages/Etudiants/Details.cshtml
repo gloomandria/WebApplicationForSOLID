@@ -1,0 +1,82 @@
+@page "{id:int}"
+@model WebApplicationForSOLID.Pages.Etudiants.DetailsModel
+@{
+    ViewData["Title"] = "Détails étudiant";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <h1>👤 @Model.Etudiant.NomComplet</h1>
+    <span class="badge bg-secondary fs-6">@Model.Etudiant.NumeroEtudiant</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">Informations personnelles</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Email</dt>
+                    <dd class="col-sm-7">@Model.Etudiant.Email</dd>
+                    <dt class="col-sm-5">Téléphone</dt>
+                    <dd class="col-sm-7">@Model.Etudiant.Telephone</dd>
+                    <dt class="col-sm-5">Date naissance</dt>
+                    <dd class="col-sm-7">@Model.Etudiant.DateNaissance.ToString("dd/MM/yyyy")</dd>
+                    <dt class="col-sm-5">Adresse</dt>
+                    <dd class="col-sm-7">@Model.Etudiant.Adresse</dd>
+                    <dt class="col-sm-5">Inscrit le</dt>
+                    <dd class="col-sm-7">@Model.Etudiant.DateInscription.ToString("dd/MM/yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        @if (Model.Bulletin is not null && Model.Bulletin.Lignes.Any())
+        {
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between">
+                    <span>📊 Bulletin de notes</span>
+                    <span class="badge bg-light text-dark fs-6">Moyenne : @Model.Bulletin.MoyenneGenerale/20 — @Model.Bulletin.Mention</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Matière</th>
+                                <th class="text-center">Coeff.</th>
+                                <th class="text-center">Moyenne</th>
+                                <th class="text-center">Pondérée</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ligne in Model.Bulletin.Lignes)
+                            {
+                                <tr class="@(ligne.MoyenneMatiere < 10 ? "table-danger" : "")">
+                                    <td>@ligne.IntituleMatiere</td>
+                                    <td class="text-center">@ligne.Coefficient</td>
+                                    <td class="text-center fw-bold">@ligne.MoyenneMatiere/20</td>
+                                    <td class="text-center">@ligne.MoyennePonderee</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-success">
+                            <tr>
+                                <td colspan="3" class="fw-bold text-end">Moyenne générale</td>
+                                <td class="text-center fw-bold">@Model.Bulletin.MoyenneGenerale/20</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">Aucune note enregistrée pour cet étudiant.</div>
+        }
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a asp-page="Edit" asp-route-id="@Model.Etudiant.Id" class="btn btn-warning">Modifier</a>
+    <a asp-page="Index" class="btn btn-secondary">Retour</a>
+</div>

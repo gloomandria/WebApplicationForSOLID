@@ -1,0 +1,57 @@
+﻿@page "{id:int}"
+@model WebApplicationForSOLID.Pages.Enseignants.EditModel
+@using WebApplicationForSOLID.Domain.Models
+@{
+    ViewData["Title"] = "Modifier l'enseignant";
+}
+
+<h1>✏️ Modifier l'enseignant</h1>
+
+<form method="post" class="mt-3" style="max-width:560px">
+    <div asp-validation-summary="All" class="alert alert-danger" style="display:@(ViewContext.ModelState.IsValid ? "none" : "block")"></div>
+
+    <input asp-for="Enseignant.Id" type="hidden" />
+    <input asp-for="Enseignant.Matricule" type="hidden" />
+    <input asp-for="Enseignant.DateEmbauche" type="hidden" />
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Matricule</label>
+            <input value="@Model.Enseignant.Matricule" class="form-control" readonly />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Enseignant.Nom" class="form-label"></label>
+            <input asp-for="Enseignant.Nom" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Enseignant.Prenom" class="form-label"></label>
+            <input asp-for="Enseignant.Prenom" class="form-control" />
+        </div>
+        <div class="col-md-8">
+            <label asp-for="Enseignant.Email" class="form-label"></label>
+            <input asp-for="Enseignant.Email" class="form-control" type="email" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Enseignant.Telephone" class="form-label"></label>
+            <input asp-for="Enseignant.Telephone" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Enseignant.Specialite" class="form-label"></label>
+            <input asp-for="Enseignant.Specialite" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Enseignant.Grade" class="form-label"></label>
+            <select asp-for="Enseignant.Grade" class="form-select"
+                    asp-items="Html.GetEnumSelectList<GradeEnseignant>()"></select>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-warning">Enregistrer</button>
+        <a asp-page="Index" class="btn btn-secondary">Annuler</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,75 @@
+@page
+@model WebApplicationForSOLID.Pages.Etudiants.IndexModel
+@{
+    ViewData["Title"] = "Étudiants";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>👨‍🎓 Étudiants</h1>
+    <a asp-page="Create" class="btn btn-primary">+ Nouvel étudiant</a>
+</div>
+
+@if (!Model.Etudiants.Items.Any())
+{
+    <div class="alert alert-info">Aucun étudiant enregistré.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>N° Étudiant</th>
+                    <th>Nom complet</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Date naissance</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.Etudiants.Items)
+                {
+                    <tr>
+                        <td><span class="badge bg-secondary">@e.NumeroEtudiant</span></td>
+                        <td>@e.NomComplet</td>
+                        <td>@e.Email</td>
+                        <td>@e.Telephone</td>
+                        <td>@e.DateNaissance.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">
+                            <a asp-page="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-info">Détails</a>
+                            <a asp-page="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-outline-warning">Éditer</a>
+                            <a asp-page="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">@Model.Etudiants.TotalCount étudiant(s) — Page @Model.Etudiants.Page / @Model.Etudiants.TotalPages</small>
+        <nav>
+            <ul class="pagination mb-0">
+                @if (Model.Etudiants.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.CurrentPage - 1)">‹</a>
+                    </li>
+                }
+                @for (int i = 1; i <= Model.Etudiants.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@i">@i</a>
+                    </li>
+                }
+                @if (Model.Etudiants.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.CurrentPage + 1)">›</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}

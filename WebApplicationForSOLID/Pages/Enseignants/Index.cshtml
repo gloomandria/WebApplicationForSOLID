@@ -1,0 +1,49 @@
+@page
+@model WebApplicationForSOLID.Pages.Enseignants.IndexModel
+@{
+    ViewData["Title"] = "Enseignants";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>👩‍🏫 Enseignants</h1>
+    <a asp-page="Create" class="btn btn-success">+ Nouvel enseignant</a>
+</div>
+
+@if (!Model.Enseignants.Items.Any())
+{
+    <div class="alert alert-info">Aucun enseignant enregistré.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-success">
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom complet</th>
+                    <th>Email</th>
+                    <th>Spécialité</th>
+                    <th>Grade</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.Enseignants.Items)
+                {
+                    <tr>
+                        <td><span class="badge bg-secondary">@e.Matricule</span></td>
+                        <td>@e.NomComplet</td>
+                        <td>@e.Email</td>
+                        <td>@e.Specialite</td>
+                        <td><span class="badge bg-info text-dark">@e.Grade</span></td>
+                        <td class="text-end">
+                            <a asp-page="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-outline-warning">Éditer</a>
+                            <a asp-page="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <small class="text-muted">@Model.Enseignants.TotalCount enseignant(s)</small>
+}

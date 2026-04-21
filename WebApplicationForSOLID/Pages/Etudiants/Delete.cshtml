@@ -1,0 +1,26 @@
+@page "{id:int}"
+@model WebApplicationForSOLID.Pages.Etudiants.DeleteModel
+@{
+    ViewData["Title"] = "Supprimer l'étudiant";
+}
+
+<h1 class="text-danger">🗑️ Supprimer l'étudiant</h1>
+
+<div class="alert alert-warning mt-3">
+    Êtes-vous sûr de vouloir supprimer <strong>@Model.Etudiant.NomComplet</strong> (@Model.Etudiant.NumeroEtudiant) ?
+    Cette action est irréversible.
+</div>
+
+<dl class="row" style="max-width:400px">
+    <dt class="col-sm-5">N° Étudiant</dt>
+    <dd class="col-sm-7">@Model.Etudiant.NumeroEtudiant</dd>
+    <dt class="col-sm-5">Email</dt>
+    <dd class="col-sm-7">@Model.Etudiant.Email</dd>
+    <dt class="col-sm-5">Date naissance</dt>
+    <dd class="col-sm-7">@Model.Etudiant.DateNaissance.ToString("dd/MM/yyyy")</dd>
+</dl>
+
+<form method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+    <a asp-page="Index" class="btn btn-secondary">Annuler</a>
+</form>

@@ -1,0 +1,75 @@
+﻿@page
+@model WebApplicationForSOLID.Pages.IndexModel
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<h1 class="mb-4">🎓 Tableau de bord — Gestion Scolarité</h1>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="display-4 fw-bold">@Model.NombreEtudiants</h2>
+                <p class="card-text fs-5">Étudiants</p>
+                <a asp-page="/Etudiants/Index" class="btn btn-light btn-sm">Voir →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="display-4 fw-bold">@Model.NombreEnseignants</h2>
+                <p class="card-text fs-5">Enseignants</p>
+                <a asp-page="/Enseignants/Index" class="btn btn-light btn-sm">Voir →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="display-4 fw-bold">@Model.NombreMatieres</h2>
+                <p class="card-text fs-5">Matières</p>
+                <a asp-page="/Matieres/Index" class="btn btn-light btn-sm">Voir →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="display-4 fw-bold">@Model.NombreClasses</h2>
+                <p class="card-text fs-5">Classes</p>
+                <a asp-page="/Inscriptions/Index" class="btn btn-light btn-sm">Voir →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-bold">🚀 Actions rapides</div>
+            <div class="card-body d-flex flex-wrap gap-2">
+                <a asp-page="/Etudiants/Create" class="btn btn-outline-primary">+ Nouvel étudiant</a>
+                <a asp-page="/Enseignants/Create" class="btn btn-outline-success">+ Nouvel enseignant</a>
+                <a asp-page="/Matieres/Create" class="btn btn-outline-warning">+ Nouvelle matière</a>
+                <a asp-page="/Notes/Create" class="btn btn-outline-danger">+ Saisir une note</a>
+                <a asp-page="/Inscriptions/Create" class="btn btn-outline-info">+ Inscrire un étudiant</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-bold">🏗️ Architecture SOLID appliquée</div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><span class="badge bg-primary me-2">S</span> Single Responsibility — chaque service = 1 responsabilité</li>
+                    <li><span class="badge bg-success me-2">O</span> Open/Closed — <code>IValidator&lt;T&gt;</code>, extensions DI</li>
+                    <li><span class="badge bg-warning text-dark me-2">L</span> Liskov — repositories substituables (InMemory → SQL)</li>
+                    <li><span class="badge bg-info me-2">I</span> Interface Segregation — <code>IRead/IWriteRepository</code> séparés</li>
+                    <li><span class="badge bg-danger me-2">D</span> Dependency Inversion — PageModels → abstractions uniquement</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

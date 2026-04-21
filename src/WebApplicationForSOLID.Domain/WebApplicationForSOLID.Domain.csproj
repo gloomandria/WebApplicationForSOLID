@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>WebApplicationForSOLID.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Domain n'a aucune dépendance externe — c'est le cœur de l'architecture -->
+
+</Project>

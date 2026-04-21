@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>WebApplicationForSOLID.Application</RootNamespace>
+  </PropertyGroup>
+
+  <!-- MediatR pour le pattern CQRS -->
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.*" />
+  </ItemGroup>
+
+  <!-- Application dépend uniquement de Domain (DIP) -->
+  <ItemGroup>
+    <ProjectReference Include="..\WebApplicationForSOLID.Domain\WebApplicationForSOLID.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
