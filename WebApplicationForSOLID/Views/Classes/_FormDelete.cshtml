@@ -1,0 +1,14 @@
+@model ProjetScolariteSOLID.ViewModels.ClassesViewModel
+
+<input type="hidden" name="ClasseId" value="@Model.ClasseId" />
+@if (Model.SelectedClasse is not null)
+{
+    <div class="alert alert-warning">
+        Supprimer la classe <strong>@Model.SelectedClasse.Nom</strong> ? Action irréversible.
+    </div>
+    <dl class="row">
+        <dt class="col-sm-5">Niveau</dt><dd class="col-sm-7">@Model.SelectedClasse.Niveau</dd>
+        <dt class="col-sm-5">Filière</dt><dd class="col-sm-7">@Model.SelectedClasse.Filiere</dd>
+        <dt class="col-sm-5">Capacité</dt><dd class="col-sm-7">@Model.SelectedClasse.CapaciteMax</dd>
+    </dl>
+}

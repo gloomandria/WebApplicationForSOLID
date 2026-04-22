@@ -34,7 +34,7 @@ builder.Host.UseSerilog((ctx, services, cfg) =>
     }
 });
 
-builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
 builder.Services.AddApplicationServices();                          // Application : MediatR + Services + Validators
 builder.Services.AddInfrastructureServices(builder.Configuration); // Infrastructure : DbContext + Repositories
 
@@ -55,7 +55,7 @@ app.UseSerilogRequestLogging();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -69,7 +69,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
 

@@ -1,0 +1,31 @@
+@model ProjetScolariteSOLID.ViewModels.InscriptionsViewModel
+
+@if (!Model.Inscriptions.Items.Any())
+{
+    <tr id="no-data-row">
+        <td colspan="5"><div class="alert alert-info mb-0">Aucune inscription enregistrée.</div></td>
+    </tr>
+}
+else
+{
+    @foreach (var i in Model.Inscriptions.Items)
+    {
+        var libelle    = i.Statut?.Libelle ?? "";
+        var badgeClass = libelle switch
+        {
+            "Active"    => "bg-success",
+            "Suspendue" => "bg-warning text-dark",
+            _           => "bg-danger"
+        };
+        <tr>
+            <td>@(i.Etudiant?.NomComplet ?? $"Id={i.EtudiantId}")</td>
+            <td>@(i.Classe?.Nom ?? $"Id={i.ClasseId}")</td>
+            <td>@i.DateInscription.ToString("dd/MM/yyyy")</td>
+            <td><span class="badge @badgeClass">@libelle</span></td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit-statut" data-id="@i.Id">Statut</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@i.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

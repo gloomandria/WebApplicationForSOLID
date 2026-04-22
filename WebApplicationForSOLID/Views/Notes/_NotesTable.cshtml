@@ -1,0 +1,25 @@
+@model ProjetScolariteSOLID.ViewModels.NotesViewModel
+
+@if (!Model.Notes.Items.Any())
+{
+    <tr><td colspan="7"><div class="alert alert-info mb-0">Aucune note enregistrée.</div></td></tr>
+}
+else
+{
+    @foreach (var n in Model.Notes.Items)
+    {
+        var noteClass = n.Valeur >= 10 ? "bg-success" : "bg-danger";
+        <tr>
+            <td>@(n.Etudiant?.NomComplet ?? $"Id={n.EtudiantId}")</td>
+            <td>@(n.Matiere?.Intitule ?? $"Id={n.MatiereId}")</td>
+            <td class="text-center"><span class="badge @noteClass">@n.Valeur.ToString("0.##")</span></td>
+            <td><span class="badge bg-secondary">@n.TypeEvaluation</span></td>
+            <td>@n.Date.ToString("dd/MM/yyyy")</td>
+            <td>@n.Commentaire</td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@n.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@n.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

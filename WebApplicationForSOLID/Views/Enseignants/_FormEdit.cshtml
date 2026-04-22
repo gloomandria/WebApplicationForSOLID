@@ -1,0 +1,50 @@
+@model ProjetScolariteSOLID.ViewModels.EnseignantsViewModel
+
+<input type="hidden" name="Enseignant.Id" value="@Model.Enseignant.Id" />
+<input type="hidden" name="Enseignant.Matricule" value="@Model.Enseignant.Matricule" />
+<input type="hidden" name="Enseignant.DateEmbauche" value="@Model.Enseignant.DateEmbauche.ToString("yyyy-MM-dd")" />
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Matricule</label>
+        <input value="@Model.Enseignant.Matricule" class="form-control" readonly />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Nom</label>
+        <input name="Enseignant.Nom" value="@Model.Enseignant.Nom" class="form-control" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Prénom</label>
+        <input name="Enseignant.Prenom" value="@Model.Enseignant.Prenom" class="form-control" required />
+    </div>
+    <div class="col-md-8">
+        <label class="form-label">Email</label>
+        <input name="Enseignant.Email" value="@Model.Enseignant.Email" class="form-control" type="email" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Téléphone</label>
+        <input name="Enseignant.Telephone" value="@Model.Enseignant.Telephone" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Spécialité</label>
+        <select name="Enseignant.SpecialiteId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.SpecialitesList)
+            {
+                if (item.Value == Model.Enseignant.SpecialiteId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Grade</label>
+        <select name="Enseignant.GradeId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.GradesList)
+            {
+                if (item.Value == Model.Enseignant.GradeId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+</div>

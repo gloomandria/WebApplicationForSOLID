@@ -1,0 +1,24 @@
+@model ProjetScolariteSOLID.ViewModels.EtudiantsViewModel
+
+@if (!Model.Etudiants.Items.Any())
+{
+    <tr><td colspan="6"><div class="alert alert-info mb-0">Aucun étudiant enregistré.</div></td></tr>
+}
+else
+{
+    @foreach (var e in Model.Etudiants.Items)
+    {
+        <tr>
+            <td><span class="badge bg-secondary">@e.NumeroEtudiant</span></td>
+            <td>@e.NomComplet</td>
+            <td>@e.Email</td>
+            <td>@e.Telephone</td>
+            <td>@e.DateNaissance.ToString("dd/MM/yyyy")</td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-info btn-details" data-id="@e.Id">Détails</button>
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@e.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@e.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

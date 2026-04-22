@@ -32,18 +32,21 @@ public sealed class GlobalExceptionMiddleware
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        if (context.Request.Headers.Accept.Any(h => h?.Contains("application/json") == true))
+        bool isAjax = context.Request.Headers["X-Requested-With"] == "XMLHttpRequest"
+                   || context.Request.Headers.Accept.Any(h => h?.Contains("application/json") == true);
+
+        if (isAjax)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             return context.Response.WriteAsync(JsonSerializer.Serialize(new
             {
-                statusCode = context.Response.StatusCode,
+                success = false,
                 message = "Une erreur interne est survenue."
             }));
         }
 
-        context.Response.Redirect("/Error");
+        context.Response.Redirect("/Home/Error");
         return Task.CompletedTask;
     }
 }

@@ -1,0 +1,15 @@
+@model ProjetScolariteSOLID.ViewModels.EtudiantsViewModel
+
+<input type="hidden" name="EtudiantId" value="@Model.EtudiantId" />
+@if (Model.SelectedEtudiant is not null)
+{
+    <div class="alert alert-warning">
+        Supprimer <strong>@Model.SelectedEtudiant.NomComplet</strong> (@Model.SelectedEtudiant.NumeroEtudiant) ? Action irréversible.
+    </div>
+    <dl class="row">
+        <dt class="col-sm-5">Email</dt>
+        <dd class="col-sm-7">@Model.SelectedEtudiant.Email</dd>
+        <dt class="col-sm-5">Date naissance</dt>
+        <dd class="col-sm-7">@Model.SelectedEtudiant.DateNaissance.ToString("dd/MM/yyyy")</dd>
+    </dl>
+}
