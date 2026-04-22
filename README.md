@@ -91,7 +91,7 @@ Controller → MediatR (LoggingBehavior → ValidationBehavior) → Handler → 
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [SQL Server](https://www.microsoft.com/fr-fr/sql-server/sql-server-downloads) (version locale ou Express)
-- Visual Studio 2022+ ou VS Code
+- Visual Studio 2022+ (ou VS Code)
 - IIS avec le module **ASP.NET Core Module V2** (Hosting Bundle .NET 10) pour la production
 
 ---
@@ -147,6 +147,45 @@ dotnet run --project WebApplicationForSOLID/ProjetScolariteSOLID.csproj
 
 > En production, le compte du **pool d'application IIS** doit avoir les droits `db_owner` sur la base.
 
+### Authentification JWT
+
+Configurer les paramètres JWT dans `appsettings.json` :
+
+```json
+"Jwt": {
+  "Key": "<clé secrète de 32+ caractères>",
+  "Issuer": "ScolariteApp",
+  "Audience": "ScolariteApp",
+  "ExpiresInMinutes": 480
+}
+```
+
+### Administrateur par défaut
+
+Un compte administrateur est créé automatiquement au premier démarrage :
+
+```json
+"AdminDefault": {
+  "Email": "admin@scolarite.local",
+  "Password": "<mot de passe>"
+}
+```
+
+### SMTP (envoi d'e-mails)
+
+Configurer les paramètres SMTP dans `appsettings.json` :
+
+```json
+"Smtp": {
+  "Host": "smtp.example.com",
+  "Port": "587",
+  "User": "<utilisateur>",
+  "Password": "<mot de passe>",
+  "From": "noreply@scolarite.local",
+  "FromName": "Gestion Scolarité"
+}
+```
+
 ### Logging (Serilog)
 
 Les logs sont écrits vers :
@@ -184,8 +223,10 @@ dotnet publish WebApplicationForSOLID/ProjetScolariteSOLID.csproj -c Release -o 
 
 ```
 WebApplicationForSOLID/
-├── Controllers/                           ← 7 controllers MVC (Etudiants, Enseignants, Matieres,
-│                                            Classes, Inscriptions, Notes, Home)
+├── Controllers/                           ← 10 controllers MVC (Etudiants, Enseignants, Matieres,
+│                                            Classes, Inscriptions, Notes, Home, Account, Admin, Audit)
+│   └── Api/
+│       └── AuthApiController.cs           ← API REST d'authentification JWT
 ├── Middleware/
 │   └── GlobalExceptionMiddleware.cs       ← Gestion centralisée des exceptions
 │                                            (JSON pour AJAX, redirect pour navigation classique)
@@ -201,10 +242,13 @@ WebApplicationForSOLID/
 src/WebApplicationForSOLID.Domain/
 ├── Models/                                ← Entités métier (Etudiant, Enseignant, Matiere,
 │                                            Classe, Inscription, Note, Referentiels…)
-└── Repositories/                          ← Interfaces (IReadRepository<T>, IWriteRepository<T>…)
+│   └── Auth/                              ← ApplicationUser, ApplicationRole, EmailQueue, RolePermission
+├── Repositories/                          ← Interfaces (IReadRepository<T>, IWriteRepository<T>,
+│                                            IAuditLogRepository…)
 
 src/WebApplicationForSOLID.Application/
-├── Contracts/                             ← IValidator<T>, ValidationResult, interfaces de services
+├── Contracts/                             ← IValidator<T>, ValidationResult, interfaces de services,
+│                                            IEmailQueueService, ISmtpEmailSender, IPermissionService
 ├── Services/                              ← EtudiantService, EnseignantService, MatiereService,
 │                                            NoteService, InscriptionService
 ├── Validators/                            ← EtudiantValidator, EnseignantValidator,
@@ -221,8 +265,14 @@ src/WebApplicationForSOLID.Infrastructure/
 │   ├── Migrations/                        ← Migrations EF Core
 │   └── DataSeeder.cs                      ← Données initiales (idempotent)
 ├── Repositories/                          ← Implémentations EF Core
-└── Notifications/
-    └── DatabaseNotificationService.cs     ← INotificationService (inscriptions + notes)
+├── Notifications/
+│   └── DatabaseNotificationService.cs     ← INotificationService (inscriptions + notes)
+├── Email/
+│   ├── EfEmailQueueService.cs             ← File d'attente d'e-mails en base
+│   ├── SmtpEmailSender.cs                 ← Envoi SMTP
+│   └── EmailQueueBackgroundService.cs     ← Service d'arrière-plan pour l'envoi
+└── Auth/
+    └── PermissionService.cs               ← Gestion des permissions par rôle
 
 tests/ProjetScolariteSOLID.Tests/
 ├── Fixtures/
@@ -271,7 +321,12 @@ dotnet test tests/ProjetScolariteSOLID.Tests --collect:"XPlat Code Coverage"
 - ✅ Saisie et gestion des **notes** avec génération de **bulletins**
 - ✅ Interactions **AJAX dynamiques** (modales sans rechargement de page)
 - ✅ Pipeline CQRS avec **logging** et **validation automatiques** via MediatR Behaviors
-- ✅ **Migrations** et **seed** automatiques au démarrage
+- ✅ **Authentification** ASP.NET Identity (inscription, connexion, mot de passe oublié/réinitialisation)
+- ✅ **API REST JWT** pour l'authentification (`/api/auth`)
+- ✅ **Rôles et permissions** — administration des utilisateurs, rôles et permissions par rôle
+- ✅ **File d'attente d'e-mails** SMTP avec service d'arrière-plan (`EmailQueueBackgroundService`)
+- ✅ **Journal d'audit** — traçabilité des opérations (AuditLog)
+- ✅ **Migrations** et **seed** automatiques au démarrage (dont admin par défaut)
 - ✅ Gestion centralisée des erreurs (JSON pour AJAX, redirect pour navigation classique)
 - ✅ Logs structurés persistés en base de données (Serilog)
 - ✅ Déploiement **IIS** via Web Deploy avec `web.config` pré-configuré
