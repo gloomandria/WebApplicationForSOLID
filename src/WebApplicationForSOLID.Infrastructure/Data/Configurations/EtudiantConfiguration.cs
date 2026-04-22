@@ -26,24 +26,6 @@ public sealed class EtudiantConfiguration : IEntityTypeConfiguration<Etudiant>
         builder.HasIndex(e => e.NumeroEtudiant)
                .IsUnique();
 
-        builder.Property(e => e.Nom)
-               .IsRequired()
-               .HasMaxLength(100);
-
-        builder.Property(e => e.Prenom)
-               .IsRequired()
-               .HasMaxLength(100);
-
-        builder.Property(e => e.Email)
-               .IsRequired()
-               .HasMaxLength(256);
-
-        builder.HasIndex(e => e.Email)
-               .IsUnique();
-
-        builder.Property(e => e.Telephone)
-               .HasMaxLength(20);
-
         builder.Property(e => e.Adresse)
                .HasMaxLength(500);
 
@@ -54,7 +36,25 @@ public sealed class EtudiantConfiguration : IEntityTypeConfiguration<Etudiant>
                .IsRequired()
                .HasDefaultValueSql("GETUTCDATE()");
 
-        // Propriété calculée — non mappée en base
+        // Lien obligatoire vers AspNetUsers
+        builder.Property(e => e.UserId)
+               .IsRequired()
+               .HasMaxLength(450);
+
+        builder.HasIndex(e => e.UserId)
+               .IsUnique();
+
+        builder.HasOne(e => e.User)
+               .WithOne()
+               .HasForeignKey<Etudiant>(e => e.UserId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        // Propriétés calculées depuis User — non mappées en base
+        builder.Ignore(e => e.Nom);
+        builder.Ignore(e => e.Prenom);
+        builder.Ignore(e => e.Email);
+        builder.Ignore(e => e.Telephone);
         builder.Ignore(e => e.NomComplet);
     }
 }

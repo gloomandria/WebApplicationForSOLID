@@ -12,46 +12,6 @@ public sealed class EnseignantValidatorTests
     }
 
     [Fact]
-    public void Nom_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EnseignantBuilder.SansNom());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("nom"));
-    }
-
-    [Fact]
-    public void Prenom_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EnseignantBuilder.SansPrenom());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("prénom"));
-    }
-
-    [Fact]
-    public void Email_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EnseignantBuilder.SansEmail());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("email"));
-    }
-
-    [Fact]
-    public void Email_invalide_retourne_erreur()
-    {
-        var result = _sut.Validate(EnseignantBuilder.EmailInvalide());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("valide"));
-    }
-
-    [Fact]
-    public void Matricule_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EnseignantBuilder.SansMatricule());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("matricule"));
-    }
-
-    [Fact]
     public void SpecialiteId_zero_retourne_erreur()
     {
         var result = _sut.Validate(EnseignantBuilder.SansSpecialite());

@@ -1,29 +1,39 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjetScolariteSOLID.Application.CQRS.Enseignants.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.Domain.Repositories;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant}")]
 public sealed class EnseignantsController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IReferentielRepository<Specialite> _specialiteRepo;
     private readonly IReferentielRepository<Grade> _gradeRepo;
+    private readonly IConfiguration _configuration;
     private const int PageSize = 8;
 
     public EnseignantsController(
         IMediator mediator,
+        UserManager<ApplicationUser> userManager,
         IReferentielRepository<Specialite> specialiteRepo,
-        IReferentielRepository<Grade> gradeRepo)
+        IReferentielRepository<Grade> gradeRepo,
+        IConfiguration configuration)
     {
         _mediator       = mediator;
+        _userManager    = userManager;
         _specialiteRepo = specialiteRepo;
         _gradeRepo      = gradeRepo;
+        _configuration  = configuration;
     }
 
     public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
@@ -52,10 +62,26 @@ public sealed class EnseignantsController : Controller
     {
         var enseignant = await _mediator.Send(new GetEnseignantByIdQuery(id), ct);
         var (spec, grad) = await LoadListsAsync(ct);
+        EnseignantFormModel form = new();
+        if (enseignant is not null)
+        {
+            form = new EnseignantFormModel
+            {
+                Id          = enseignant.Id,
+                Matricule   = enseignant.Matricule,
+                Nom         = enseignant.Nom,
+                Prenom      = enseignant.Prenom,
+                Email       = enseignant.Email,
+                Telephone   = enseignant.Telephone,
+                SpecialiteId = enseignant.SpecialiteId,
+                GradeId     = enseignant.GradeId,
+                DateEmbauche = enseignant.DateEmbauche
+            };
+        }
         return PartialView("_FormEdit", new EnseignantsViewModel
         {
             SelectedEnseignant = enseignant,
-            Enseignant = enseignant ?? new Enseignant(),
+            Enseignant = form,
             SpecialitesList = spec,
             GradesList = grad
         });
@@ -72,30 +98,95 @@ public sealed class EnseignantsController : Controller
         });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAjax([FromForm] Enseignant Enseignant, CancellationToken ct)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateAjax([FromForm] EnseignantFormModel form, CancellationToken ct)
     {
-        var result = await _mediator.Send(new CreateEnseignantCommand(Enseignant), ct);
-        if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
-        return Json(new { success = true, message = $"Enseignant {result.Value!.NomComplet} créé avec succès." });
+        // 1. Créer le compte Identity
+        var user = new ApplicationUser
+        {
+            UserName       = form.Email,
+            Email          = form.Email,
+            Prenom         = form.Prenom,
+            Nom            = form.Nom,
+            PhoneNumber    = form.Telephone,
+            EmailConfirmed = true,
+            EstActif       = false
+        };
+        var defaultPassword = _configuration["Identity:DefaultPassword"] ?? "Changeme@1234!";
+        var identityResult = await _userManager.CreateAsync(user, defaultPassword);
+        if (!identityResult.Succeeded)
+        {
+            var errors = string.Join(" | ", identityResult.Errors.Select(e => e.Description));
+            return Json(new { success = false, message = errors });
+        }
+        await _userManager.AddToRoleAsync(user, ApplicationRole.Enseignant);
+
+        // 2. Créer la fiche enseignant liée
+        var enseignant = new Enseignant
+        {
+            UserId      = user.Id,
+            SpecialiteId = form.SpecialiteId,
+            GradeId     = form.GradeId
+        };
+        var result = await _mediator.Send(new CreateEnseignantCommand(enseignant), ct);
+        if (!result.IsSuccess)
+        {
+            await _userManager.DeleteAsync(user);
+            return Json(new { success = false, message = result.ErrorMessage });
+        }
+
+        // 3. Mettre à jour le lien EnseignantId dans AspNetUsers
+        user.EnseignantId = result.Value!.Id;
+        await _userManager.UpdateAsync(user);
+
+        return Json(new { success = true, message = $"Enseignant {user.Prenom} {user.Nom} créé avec succès." });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditAjax([FromForm] Enseignant Enseignant, CancellationToken ct)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAjax([FromForm] EnseignantFormModel form, CancellationToken ct)
     {
-        var result = await _mediator.Send(new UpdateEnseignantCommand(Enseignant), ct);
+        var enseignant = await _mediator.Send(new GetEnseignantByIdQuery(form.Id), ct);
+        if (enseignant is null)
+            return Json(new { success = false, message = "Enseignant introuvable." });
+
+        // Mettre à jour le compte Identity
+        var user = await _userManager.FindByIdAsync(enseignant.UserId);
+        if (user is not null)
+        {
+            user.Prenom      = form.Prenom;
+            user.Nom         = form.Nom;
+            user.PhoneNumber = form.Telephone;
+            if (user.Email != form.Email)
+            {
+                user.Email               = form.Email;
+                user.UserName            = form.Email;
+                user.NormalizedEmail     = form.Email.ToUpperInvariant();
+                user.NormalizedUserName  = form.Email.ToUpperInvariant();
+            }
+            await _userManager.UpdateAsync(user);
+        }
+
+        // Mettre à jour la fiche enseignant
+        enseignant.SpecialiteId = form.SpecialiteId;
+        enseignant.GradeId      = form.GradeId;
+
+        var result = await _mediator.Send(new UpdateEnseignantCommand(enseignant), ct);
         if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
         return Json(new { success = true, message = "Enseignant mis à jour avec succès." });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAjax([FromForm] int EnseignantId, CancellationToken ct)
     {
+        var enseignant = await _mediator.Send(new GetEnseignantByIdQuery(EnseignantId), ct);
         var result = await _mediator.Send(new DeleteEnseignantCommand(EnseignantId), ct);
         if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
+
+        if (enseignant is not null)
+        {
+            var user = await _userManager.FindByIdAsync(enseignant.UserId);
+            if (user is not null) await _userManager.DeleteAsync(user);
+        }
         return Json(new { success = true, message = "Enseignant supprimé avec succès." });
     }
 

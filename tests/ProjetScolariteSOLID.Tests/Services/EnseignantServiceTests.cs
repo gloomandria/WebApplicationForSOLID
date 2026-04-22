@@ -21,7 +21,6 @@ public sealed class EnseignantServiceTests
         var cree = EnseignantBuilder.Valide(10);
 
         _validatorMock.Setup(v => v.Validate(enseignant)).Returns(new ValidationResult());
-        _repoMock.Setup(r => r.EmailExistsAsync(enseignant.Email, null, default)).ReturnsAsync(false);
         _repoMock.Setup(r => r.AddAsync(enseignant, default)).ReturnsAsync(cree);
 
         var result = await _sut.CreateAsync(enseignant);
@@ -46,17 +45,18 @@ public sealed class EnseignantServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_email_duplique_retourne_failure()
+    public async Task CreateAsync_validation_echouee_retourne_failure_specialite()
     {
-        var enseignant = EnseignantBuilder.Valide(0);
+        var enseignant = EnseignantBuilder.SansSpecialite();
+        var validation = new ValidationResult();
+        validation.AddError("La spécialité est obligatoire.");
 
-        _validatorMock.Setup(v => v.Validate(enseignant)).Returns(new ValidationResult());
-        _repoMock.Setup(r => r.EmailExistsAsync(enseignant.Email, null, default)).ReturnsAsync(true);
+        _validatorMock.Setup(v => v.Validate(enseignant)).Returns(validation);
 
         var result = await _sut.CreateAsync(enseignant);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("email", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Enseignant>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // ── UpdateAsync ──────────────────────────────────────────────────────────
@@ -68,7 +68,6 @@ public sealed class EnseignantServiceTests
 
         _validatorMock.Setup(v => v.Validate(enseignant)).Returns(new ValidationResult());
         _repoMock.Setup(r => r.ExistsAsync(3, default)).ReturnsAsync(true);
-        _repoMock.Setup(r => r.EmailExistsAsync(enseignant.Email, 3, default)).ReturnsAsync(false);
 
         var result = await _sut.UpdateAsync(enseignant);
 

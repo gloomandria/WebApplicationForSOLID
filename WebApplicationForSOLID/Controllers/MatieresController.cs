@@ -1,14 +1,17 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Matieres.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant}")]
 public sealed class MatieresController : Controller
 {
     private readonly IMediator _mediator;

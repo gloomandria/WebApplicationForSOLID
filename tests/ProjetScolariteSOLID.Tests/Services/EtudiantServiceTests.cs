@@ -21,7 +21,6 @@ public sealed class EtudiantServiceTests
         var cree = EtudiantBuilder.Valide(42);
 
         _validatorMock.Setup(v => v.Validate(etudiant)).Returns(new ValidationResult());
-        _repoMock.Setup(r => r.EmailExistsAsync(etudiant.Email, null, default)).ReturnsAsync(false);
         _repoMock.Setup(r => r.AddAsync(etudiant, default)).ReturnsAsync(cree);
 
         var result = await _sut.CreateAsync(etudiant);
@@ -49,15 +48,17 @@ public sealed class EtudiantServiceTests
     [Fact]
     public async Task CreateAsync_email_duplique_retourne_failure()
     {
+        // L'unicité email est désormais gérée par Identity (UserManager).
+        // Ce test vérifie qu'une validation métier échouée est correctement propagée.
         var etudiant = EtudiantBuilder.Valide(0);
+        var validation = new ValidationResult();
+        validation.AddError("Date de naissance invalide.");
 
-        _validatorMock.Setup(v => v.Validate(etudiant)).Returns(new ValidationResult());
-        _repoMock.Setup(r => r.EmailExistsAsync(etudiant.Email, null, default)).ReturnsAsync(true);
+        _validatorMock.Setup(v => v.Validate(etudiant)).Returns(validation);
 
         var result = await _sut.CreateAsync(etudiant);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("email", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     // ── UpdateAsync ──────────────────────────────────────────────────────────
@@ -69,7 +70,6 @@ public sealed class EtudiantServiceTests
 
         _validatorMock.Setup(v => v.Validate(etudiant)).Returns(new ValidationResult());
         _repoMock.Setup(r => r.ExistsAsync(5, default)).ReturnsAsync(true);
-        _repoMock.Setup(r => r.EmailExistsAsync(etudiant.Email, 5, default)).ReturnsAsync(false);
 
         var result = await _sut.UpdateAsync(etudiant);
 
@@ -92,18 +92,17 @@ public sealed class EtudiantServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_email_duplique_retourne_failure()
+    public async Task UpdateAsync_validation_echouee_retourne_failure()
     {
         var etudiant = EtudiantBuilder.Valide(5);
+        var validation = new ValidationResult();
+        validation.AddError("Date de naissance invalide.");
 
-        _validatorMock.Setup(v => v.Validate(etudiant)).Returns(new ValidationResult());
-        _repoMock.Setup(r => r.ExistsAsync(5, default)).ReturnsAsync(true);
-        _repoMock.Setup(r => r.EmailExistsAsync(etudiant.Email, 5, default)).ReturnsAsync(true);
+        _validatorMock.Setup(v => v.Validate(etudiant)).Returns(validation);
 
         var result = await _sut.UpdateAsync(etudiant);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("email", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     // ── DeleteAsync ──────────────────────────────────────────────────────────

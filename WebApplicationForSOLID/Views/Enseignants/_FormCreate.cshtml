@@ -3,23 +3,23 @@
 <div class="row g-3">
     <div class="col-md-6">
         <label class="form-label">Nom</label>
-        <input name="Enseignant.Nom" class="form-control" required />
+        <input name="Nom" class="form-control" required />
     </div>
     <div class="col-md-6">
         <label class="form-label">Prénom</label>
-        <input name="Enseignant.Prenom" class="form-control" required />
+        <input name="Prenom" class="form-control" required />
     </div>
     <div class="col-md-8">
         <label class="form-label">Email</label>
-        <input name="Enseignant.Email" class="form-control" type="email" required />
+        <input name="Email" class="form-control" type="email" required />
     </div>
     <div class="col-md-4">
         <label class="form-label">Téléphone</label>
-        <input name="Enseignant.Telephone" class="form-control" />
+        <input name="Telephone" class="form-control" />
     </div>
     <div class="col-md-6">
         <label class="form-label">Spécialité</label>
-        <select name="Enseignant.SpecialiteId" class="form-select">
+        <select name="SpecialiteId" class="form-select">
             <option value="">— Choisir —</option>
             @foreach (var item in Model.SpecialitesList)
             {
@@ -29,7 +29,7 @@
     </div>
     <div class="col-md-6">
         <label class="form-label">Grade</label>
-        <select name="Enseignant.GradeId" class="form-select">
+        <select name="GradeId" class="form-select">
             <option value="">— Choisir —</option>
             @foreach (var item in Model.GradesList)
             {
