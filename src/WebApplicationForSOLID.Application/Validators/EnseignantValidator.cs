@@ -1,8 +1,4 @@
-﻿using ProjetScolariteSOLID.Domain.Repositories;
-using ProjetScolariteSOLID.Application.Contracts;
-using ProjetScolariteSOLID.Domain.Models;
-
-namespace ProjetScolariteSOLID.Application.Validators;
+﻿namespace ProjetScolariteSOLID.Application.Validators;
 
 public sealed class EnseignantValidator : IValidator<Enseignant>
 {

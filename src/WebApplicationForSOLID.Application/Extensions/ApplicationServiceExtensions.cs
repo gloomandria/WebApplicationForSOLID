@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using ProjetScolariteSOLID.Application.Contracts;
 using ProjetScolariteSOLID.Application.CQRS.Behaviors;
 using ProjetScolariteSOLID.Application.Services;
 using ProjetScolariteSOLID.Application.Validators;
-using ProjetScolariteSOLID.Domain.Models;
 
 namespace ProjetScolariteSOLID.Application.Extensions;
 

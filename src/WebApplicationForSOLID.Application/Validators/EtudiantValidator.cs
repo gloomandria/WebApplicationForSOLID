@@ -1,8 +1,4 @@
-﻿using ProjetScolariteSOLID.Domain.Repositories;
-using ProjetScolariteSOLID.Application.Contracts;
-using ProjetScolariteSOLID.Domain.Models;
-
-namespace ProjetScolariteSOLID.Application.Validators;
+﻿namespace ProjetScolariteSOLID.Application.Validators;
 
 /// <summary>
 /// SRP — Seule responsabilité : valider un étudiant.

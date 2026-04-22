@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using ProjetScolariteSOLID.Domain.Models;
 
 namespace ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 

@@ -14,11 +14,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Remplacer le logging ASP.NET Core par Serilog configuré depuis appsettings.json
 builder.Host.UseSerilog((ctx, services, cfg) =>
-    cfg.ReadFrom.Configuration(ctx.Configuration)
-       .ReadFrom.Services(services)
-       .Enrich.FromLogContext()
-       .Enrich.WithMachineName()
-       .Enrich.WithEnvironmentName());
+{
+    try
+    {
+        cfg.ReadFrom.Configuration(ctx.Configuration)
+           .ReadFrom.Services(services)
+           .Enrich.FromLogContext()
+           .Enrich.WithMachineName()
+           .Enrich.WithEnvironmentName();
+    }
+    catch (Exception ex)
+    {
+        // Si le sink SQL échoue (DB inaccessible), fallback console uniquement
+        cfg.WriteTo.Console()
+           .Enrich.FromLogContext()
+           .Enrich.WithMachineName()
+           .Enrich.WithEnvironmentName();
+        Console.Error.WriteLine($"Serilog SQL sink failed, falling back to console: {ex.Message}");
+    }
+});
 
 builder.Services.AddRazorPages();
 builder.Services.AddApplicationServices();                          // Application : MediatR + Services + Validators
@@ -37,7 +51,7 @@ if (args.Contains("--seed-only"))
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseSerilogRequestLogging(); // Log HTTP requests via Serilog
+app.UseSerilogRequestLogging();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -45,7 +59,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Redirection HTTPS uniquement si le serveur écoute sur HTTPS
+var httpsPort = app.Configuration.GetValue<int?>("HTTPS_PORT") ?? app.Configuration.GetValue<int?>("ANCM_HTTPS_PORT");
+if (httpsPort.HasValue)
+{
+    app.UseHttpsRedirection();
+}
 app.UseRouting();
 app.UseAuthorization();
 
@@ -73,7 +92,6 @@ static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erreur lors de la migration ou du seed.");
-        throw;
+        logger.LogError(ex, "Erreur lors de la migration ou du seed. L'application démarre sans migration.");
     }
 }

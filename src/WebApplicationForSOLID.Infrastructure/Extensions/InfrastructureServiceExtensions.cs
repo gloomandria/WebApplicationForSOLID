@@ -1,9 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProjetScolariteSOLID.Application.Contracts;
-using ProjetScolariteSOLID.Domain.Repositories;
-using ProjetScolariteSOLID.Infrastructure.Data;
 using ProjetScolariteSOLID.Infrastructure.Notifications;
 using ProjetScolariteSOLID.Infrastructure.Repositories;
 
@@ -26,16 +22,6 @@ public static class InfrastructureServiceExtensions
                     maxRetryCount: 5,
                     maxRetryDelay: TimeSpan.FromSeconds(30),
                     errorNumbersToAdd: null)));
-
-        // IDbContextFactory — utilisé par DatabaseNotificationService (Singleton-safe)
-        services.AddDbContextFactory<ScolariteDbContext>(options =>
-            options.UseSqlServer(
-                configuration.GetConnectionString("ScolariteDb"),
-                sql => sql.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null)),
-            ServiceLifetime.Scoped);
 
         // ── Repositories EF Core (Scoped = même DbContext par requête) ────────────
         services.AddScoped<IEtudiantRepository,    EfEtudiantRepository>();

@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjetScolariteSOLID.Domain.Repositories;
-using ProjetScolariteSOLID.Infrastructure.Data;
-using ProjetScolariteSOLID.Domain.Models;
-
-namespace ProjetScolariteSOLID.Infrastructure.Repositories;
+﻿namespace ProjetScolariteSOLID.Infrastructure.Repositories;
 
 public sealed class EfNoteRepository : INoteRepository
 {

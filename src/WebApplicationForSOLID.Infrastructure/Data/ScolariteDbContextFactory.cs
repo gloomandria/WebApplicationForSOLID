@@ -28,7 +28,7 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
             {
                 if (connStrings.TryGetProperty("ScolariteDb", out var dbConn))
                 {
-                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString();
+                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString() ?? string.Empty;
                 }
             }
         }
@@ -41,7 +41,7 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
             {
                 if (connStrings.TryGetProperty("ScolariteDb", out var dbConn))
                 {
-                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString();
+                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString() ?? string.Empty;
                 }
             }
         }
