@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Domain.Repositories;
+﻿namespace ProjetScolariteSOLID.Domain.Repositories;
 
 /// <summary>
 /// ISP — Interface dédiée uniquement à la lecture (générique).

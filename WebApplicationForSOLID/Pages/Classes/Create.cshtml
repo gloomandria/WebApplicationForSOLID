@@ -1,0 +1,43 @@
+@page
+@model ProjetScolariteSOLID.Pages.Classes.CreateModel
+@{
+    ViewData["Title"] = "Nouvelle classe";
+}
+
+<h1>🏫 Nouvelle classe</h1>
+
+<form method="post" class="mt-3" style="max-width:560px">
+    <div asp-validation-summary="All" class="alert alert-danger" style="display:@(ViewContext.ModelState.IsValid ? "none" : "block")"></div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="Classe.Nom" class="form-label"></label>
+            <input asp-for="Classe.Nom" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Classe.Niveau" class="form-label"></label>
+            <select asp-for="Classe.Niveau" asp-items="Html.GetEnumSelectList<ProjetScolariteSOLID.Domain.Models.NiveauClasse>()" class="form-select"></select>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Classe.Filiere" class="form-label"></label>
+            <input asp-for="Classe.Filiere" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Classe.AnneeAcademique" class="form-label"></label>
+            <input asp-for="Classe.AnneeAcademique" class="form-control" placeholder="ex: 2024-2025" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Classe.CapaciteMax" class="form-label"></label>
+            <input asp-for="Classe.CapaciteMax" class="form-control" type="number" min="1" />
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-success">Créer</button>
+        <a asp-page="Index" class="btn btn-secondary">Annuler</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

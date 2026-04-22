@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WebApplicationForSOLID.Application/ProjetScolariteSOLID.Application.csproj" />
+    <Project Path="src/WebApplicationForSOLID.Domain/ProjetScolariteSOLID.Domain.csproj" />
+    <Project Path="src/WebApplicationForSOLID.Infrastructure/ProjetScolariteSOLID.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="WebApplicationForSOLID/ProjetScolariteSOLID.csproj" />
+</Solution>

@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Queries;
-using WebApplicationForSOLID.Application.CQRS.Matieres.Commands;
-using WebApplicationForSOLID.Domain.Models;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
+using ProjetScolariteSOLID.Application.CQRS.Matieres.Commands;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Pages.Matieres;
+namespace ProjetScolariteSOLID.Pages.Matieres;
 
 public sealed class CreateModel : PageModel
 {

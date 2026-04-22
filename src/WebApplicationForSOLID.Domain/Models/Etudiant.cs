@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebApplicationForSOLID.Domain.Models;
+namespace ProjetScolariteSOLID.Domain.Models;
 
 public sealed class Etudiant
 {

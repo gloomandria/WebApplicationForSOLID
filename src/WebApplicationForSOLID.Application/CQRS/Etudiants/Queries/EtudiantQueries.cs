@@ -1,7 +1,7 @@
-using MediatR;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.CQRS.Etudiants.Queries;
+namespace ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
 
 public sealed record GetEtudiantsQuery(int Page, int PageSize) : IRequest<PagedResult<Etudiant>>;
 public sealed record GetEtudiantByIdQuery(int Id) : IRequest<Etudiant?>;

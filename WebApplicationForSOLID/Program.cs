@@ -1,10 +1,24 @@
-using Microsoft.EntityFrameworkCore;
-using WebApplicationForSOLID.Application.Extensions;
-using WebApplicationForSOLID.Infrastructure.Data;
-using WebApplicationForSOLID.Infrastructure.Extensions;
-using WebApplicationForSOLID.Web.Middleware;
+﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
+using ProjetScolariteSOLID.Application.Extensions;
+using ProjetScolariteSOLID.Infrastructure.Data;
+using ProjetScolariteSOLID.Infrastructure.Extensions;
+using ProjetScolariteSOLID.Web.Middleware;
+
+// Bootstrap logger pour capturer les erreurs au démarrage avant la configuration complète
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Remplacer le logging ASP.NET Core par Serilog configuré depuis appsettings.json
+builder.Host.UseSerilog((ctx, services, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .ReadFrom.Services(services)
+       .Enrich.FromLogContext()
+       .Enrich.WithMachineName()
+       .Enrich.WithEnvironmentName());
 
 builder.Services.AddRazorPages();
 builder.Services.AddApplicationServices();                          // Application : MediatR + Services + Validators
@@ -14,7 +28,16 @@ var app = builder.Build();
 
 await ApplyMigrationsAndSeedAsync(app);
 
+// Mode seed-only : migrations + seed sans démarrer le serveur web
+if (args.Contains("--seed-only"))
+{
+    Log.Information("Mode --seed-only : migrations et seed terminés. Arrêt.");
+    Log.CloseAndFlush();
+    return;
+}
+
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseSerilogRequestLogging(); // Log HTTP requests via Serilog
 
 if (!app.Environment.IsDevelopment())
 {
@@ -31,6 +54,8 @@ app.MapRazorPages().WithStaticAssets();
 
 app.Run();
 
+Log.CloseAndFlush();
+
 static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
 {
     await using var scope = app.Services.CreateAsyncScope();
@@ -42,11 +67,9 @@ static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
         await db.Database.MigrateAsync();
         logger.LogInformation("Migrations appliquées.");
 
-        if (app.Environment.IsDevelopment())
-        {
-            var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
-            await seeder.SeedAsync();
-        }
+        // Seed en Development et Release (idempotent, ne réinsère pas si données existent)
+        var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
+        await seeder.SeedAsync();
     }
     catch (Exception ex)
     {

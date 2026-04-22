@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Domain.Models;
+﻿namespace ProjetScolariteSOLID.Domain.Models;
 
 /// <summary>
 /// Encapsule le résultat d'une opération sans lever d'exception (pattern Result).

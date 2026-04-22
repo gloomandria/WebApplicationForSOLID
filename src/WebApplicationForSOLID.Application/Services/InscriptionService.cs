@@ -1,8 +1,4 @@
-using WebApplicationForSOLID.Domain.Repositories;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Domain.Models;
-
-namespace WebApplicationForSOLID.Application.Services;
+﻿namespace ProjetScolariteSOLID.Application.Services;
 
 public sealed class InscriptionService : IInscriptionService
 {
@@ -28,6 +24,9 @@ public sealed class InscriptionService : IInscriptionService
 
     public Task<PagedResult<Inscription>> GetInscriptionsAsync(int page, int pageSize, CancellationToken ct = default)
         => _inscriptionRepository.GetPagedAsync(page, pageSize, ct);
+
+    public Task<Inscription?> GetByIdAsync(int id, CancellationToken ct = default)
+        => _inscriptionRepository.GetByIdAsync(id, ct);
 
     public Task<IReadOnlyList<Inscription>> GetByEtudiantAsync(int etudiantId, CancellationToken ct = default)
         => _inscriptionRepository.GetByEtudiantAsync(etudiantId, ct);
@@ -76,6 +75,17 @@ public sealed class InscriptionService : IInscriptionService
         inscription.Statut = statut;
         await _inscriptionRepository.UpdateAsync(inscription, ct);
         _logger.LogInformation("Statut inscription {Id} modifié : {Statut}", inscriptionId, statut);
+        return OperationResult.Success();
+    }
+
+    public async Task<OperationResult> SupprimerAsync(int id, CancellationToken ct = default)
+    {
+        var inscription = await _inscriptionRepository.GetByIdAsync(id, ct);
+        if (inscription is null)
+            return OperationResult.Failure($"Inscription introuvable (Id={id}).");
+
+        await _inscriptionRepository.DeleteAsync(id, ct);
+        _logger.LogInformation("Inscription supprimée : {Id}", id);
         return OperationResult.Success();
     }
 }

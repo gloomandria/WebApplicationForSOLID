@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Inscriptions.Commands;
-using WebApplicationForSOLID.Application.CQRS.Inscriptions.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Inscriptions.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Inscriptions.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Inscriptions.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Inscriptions.Handlers;
 
 public sealed class GetInscriptionsQueryHandler : IRequestHandler<GetInscriptionsQuery, PagedResult<Inscription>>
 {
@@ -12,6 +10,14 @@ public sealed class GetInscriptionsQueryHandler : IRequestHandler<GetInscription
     public GetInscriptionsQueryHandler(IInscriptionService service) => _service = service;
     public Task<PagedResult<Inscription>> Handle(GetInscriptionsQuery request, CancellationToken ct)
         => _service.GetInscriptionsAsync(request.Page, request.PageSize, ct);
+}
+
+public sealed class GetInscriptionByIdQueryHandler : IRequestHandler<GetInscriptionByIdQuery, Inscription?>
+{
+    private readonly IInscriptionService _service;
+    public GetInscriptionByIdQueryHandler(IInscriptionService service) => _service = service;
+    public Task<Inscription?> Handle(GetInscriptionByIdQuery request, CancellationToken ct)
+        => _service.GetByIdAsync(request.Id, ct);
 }
 
 public sealed class GetInscriptionsByEtudiantQueryHandler : IRequestHandler<GetInscriptionsByEtudiantQuery, IReadOnlyList<Inscription>>
@@ -44,4 +50,12 @@ public sealed class ModifierStatutInscriptionCommandHandler : IRequestHandler<Mo
     public ModifierStatutInscriptionCommandHandler(IInscriptionService service) => _service = service;
     public Task<OperationResult> Handle(ModifierStatutInscriptionCommand request, CancellationToken ct)
         => _service.ModifierStatutAsync(request.InscriptionId, request.Statut, ct);
+}
+
+public sealed class SupprimerInscriptionCommandHandler : IRequestHandler<SupprimerInscriptionCommand, OperationResult>
+{
+    private readonly IInscriptionService _service;
+    public SupprimerInscriptionCommandHandler(IInscriptionService service) => _service = service;
+    public Task<OperationResult> Handle(SupprimerInscriptionCommand request, CancellationToken ct)
+        => _service.SupprimerAsync(request.Id, ct);
 }

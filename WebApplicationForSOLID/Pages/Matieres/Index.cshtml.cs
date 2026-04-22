@@ -1,9 +1,9 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApplicationForSOLID.Application.CQRS.Matieres.Queries;
-using WebApplicationForSOLID.Domain.Models;
+using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Pages.Matieres;
+namespace ProjetScolariteSOLID.Pages.Matieres;
 
 public sealed class IndexModel : PageModel
 {

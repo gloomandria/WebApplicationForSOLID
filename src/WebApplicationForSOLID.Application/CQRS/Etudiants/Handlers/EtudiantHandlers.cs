@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Etudiants.Commands;
-using WebApplicationForSOLID.Application.CQRS.Etudiants.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Etudiants.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Etudiants.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Etudiants.Handlers;
 
 public sealed class GetEtudiantsQueryHandler : IRequestHandler<GetEtudiantsQuery, PagedResult<Etudiant>>
 {

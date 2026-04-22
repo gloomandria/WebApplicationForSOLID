@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using WebApplicationForSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Infrastructure.Data.Configurations;
+namespace ProjetScolariteSOLID.Infrastructure.Data.Configurations;
 
 public sealed class MatiereConfiguration : IEntityTypeConfiguration<Matiere>
 {

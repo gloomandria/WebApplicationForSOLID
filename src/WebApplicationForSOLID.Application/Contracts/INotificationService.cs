@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Application.Contracts;
+﻿namespace ProjetScolariteSOLID.Application.Contracts;
 
 /// <summary>
 /// ISP — Séparé des services métier (SRP : notification = responsabilité unique).

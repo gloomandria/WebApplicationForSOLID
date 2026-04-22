@@ -1,9 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using WebApplicationForSOLID.Domain.Repositories;
-using WebApplicationForSOLID.Infrastructure.Data;
-using WebApplicationForSOLID.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjetScolariteSOLID.Domain.Repositories;
+using ProjetScolariteSOLID.Infrastructure.Data;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Infrastructure.Repositories;
+namespace ProjetScolariteSOLID.Infrastructure.Repositories;
 
 public sealed class EfMatiereRepository : IMatiereRepository
 {

@@ -1,6 +1,6 @@
-using WebApplicationForSOLID.Domain.Models;
+﻿using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Domain.Repositories;
+namespace ProjetScolariteSOLID.Domain.Repositories;
 
 /// <summary>
 /// OCP — Extension des interfaces génériques avec des requêtes spécifiques aux étudiants.

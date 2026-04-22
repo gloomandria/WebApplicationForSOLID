@@ -1,6 +1,6 @@
-using WebApplicationForSOLID.Domain.Models;
+﻿using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.Contracts;
+namespace ProjetScolariteSOLID.Application.Contracts;
 
 public interface IClasseService
 {

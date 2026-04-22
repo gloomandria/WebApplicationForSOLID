@@ -1,7 +1,7 @@
-using MediatR;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.CQRS.Matieres.Commands;
+namespace ProjetScolariteSOLID.Application.CQRS.Matieres.Commands;
 
 public sealed record CreateMatiereCommand(Matiere Matiere) : IRequest<OperationResult<Matiere>>;
 public sealed record UpdateMatiereCommand(Matiere Matiere) : IRequest<OperationResult>;

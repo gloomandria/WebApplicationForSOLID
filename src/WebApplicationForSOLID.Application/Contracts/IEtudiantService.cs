@@ -1,6 +1,6 @@
-using WebApplicationForSOLID.Domain.Models;
+﻿using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.Contracts;
+namespace ProjetScolariteSOLID.Application.Contracts;
 
 /// <summary>
 /// DIP — Les PageModel dépendent de cette abstraction.

@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Classes.Commands;
-using WebApplicationForSOLID.Application.CQRS.Classes.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Classes.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Classes.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Classes.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Classes.Handlers;
 
 public sealed class GetAllClassesQueryHandler : IRequestHandler<GetAllClassesQuery, IReadOnlyList<Classe>>
 {

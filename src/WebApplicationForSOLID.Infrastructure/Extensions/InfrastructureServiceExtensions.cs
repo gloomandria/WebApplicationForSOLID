@@ -1,13 +1,13 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Domain.Repositories;
-using WebApplicationForSOLID.Infrastructure.Data;
-using WebApplicationForSOLID.Infrastructure.Notifications;
-using WebApplicationForSOLID.Infrastructure.Repositories;
+using ProjetScolariteSOLID.Application.Contracts;
+using ProjetScolariteSOLID.Domain.Repositories;
+using ProjetScolariteSOLID.Infrastructure.Data;
+using ProjetScolariteSOLID.Infrastructure.Notifications;
+using ProjetScolariteSOLID.Infrastructure.Repositories;
 
-namespace WebApplicationForSOLID.Infrastructure.Extensions;
+namespace ProjetScolariteSOLID.Infrastructure.Extensions;
 
 /// <summary>
 /// OCP — Centralise l'enregistrement de la couche Infrastructure.
@@ -27,6 +27,16 @@ public static class InfrastructureServiceExtensions
                     maxRetryDelay: TimeSpan.FromSeconds(30),
                     errorNumbersToAdd: null)));
 
+        // IDbContextFactory — utilisé par DatabaseNotificationService (Singleton-safe)
+        services.AddDbContextFactory<ScolariteDbContext>(options =>
+            options.UseSqlServer(
+                configuration.GetConnectionString("ScolariteDb"),
+                sql => sql.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null)),
+            ServiceLifetime.Scoped);
+
         // ── Repositories EF Core (Scoped = même DbContext par requête) ────────────
         services.AddScoped<IEtudiantRepository,    EfEtudiantRepository>();
         services.AddScoped<IEnseignantRepository,  EfEnseignantRepository>();
@@ -35,8 +45,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IInscriptionRepository, EfInscriptionRepository>();
         services.AddScoped<INoteRepository,        EfNoteRepository>();
 
-        // ── Notification ──────────────────────────────────────────────────────────
-        services.AddSingleton<INotificationService, LogNotificationService>();
+        // ── Notification — log console + persistance BDD ──────────────────────────
+        services.AddScoped<INotificationService, DatabaseNotificationService>();
 
         // ── Seed ──────────────────────────────────────────────────────────────────
         services.AddScoped<IDataSeeder, DataSeeder>();

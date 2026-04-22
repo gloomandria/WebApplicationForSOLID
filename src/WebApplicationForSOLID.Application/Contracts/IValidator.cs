@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Application.Contracts;
+﻿namespace ProjetScolariteSOLID.Application.Contracts;
 
 /// <summary>
 /// ISP — Interface de validation découplée des services.

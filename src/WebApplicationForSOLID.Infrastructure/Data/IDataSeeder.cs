@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Infrastructure.Data;
+﻿namespace ProjetScolariteSOLID.Infrastructure.Data;
 
 /// <summary>
 /// DIP — Program.cs dépend de cette abstraction, pas de DataSeeder directement.

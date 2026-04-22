@@ -1,7 +1,7 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 
-namespace WebApplicationForSOLID.Web.Middleware;
+namespace ProjetScolariteSOLID.Web.Middleware;
 
 /// <summary>
 /// SRP — Responsabilité unique : intercepter et gérer toutes les exceptions non traitées.

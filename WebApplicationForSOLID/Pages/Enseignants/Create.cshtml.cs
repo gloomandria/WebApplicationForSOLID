@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Commands;
-using WebApplicationForSOLID.Domain.Models;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Commands;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Pages.Enseignants;
+namespace ProjetScolariteSOLID.Pages.Enseignants;
 
 public sealed class CreateModel : PageModel
 {

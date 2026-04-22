@@ -1,11 +1,11 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApplicationForSOLID.Application.CQRS.Classes.Queries;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Queries;
-using WebApplicationForSOLID.Application.CQRS.Etudiants.Queries;
-using WebApplicationForSOLID.Application.CQRS.Matieres.Queries;
+using ProjetScolariteSOLID.Application.CQRS.Classes.Queries;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
+using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
+using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 
-namespace WebApplicationForSOLID.Pages;
+namespace ProjetScolariteSOLID.Pages;
 
 public sealed class IndexModel : PageModel
 {

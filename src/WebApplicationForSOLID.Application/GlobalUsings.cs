@@ -1,4 +1,4 @@
-global using Microsoft.Extensions.Logging;
-global using WebApplicationForSOLID.Domain.Models;
-global using WebApplicationForSOLID.Domain.Repositories;
-global using WebApplicationForSOLID.Application.Contracts;
+﻿global using Microsoft.Extensions.Logging;
+global using ProjetScolariteSOLID.Domain.Models;
+global using ProjetScolariteSOLID.Domain.Repositories;
+global using ProjetScolariteSOLID.Application.Contracts;

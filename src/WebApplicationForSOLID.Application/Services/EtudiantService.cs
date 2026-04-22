@@ -1,8 +1,4 @@
-using WebApplicationForSOLID.Domain.Repositories;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Domain.Models;
-
-namespace WebApplicationForSOLID.Application.Services;
+﻿namespace ProjetScolariteSOLID.Application.Services;
 
 /// <summary>
 /// SRP — Orchestre uniquement la logique métier des étudiants.

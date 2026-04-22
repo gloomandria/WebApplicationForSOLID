@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Matieres.Commands;
-using WebApplicationForSOLID.Application.CQRS.Matieres.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Matieres.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Matieres.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Matieres.Handlers;
 
 public sealed class GetAllMatieresQueryHandler : IRequestHandler<GetAllMatieresQuery, IReadOnlyList<Matiere>>
 {

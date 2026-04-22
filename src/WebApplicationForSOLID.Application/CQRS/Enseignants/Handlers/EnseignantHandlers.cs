@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Commands;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Enseignants.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Enseignants.Handlers;
 
 public sealed class GetEnseignantsQueryHandler : IRequestHandler<GetEnseignantsQuery, PagedResult<Enseignant>>
 {

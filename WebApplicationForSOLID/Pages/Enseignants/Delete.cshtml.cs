@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Commands;
-using WebApplicationForSOLID.Application.CQRS.Enseignants.Queries;
-using WebApplicationForSOLID.Domain.Models;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Pages.Enseignants;
+namespace ProjetScolariteSOLID.Pages.Enseignants;
 
 public sealed class DeleteModel : PageModel
 {

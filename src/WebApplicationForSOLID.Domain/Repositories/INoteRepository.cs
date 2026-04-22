@@ -1,6 +1,6 @@
-using WebApplicationForSOLID.Domain.Models;
+﻿using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Domain.Repositories;
+namespace ProjetScolariteSOLID.Domain.Repositories;
 
 public interface INoteRepository : IReadRepository<Note>, IWriteRepository<Note>
 {

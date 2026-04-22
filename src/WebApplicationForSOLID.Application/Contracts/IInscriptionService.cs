@@ -1,12 +1,14 @@
-using WebApplicationForSOLID.Domain.Models;
+﻿using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.Contracts;
+namespace ProjetScolariteSOLID.Application.Contracts;
 
 public interface IInscriptionService
 {
     Task<PagedResult<Inscription>> GetInscriptionsAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<Inscription?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<OperationResult<Inscription>> InscrireEtudiantAsync(int etudiantId, int classeId, CancellationToken ct = default);
     Task<OperationResult> ModifierStatutAsync(int inscriptionId, StatutInscription statut, CancellationToken ct = default);
     Task<IReadOnlyList<Inscription>> GetByEtudiantAsync(int etudiantId, CancellationToken ct = default);
     Task<IReadOnlyList<Inscription>> GetByClasseAsync(int classeId, CancellationToken ct = default);
+    Task<OperationResult> SupprimerAsync(int id, CancellationToken ct = default);
 }

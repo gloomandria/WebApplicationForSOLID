@@ -1,0 +1,81 @@
+@page
+@model ProjetScolariteSOLID.Pages.Notes.IndexModel
+@{
+    ViewData["Title"] = "Notes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>📝 Notes</h1>
+    <a asp-page="Create" class="btn btn-info text-white">+ Ajouter une note</a>
+</div>
+
+@if (!Model.Notes.Items.Any())
+{
+    <div class="alert alert-info">Aucune note enregistrée.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-info">
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Matière</th>
+                    <th class="text-center">Note /20</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Commentaire</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var n in Model.Notes.Items)
+                {
+                    <tr>
+                        <td>@(n.Etudiant?.NomComplet ?? $"Id={n.EtudiantId}")</td>
+                        <td>@(n.Matiere?.Intitule ?? $"Id={n.MatiereId}")</td>
+                        <td class="text-center">
+                            @{
+                                var noteClass = n.Valeur >= 10 ? "bg-success" : "bg-danger";
+                            }
+                            <span class="badge @noteClass">@n.Valeur.ToString("0.##")</span>
+                        </td>
+                        <td><span class="badge bg-secondary">@n.TypeEvaluation</span></td>
+                        <td>@n.Date.ToString("dd/MM/yyyy")</td>
+                        <td>@n.Commentaire</td>
+                        <td class="text-end">
+                            <a asp-page="Edit" asp-route-id="@n.Id" class="btn btn-sm btn-outline-warning">Éditer</a>
+                            <a asp-page="Delete" asp-route-id="@n.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">@Model.Notes.TotalCount note(s) — Page @Model.Notes.Page / @Model.Notes.TotalPages</small>
+        <nav>
+            <ul class="pagination mb-0">
+                @if (Model.Notes.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.CurrentPage - 1)">‹</a>
+                    </li>
+                }
+                @for (int p = 1; p <= Model.Notes.TotalPages; p++)
+                {
+                    <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@p">@p</a>
+                    </li>
+                }
+                @if (Model.Notes.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.CurrentPage + 1)">›</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}

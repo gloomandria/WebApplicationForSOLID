@@ -1,7 +1,7 @@
-using MediatR;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.CQRS.Etudiants.Commands;
+namespace ProjetScolariteSOLID.Application.CQRS.Etudiants.Commands;
 
 public sealed record CreateEtudiantCommand(Etudiant Etudiant) : IRequest<OperationResult<Etudiant>>;
 public sealed record UpdateEtudiantCommand(Etudiant Etudiant) : IRequest<OperationResult>;

@@ -1,10 +1,8 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Notes.Commands;
-using WebApplicationForSOLID.Application.CQRS.Notes.Queries;
-using WebApplicationForSOLID.Domain.Models;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.CQRS.Notes.Commands;
+using ProjetScolariteSOLID.Application.CQRS.Notes.Queries;
 
-namespace WebApplicationForSOLID.Application.CQRS.Notes.Handlers;
+namespace ProjetScolariteSOLID.Application.CQRS.Notes.Handlers;
 
 public sealed class GetNotesQueryHandler : IRequestHandler<GetNotesQuery, PagedResult<Note>>
 {

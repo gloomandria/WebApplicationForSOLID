@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using WebApplicationForSOLID.Infrastructure.Data.Configurations;
-using WebApplicationForSOLID.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjetScolariteSOLID.Infrastructure.Data.Configurations;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Infrastructure.Data;
+namespace ProjetScolariteSOLID.Infrastructure.Data;
 
 /// <summary>
 /// DbContext central de l'application — applique toutes les configurations via ApplyConfigurationsFromAssembly.

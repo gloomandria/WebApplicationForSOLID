@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Domain.Models;
+﻿namespace ProjetScolariteSOLID.Domain.Models;
 
 public sealed class PagedResult<T>
 {

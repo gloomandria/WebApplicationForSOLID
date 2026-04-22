@@ -1,4 +1,4 @@
-namespace WebApplicationForSOLID.Domain.Models;
+﻿namespace ProjetScolariteSOLID.Domain.Models;
 
 /// <summary>
 /// Résumé académique d'un étudiant : moyennes pondérées par matière.

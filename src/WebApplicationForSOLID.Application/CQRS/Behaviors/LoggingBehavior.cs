@@ -1,8 +1,8 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace WebApplicationForSOLID.Application.CQRS.Behaviors;
+namespace ProjetScolariteSOLID.Application.CQRS.Behaviors;
 
 /// <summary>
 /// SRP — Cross-cutting concern : log automatique de toutes les requêtes MediatR.

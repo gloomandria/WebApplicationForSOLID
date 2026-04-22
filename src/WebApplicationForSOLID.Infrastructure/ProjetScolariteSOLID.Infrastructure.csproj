@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>WebApplicationForSOLID.Infrastructure</RootNamespace>
+    <RootNamespace>ProjetScolariteSOLID.Infrastructure</RootNamespace>
   </PropertyGroup>
 
   <!-- EF Core SQL Server uniquement dans Infrastructure -->
@@ -19,8 +19,8 @@
 
   <!-- Infrastructure dépend de Domain + Application -->
   <ItemGroup>
-    <ProjectReference Include="..\WebApplicationForSOLID.Domain\WebApplicationForSOLID.Domain.csproj" />
-    <ProjectReference Include="..\WebApplicationForSOLID.Application\WebApplicationForSOLID.Application.csproj" />
+    <ProjectReference Include="..\WebApplicationForSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
+    <ProjectReference Include="..\WebApplicationForSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
   </ItemGroup>
 
 </Project>

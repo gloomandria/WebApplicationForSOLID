@@ -1,7 +1,7 @@
-using MediatR;
-using WebApplicationForSOLID.Application.Contracts;
+﻿using MediatR;
+using ProjetScolariteSOLID.Application.Contracts;
 
-namespace WebApplicationForSOLID.Application.CQRS.Behaviors;
+namespace ProjetScolariteSOLID.Application.CQRS.Behaviors;
 
 /// <summary>
 /// SRP — Cross-cutting concern : validation automatique des Commands via IValidator&lt;T&gt;.

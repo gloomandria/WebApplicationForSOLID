@@ -1,11 +1,11 @@
-using Microsoft.Extensions.DependencyInjection;
-using WebApplicationForSOLID.Application.Contracts;
-using WebApplicationForSOLID.Application.CQRS.Behaviors;
-using WebApplicationForSOLID.Application.Services;
-using WebApplicationForSOLID.Application.Validators;
-using WebApplicationForSOLID.Domain.Models;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ProjetScolariteSOLID.Application.Contracts;
+using ProjetScolariteSOLID.Application.CQRS.Behaviors;
+using ProjetScolariteSOLID.Application.Services;
+using ProjetScolariteSOLID.Application.Validators;
+using ProjetScolariteSOLID.Domain.Models;
 
-namespace WebApplicationForSOLID.Application.Extensions;
+namespace ProjetScolariteSOLID.Application.Extensions;
 
 /// <summary>
 /// OCP — Centralise l'enregistrement de la couche Application.

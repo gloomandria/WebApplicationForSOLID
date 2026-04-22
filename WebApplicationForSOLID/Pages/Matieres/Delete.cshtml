@@ -1,0 +1,28 @@
+@page "{id:int}"
+@model ProjetScolariteSOLID.Pages.Matieres.DeleteModel
+@{
+    ViewData["Title"] = "Supprimer la matière";
+}
+
+<h1 class="text-danger">🗑️ Supprimer la matière</h1>
+
+<div class="alert alert-warning mt-3">
+    Êtes-vous sûr de vouloir supprimer la matière <strong>@Model.Matiere.Intitule</strong> (@Model.Matiere.Code) ?
+    Cette action est irréversible.
+</div>
+
+<dl class="row" style="max-width:400px">
+    <dt class="col-sm-5">Code</dt>
+    <dd class="col-sm-7"><code>@Model.Matiere.Code</code></dd>
+    <dt class="col-sm-5">Intitulé</dt>
+    <dd class="col-sm-7">@Model.Matiere.Intitule</dd>
+    <dt class="col-sm-5">Coefficient</dt>
+    <dd class="col-sm-7">@Model.Matiere.Coefficient</dd>
+    <dt class="col-sm-5">Enseignant</dt>
+    <dd class="col-sm-7">@(Model.Matiere.Enseignant?.NomComplet ?? "—")</dd>
+</dl>
+
+<form method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+    <a asp-page="Index" class="btn btn-secondary">Annuler</a>
+</form>
