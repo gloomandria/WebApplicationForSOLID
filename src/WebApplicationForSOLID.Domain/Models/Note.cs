@@ -20,7 +20,9 @@ public sealed class Note
     public decimal Valeur { get; set; }
 
     [Display(Name = "Type d'évaluation")]
-    public TypeEvaluation TypeEvaluation { get; set; }
+    public int TypeEvaluationId { get; set; }
+
+    public TypeEvaluationRef? TypeEvaluation { get; set; }
 
     [Display(Name = "Date")]
     [DataType(DataType.Date)]
@@ -28,12 +30,4 @@ public sealed class Note
 
     [Display(Name = "Commentaire")]
     public string Commentaire { get; set; } = string.Empty;
-}
-
-public enum TypeEvaluation
-{
-    [Display(Name = "Contrôle continu")] ControleContinu,
-    [Display(Name = "Examen partiel")] ExamenPartiel,
-    [Display(Name = "Examen final")] ExamenFinal,
-    [Display(Name = "Rattrapage")] Rattrapage
 }

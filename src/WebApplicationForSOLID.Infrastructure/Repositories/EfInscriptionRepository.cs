@@ -25,8 +25,7 @@ public sealed class EfInscriptionRepository : IInscriptionRepository
     public Task<bool> ExistsAsync(int etudiantId, int classeId, CancellationToken ct = default)
         => _context.Inscriptions.AnyAsync(
                i => i.EtudiantId == etudiantId &&
-                    i.ClasseId == classeId &&
-                    i.Statut == StatutInscription.Active, ct);
+                    i.ClasseId == classeId, ct);
 
     public async Task<IReadOnlyList<Inscription>> GetByEtudiantAsync(int etudiantId, CancellationToken ct = default)
         => await _context.Inscriptions

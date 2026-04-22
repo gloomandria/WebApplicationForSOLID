@@ -19,11 +19,6 @@ public sealed class NoteConfiguration : IEntityTypeConfiguration<Note>
                .IsRequired()
                .HasPrecision(4, 2); // ex: 18.50
 
-        builder.Property(n => n.TypeEvaluation)
-               .IsRequired()
-               .HasConversion<string>()
-               .HasMaxLength(50);
-
         builder.Property(n => n.Date)
                .IsRequired();
 
@@ -39,6 +34,12 @@ public sealed class NoteConfiguration : IEntityTypeConfiguration<Note>
         builder.HasOne(n => n.Matiere)
                .WithMany()
                .HasForeignKey(n => n.MatiereId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(n => n.TypeEvaluation)
+               .WithMany()
+               .HasForeignKey(n => n.TypeEvaluationId)
                .IsRequired()
                .OnDelete(DeleteBehavior.Restrict);
     }

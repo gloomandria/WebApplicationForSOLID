@@ -49,7 +49,7 @@ public sealed class ModifierStatutInscriptionCommandHandler : IRequestHandler<Mo
     private readonly IInscriptionService _service;
     public ModifierStatutInscriptionCommandHandler(IInscriptionService service) => _service = service;
     public Task<OperationResult> Handle(ModifierStatutInscriptionCommand request, CancellationToken ct)
-        => _service.ModifierStatutAsync(request.InscriptionId, request.Statut, ct);
+        => _service.ModifierStatutAsync(request.InscriptionId, request.StatutId, ct);
 }
 
 public sealed class SupprimerInscriptionCommandHandler : IRequestHandler<SupprimerInscriptionCommand, OperationResult>

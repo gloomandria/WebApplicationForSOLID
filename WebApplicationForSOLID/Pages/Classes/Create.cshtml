@@ -15,16 +15,22 @@
             <input asp-for="Classe.Nom" class="form-control" />
         </div>
         <div class="col-md-6">
-            <label asp-for="Classe.Niveau" class="form-label"></label>
-            <select asp-for="Classe.Niveau" asp-items="Html.GetEnumSelectList<ProjetScolariteSOLID.Domain.Models.NiveauClasse>()" class="form-select"></select>
+            <label asp-for="Classe.NiveauId" class="form-label">Niveau</label>
+            <select asp-for="Classe.NiveauId" asp-items="Model.NiveauxList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
         <div class="col-md-6">
-            <label asp-for="Classe.Filiere" class="form-label"></label>
-            <input asp-for="Classe.Filiere" class="form-control" />
+            <label asp-for="Classe.FiliereId" class="form-label">Filière</label>
+            <select asp-for="Classe.FiliereId" asp-items="Model.FilieresList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
         <div class="col-md-6">
-            <label asp-for="Classe.AnneeAcademique" class="form-label"></label>
-            <input asp-for="Classe.AnneeAcademique" class="form-control" placeholder="ex: 2024-2025" />
+            <label asp-for="Classe.AnneeAcademiqueId" class="form-label">Année académique</label>
+            <select asp-for="Classe.AnneeAcademiqueId" asp-items="Model.AnneesAcadList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
         <div class="col-md-4">
             <label asp-for="Classe.CapaciteMax" class="form-label"></label>

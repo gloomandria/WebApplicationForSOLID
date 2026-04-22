@@ -5,6 +5,7 @@ public sealed class InscriptionService : IInscriptionService
     private readonly IInscriptionRepository _inscriptionRepository;
     private readonly IEtudiantRepository _etudiantRepository;
     private readonly IClasseRepository _classeRepository;
+    private readonly IReferentielRepository<StatutInscriptionRef> _statutRepository;
     private readonly INotificationService _notificationService;
     private readonly ILogger<InscriptionService> _logger;
 
@@ -12,12 +13,14 @@ public sealed class InscriptionService : IInscriptionService
         IInscriptionRepository inscriptionRepository,
         IEtudiantRepository etudiantRepository,
         IClasseRepository classeRepository,
+        IReferentielRepository<StatutInscriptionRef> statutRepository,
         INotificationService notificationService,
         ILogger<InscriptionService> logger)
     {
         _inscriptionRepository = inscriptionRepository;
         _etudiantRepository = etudiantRepository;
         _classeRepository = classeRepository;
+        _statutRepository = statutRepository;
         _notificationService = notificationService;
         _logger = logger;
     }
@@ -51,11 +54,15 @@ public sealed class InscriptionService : IInscriptionService
         if (nbEtudiants >= classe.CapaciteMax)
             return OperationResult<Inscription>.Failure($"La classe {classe.Nom} a atteint sa capacité maximale ({classe.CapaciteMax} étudiants).");
 
+        var statuts = await _statutRepository.GetAllAsync(ct);
+        var statutActive = statuts.FirstOrDefault(s => s.Libelle == "Active")
+                           ?? throw new InvalidOperationException("Statut 'Active' introuvable dans le référentiel.");
+
         var inscription = new Inscription
         {
             EtudiantId = etudiantId,
             ClasseId = classeId,
-            Statut = StatutInscription.Active
+            StatutId = statutActive.Id
         };
 
         var created = await _inscriptionRepository.AddAsync(inscription, ct);
@@ -66,15 +73,15 @@ public sealed class InscriptionService : IInscriptionService
         return OperationResult<Inscription>.Success(created);
     }
 
-    public async Task<OperationResult> ModifierStatutAsync(int inscriptionId, StatutInscription statut, CancellationToken ct = default)
+    public async Task<OperationResult> ModifierStatutAsync(int inscriptionId, int statutId, CancellationToken ct = default)
     {
         var inscription = await _inscriptionRepository.GetByIdAsync(inscriptionId, ct);
         if (inscription is null)
             return OperationResult.Failure("Inscription introuvable.");
 
-        inscription.Statut = statut;
+        inscription.StatutId = statutId;
         await _inscriptionRepository.UpdateAsync(inscription, ct);
-        _logger.LogInformation("Statut inscription {Id} modifié : {Statut}", inscriptionId, statut);
+        _logger.LogInformation("Statut inscription {Id} modifié : statutId={StatutId}", inscriptionId, statutId);
         return OperationResult.Success();
     }
 

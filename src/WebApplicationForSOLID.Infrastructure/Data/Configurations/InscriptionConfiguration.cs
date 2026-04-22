@@ -15,11 +15,6 @@ public sealed class InscriptionConfiguration : IEntityTypeConfiguration<Inscript
         builder.Property(i => i.Id)
                .UseIdentityColumn();
 
-        builder.Property(i => i.Statut)
-               .IsRequired()
-               .HasConversion<string>()
-               .HasMaxLength(30);
-
         builder.Property(i => i.DateInscription)
                .IsRequired()
                .HasDefaultValueSql("GETUTCDATE()");
@@ -37,6 +32,12 @@ public sealed class InscriptionConfiguration : IEntityTypeConfiguration<Inscript
         builder.HasOne(i => i.Classe)
                .WithMany()
                .HasForeignKey(i => i.ClasseId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.Statut)
+               .WithMany()
+               .HasForeignKey(i => i.StatutId)
                .IsRequired()
                .OnDelete(DeleteBehavior.Restrict);
     }

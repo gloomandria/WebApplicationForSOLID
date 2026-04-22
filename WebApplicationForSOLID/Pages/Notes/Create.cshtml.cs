@@ -6,20 +6,27 @@ using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Notes.Commands;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Repositories;
 
 namespace ProjetScolariteSOLID.Pages.Notes;
 
 public sealed class CreateModel : PageModel
 {
     private readonly IMediator _mediator;
+    private readonly IReferentielRepository<TypeEvaluationRef> _typeEvalRepo;
 
-    public CreateModel(IMediator mediator) => _mediator = mediator;
+    public CreateModel(IMediator mediator, IReferentielRepository<TypeEvaluationRef> typeEvalRepo)
+    {
+        _mediator     = mediator;
+        _typeEvalRepo = typeEvalRepo;
+    }
 
     [BindProperty]
     public Note Note { get; set; } = new();
 
-    public SelectList EtudiantsList { get; private set; } = default!;
-    public SelectList MatieresList  { get; private set; } = default!;
+    public SelectList EtudiantsList    { get; private set; } = default!;
+    public SelectList MatieresList     { get; private set; } = default!;
+    public SelectList TypesEvalList    { get; private set; } = default!;
 
     public async Task OnGetAsync(CancellationToken ct) => await LoadListsAsync(ct);
 
@@ -41,9 +48,11 @@ public sealed class CreateModel : PageModel
 
     private async Task LoadListsAsync(CancellationToken ct)
     {
-        var etudiants = await _mediator.Send(new GetAllEtudiantsQuery(), ct);
-        var matieres  = await _mediator.Send(new GetAllMatieresQuery(), ct);
-        EtudiantsList = new SelectList(etudiants, nameof(Etudiant.Id), nameof(Etudiant.NomComplet));
-        MatieresList  = new SelectList(matieres,  nameof(Matiere.Id),  nameof(Matiere.Intitule));
+        var etudiants  = await _mediator.Send(new GetAllEtudiantsQuery(), ct);
+        var matieres   = await _mediator.Send(new GetAllMatieresQuery(), ct);
+        var typesEval  = await _typeEvalRepo.GetAllAsync(ct);
+        EtudiantsList  = new SelectList(etudiants,  nameof(Etudiant.Id),          nameof(Etudiant.NomComplet));
+        MatieresList   = new SelectList(matieres,   nameof(Matiere.Id),           nameof(Matiere.Intitule));
+        TypesEvalList  = new SelectList(typesEval,  nameof(TypeEvaluationRef.Id), nameof(TypeEvaluationRef.Libelle));
     }
 }

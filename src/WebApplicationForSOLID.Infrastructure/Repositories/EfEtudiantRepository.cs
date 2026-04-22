@@ -54,7 +54,8 @@ public sealed class EfEtudiantRepository : IEtudiantRepository
     public async Task<IReadOnlyList<Etudiant>> GetByClasseAsync(int classeId, CancellationToken ct = default)
         => await _context.Inscriptions
                          .AsNoTracking()
-                         .Where(i => i.ClasseId == classeId && i.Statut == StatutInscription.Active)
+                         .Where(i => i.ClasseId == classeId
+                                && i.Statut != null && i.Statut.Libelle == "Active")
                          .Include(i => i.Etudiant)
                          .Select(i => i.Etudiant!)
                          .OrderBy(e => e.Nom)

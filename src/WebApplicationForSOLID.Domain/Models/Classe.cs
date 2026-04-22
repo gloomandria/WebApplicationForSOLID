@@ -10,24 +10,20 @@ public sealed class Classe
     public string Nom { get; set; } = string.Empty;
 
     [Display(Name = "Niveau")]
-    public NiveauClasse Niveau { get; set; }
+    public int NiveauId { get; set; }
+
+    public Niveau? Niveau { get; set; }
 
     [Display(Name = "Année académique")]
-    public string AnneeAcademique { get; set; } = string.Empty;
+    public int AnneeAcademiqueId { get; set; }
+
+    public AnneeAcademique? AnneeAcademique { get; set; }
 
     [Display(Name = "Capacité max.")]
     public int CapaciteMax { get; set; } = 30;
 
     [Display(Name = "Filière")]
-    public string Filiere { get; set; } = string.Empty;
-}
+    public int FiliereId { get; set; }
 
-public enum NiveauClasse
-{
-    [Display(Name = "Licence 1")] L1,
-    [Display(Name = "Licence 2")] L2,
-    [Display(Name = "Licence 3")] L3,
-    [Display(Name = "Master 1")] M1,
-    [Display(Name = "Master 2")] M2,
-    [Display(Name = "Doctorat")] Doctorat
+    public Filiere? Filiere { get; set; }
 }
