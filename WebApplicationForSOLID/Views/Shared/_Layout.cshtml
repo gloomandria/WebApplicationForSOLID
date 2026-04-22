@@ -40,6 +40,22 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-controller="Notes" asp-action="Index">Notes</a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link text-white dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                📋 Référentiels
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="AnneesAcademiques">📅 Années académiques</a></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Filieres">🎓 Filières</a></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Grades">🏅 Grades</a></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Niveaux">📊 Niveaux</a></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Specialites">🔬 Spécialités</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="StatutsInscription">📌 Statuts d'inscription</a></li>
+                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="TypesEvaluation">📝 Types d'évaluation</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
