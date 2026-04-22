@@ -3,6 +3,10 @@
     ViewData["Title"] = "Notes";
 }
 
+<div id="app-data"
+     data-controller="Notes"
+     data-current-page="@Model.CurrentPage"></div>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>📝 Notes</h1>
     <button type="button" class="btn btn-info text-white" id="btn-open-create">+ Ajouter une note</button>
@@ -106,80 +110,6 @@
 </div>
 
 @section Scripts {
-<script>
-(function ($) {
-    let currentPage = @Model.CurrentPage;
-    const token = () => $('input[name="__RequestVerificationToken"]').val() ?? '';
-
-    function showAlert(msg, ok) {
-        $('#alert-zone').html(
-            `<div class="alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`
-        );
-    }
-
-    function refreshTable(page) {
-        return $.get('/Notes/Table', { page })
-            .done(html => { $('#table-body').html(html); bindRowButtons(); });
-    }
-
-    function loadModal(modalId, bodyId, url) {
-        $('#' + bodyId).html('<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>');
-        bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId)).show();
-        return $.get(url)
-            .done(html => $('#' + bodyId).html(html))
-            .fail(() => {
-                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
-                showAlert('Impossible de charger le formulaire.', false);
-            });
-    }
-
-    function wireForm(formId, alertId, actionUrl, modalId) {
-        const $form = $('#' + formId);
-        $form[0].onsubmit = function (e) {
-            e.preventDefault();
-            $('#' + alertId).text('');
-            const fd = new FormData($form[0]);
-            $('#' + modalId + '-body').find('input,select,textarea').each(function () {
-                if (this.name) fd.set(this.name, this.value);
-            });
-            $.ajax({
-                url: actionUrl, method: 'POST', data: fd, processData: false, contentType: false,
-                headers: { 'RequestVerificationToken': token() }
-            }).done(data => {
-                if (!data.success) { $('#' + alertId).text(data.message); return; }
-                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
-                showAlert(data.message, true);
-                refreshTable(currentPage);
-            }).fail(() => $('#' + alertId).text('Erreur serveur inattendue.'));
-        };
-    }
-
-    $('#btn-open-create').on('click', function () {
-        $('#modal-create-alert').text('');
-        loadModal('modal-create', 'modal-create-body', '/Notes/FormCreate')
-            .done(() => wireForm('form-create', 'modal-create-alert', '/Notes/CreateAjax', 'modal-create'));
-    });
-
-    $('#pagination-links').on('click', '.ajax-page', function (e) {
-        e.preventDefault();
-        currentPage = parseInt($(this).data('page'), 10);
-        refreshTable(currentPage);
-    });
-
-    function bindRowButtons() {
-        $('.btn-edit').off('click').on('click', function () {
-            $('#modal-edit-alert').text('');
-            loadModal('modal-edit', 'modal-edit-body', '/Notes/FormEdit?id=' + $(this).data('id'))
-                .done(() => wireForm('form-edit', 'modal-edit-alert', '/Notes/EditAjax', 'modal-edit'));
-        });
-        $('.btn-delete').off('click').on('click', function () {
-            $('#modal-delete-alert').text('');
-            loadModal('modal-delete', 'modal-delete-body', '/Notes/FormDelete?id=' + $(this).data('id'))
-                .done(() => wireForm('form-delete', 'modal-delete-alert', '/Notes/DeleteAjax', 'modal-delete'));
-        });
-    }
-
-    bindRowButtons();
-}(jQuery));
-</script>
+    <script src="~/js/ajax-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/notes.js" asp-append-version="true"></script>
 }
