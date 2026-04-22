@@ -20,6 +20,17 @@ public sealed class GetClasseByIdQueryHandler : IRequestHandler<GetClasseByIdQue
         => _service.GetByIdAsync(request.Id, ct);
 }
 
+public sealed class GetMoyennesParClasseQueryHandler : IRequestHandler<GetMoyennesParClasseQuery, IReadOnlyList<MoyenneClasseDto>>
+{
+    private readonly IClasseRepository _repository;
+    public GetMoyennesParClasseQueryHandler(IClasseRepository repository) => _repository = repository;
+    public async Task<IReadOnlyList<MoyenneClasseDto>> Handle(GetMoyennesParClasseQuery request, CancellationToken ct)
+    {
+        var data = await _repository.GetMoyennesParClasseAsync(ct);
+        return data.Select(d => new MoyenneClasseDto(d.ClasseId, d.ClasseNom, d.Moyenne)).ToList();
+    }
+}
+
 public sealed class CreateClasseCommandHandler : IRequestHandler<CreateClasseCommand, OperationResult<Classe>>
 {
     private readonly IClasseService _service;

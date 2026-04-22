@@ -46,6 +46,48 @@
 </div>
 
 <div class="row g-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-bold">📊 Moyenne générale par classe</div>
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Classe</th>
+                            <th class="text-end">Moyenne générale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.MoyennesParClasse)
+                        {
+                            <tr>
+                                <td>@item.ClasseNom</td>
+                                <td class="text-end">
+                                    @if (item.Moyenne.HasValue)
+                                    {
+                                        <span class="badge @(item.Moyenne >= 10 ? "bg-success" : "bg-danger") fs-6">
+                                            @item.Moyenne.Value.ToString("F2") / 20
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Aucune note</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.MoyennesParClasse.Any())
+                        {
+                            <tr><td colspan="2" class="text-center text-muted fst-italic">Aucune classe enregistrée</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-light fw-bold">🚀 Actions rapides</div>

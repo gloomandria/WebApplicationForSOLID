@@ -17,6 +17,7 @@ public sealed class IndexModel : PageModel
     public int NombreEnseignants { get; private set; }
     public int NombreMatieres { get; private set; }
     public int NombreClasses { get; private set; }
+    public IReadOnlyList<MoyenneClasseDto> MoyennesParClasse { get; private set; } = [];
 
     public async Task OnGetAsync(CancellationToken ct)
     {
@@ -29,5 +30,7 @@ public sealed class IndexModel : PageModel
         NombreEnseignants = enseignants.Count;
         NombreMatieres    = matieres.Count;
         NombreClasses     = classes.Count;
+
+        MoyennesParClasse = await _mediator.Send(new GetMoyennesParClasseQuery(), ct);
     }
 }
