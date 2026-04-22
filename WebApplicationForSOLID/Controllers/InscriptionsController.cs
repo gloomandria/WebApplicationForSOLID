@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjetScolariteSOLID.Application.CQRS.Classes.Queries;
@@ -6,11 +7,13 @@ using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Inscriptions.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Inscriptions.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.Domain.Repositories;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant}")]
 public sealed class InscriptionsController : Controller
 {
     private readonly IMediator _mediator;

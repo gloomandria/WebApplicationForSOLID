@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.Domain.Repositories;
 using ProjetScolariteSOLID.ViewModels;
 
@@ -9,6 +11,7 @@ namespace ProjetScolariteSOLID.Controllers;
 /// Contrôleur unique gérant le CRUD de tous les référentiels simples (Id + Libelle).
 /// Le type est sélectionné via le paramètre de route "type".
 /// </summary>
+[Authorize(Roles = ApplicationRole.Administrateur)]
 public sealed class ReferentielsController : Controller
 {
     private readonly IReferentielRepository<AnneeAcademique>      _anneeRepo;

@@ -31,9 +31,6 @@ public sealed class EnseignantService : IEnseignantService
         if (!validation.IsValid)
             return OperationResult<Enseignant>.Failure(string.Join(" | ", validation.Errors));
 
-        if (await _repository.EmailExistsAsync(enseignant.Email, ct: ct))
-            return OperationResult<Enseignant>.Failure("Cet email est déjà utilisé.");
-
         var created = await _repository.AddAsync(enseignant, ct);
         _logger.LogInformation("Enseignant créé : {Id} — {NomComplet}", created.Id, created.NomComplet);
         return OperationResult<Enseignant>.Success(created);
@@ -47,9 +44,6 @@ public sealed class EnseignantService : IEnseignantService
 
         if (!await _repository.ExistsAsync(enseignant.Id, ct))
             return OperationResult.Failure($"Enseignant introuvable (Id={enseignant.Id}).");
-
-        if (await _repository.EmailExistsAsync(enseignant.Email, enseignant.Id, ct))
-            return OperationResult.Failure("Cet email est déjà utilisé.");
 
         await _repository.UpdateAsync(enseignant, ct);
         _logger.LogInformation("Enseignant mis à jour : {Id}", enseignant.Id);

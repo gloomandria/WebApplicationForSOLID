@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Back-office Administrateur";
+}
+
+<h2 class="mb-4">⚙️ Back-office Administrateur</h2>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <a asp-action="Users" class="text-decoration-none">
+            <div class="card border-primary h-100 text-center p-3 hover-shadow">
+                <div style="font-size:2.5rem">👥</div>
+                <h5 class="mt-2">Utilisateurs</h5>
+                <p class="text-muted small">Gérer les comptes et assigner les rôles</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a asp-action="Permissions" class="text-decoration-none">
+            <div class="card border-warning h-100 text-center p-3">
+                <div style="font-size:2.5rem">🔐</div>
+                <h5 class="mt-2">Permissions</h5>
+                <p class="text-muted small">Matrice d'accès par rôle et ressource</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a asp-action="EmailQueue" class="text-decoration-none">
+            <div class="card border-info h-100 text-center p-3">
+                <div style="font-size:2.5rem">📧</div>
+                <h5 class="mt-2">File d'emails</h5>
+                <p class="text-muted small">Suivi des emails en attente / envoyés</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a asp-controller="Audit" asp-action="Index" class="text-decoration-none">
+            <div class="card border-dark h-100 text-center p-3">
+                <div style="font-size:2.5rem">🕵️</div>
+                <h5 class="mt-2">Journal d'audit</h5>
+                <p class="text-muted small">Historique de toutes les modifications</p>
+            </div>
+        </a>
+    </div>
+</div>

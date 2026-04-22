@@ -9,6 +9,5 @@ public interface IEtudiantRepository : IReadRepository<Etudiant>, IWriteReposito
 {
     Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default);
     Task<bool> ExistsAsync(int id, CancellationToken ct = default);
-    Task<bool> EmailExistsAsync(string email, int? excludeId = null, CancellationToken ct = default);
     Task<IReadOnlyList<Etudiant>> GetByClasseAsync(int classeId, CancellationToken ct = default);
 }

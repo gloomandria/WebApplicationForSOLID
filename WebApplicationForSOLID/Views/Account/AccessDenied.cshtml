@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Accès refusé";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div class="card shadow-sm text-center">
+    <div class="card-body p-5">
+        <div style="font-size:3rem">🚫</div>
+        <h3 class="mt-3 fw-bold text-danger">Accès refusé</h3>
+        <p class="text-muted">Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Retour au tableau de bord</a>
+    </div>
+</div>

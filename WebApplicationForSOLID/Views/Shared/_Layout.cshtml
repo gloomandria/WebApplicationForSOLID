@@ -1,3 +1,4 @@
+@using ProjetScolariteSOLID.Domain.Models.Auth
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,53 +11,139 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">🎓 Gestion Scolarité</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+                        aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Tableau de bord</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Etudiants" asp-action="Index">Étudiants</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Enseignants" asp-action="Index">Enseignants</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Matieres" asp-action="Index">Matières</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Classes" asp-action="Index">Classes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Inscriptions" asp-action="Index">Inscriptions</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Notes" asp-action="Index">Notes</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link text-white dropdown-toggle" href="#" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                📋 Référentiels
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="AnneesAcademiques">📅 Années académiques</a></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Filieres">🎓 Filières</a></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Grades">🏅 Grades</a></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Niveaux">📊 Niveaux</a></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Specialites">🔬 Spécialités</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="StatutsInscription">📌 Statuts d'inscription</a></li>
-                                <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="TypesEvaluation">📝 Types d'évaluation</a></li>
-                            </ul>
-                        </li>
+                <div class="collapse navbar-collapse" id="navMain">
+
+                    @* ── Menu principal (visible uniquement si connecté) ── *@
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Home" asp-action="Index">📊 Tableau de bord</a>
+                            </li>
+
+                            @* Étudiants — Administrateur, Enseignant, Etudiant *@
+                            @if (User.IsInRole(ApplicationRole.Administrateur) ||
+                                 User.IsInRole(ApplicationRole.Enseignant) ||
+                                 User.IsInRole(ApplicationRole.Etudiant))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Etudiants" asp-action="Index">🎓 Étudiants</a>
+                                </li>
+                            }
+
+                            @* Enseignants — Administrateur, Enseignant *@
+                            @if (User.IsInRole(ApplicationRole.Administrateur) ||
+                                 User.IsInRole(ApplicationRole.Enseignant))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Enseignants" asp-action="Index">👨‍🏫 Enseignants</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Notes" asp-action="Index">📝 Notes</a>
+                                </li>
+                            }
+
+                            @* Matières, Classes, Inscriptions — Administrateur + Enseignant *@
+                            @if (User.IsInRole(ApplicationRole.Administrateur) ||
+                                 User.IsInRole(ApplicationRole.Enseignant))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Matieres" asp-action="Index">📚 Matières</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Classes" asp-action="Index">🏫 Classes</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Inscriptions" asp-action="Index">📋 Inscriptions</a>
+                                </li>
+                            }
+
+                            @* Référentiels — Administrateur uniquement *@
+                            @if (User.IsInRole(ApplicationRole.Administrateur))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-white dropdown-toggle" href="#" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        🗂️ Référentiels
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="AnneesAcademiques">📅 Années académiques</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Filieres">🎓 Filières</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Grades">🏅 Grades</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Niveaux">📊 Niveaux</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="Specialites">🔬 Spécialités</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="StatutsInscription">📌 Statuts d'inscription</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Referentiels" asp-action="Index" asp-route-type="TypesEvaluation">📝 Types d'évaluation</a></li>
+                                    </ul>
+                                </li>
+
+                                @* Back-office Admin *@
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-warning dropdown-toggle fw-semibold" href="#" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        ⚙️ Administration
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">🏠 Back-office</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">👥 Utilisateurs</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Permissions">🔐 Permissions</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="EmailQueue">📧 File d'emails</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Audit" asp-action="Index">🕵️ Journal d'audit</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav me-auto"></ul>
+                    }
+
+                    @* ── Barre utilisateur (droite) ── *@
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-white dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    👤 @User.Identity.Name
+                                    @if (User.IsInRole(ApplicationRole.Administrateur))
+                                    { <span class="badge bg-warning text-dark ms-1">Admin</span> }
+                                    else if (User.IsInRole(ApplicationRole.Enseignant))
+                                    { <span class="badge bg-info text-dark ms-1">Enseignant</span> }
+                                    else if (User.IsInRole(ApplicationRole.Etudiant))
+                                    { <span class="badge bg-success ms-1">Étudiant</span> }
+                                    else if (User.IsInRole(ApplicationRole.Visiteur))
+                                    { <span class="badge bg-secondary ms-1">Visiteur</span> }
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item text-danger">🚪 Se déconnecter</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Login">🔑 Connexion</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Register">✏️ S'inscrire</a>
+                            </li>
+                        }
                     </ul>
+
                 </div>
             </div>
         </nav>

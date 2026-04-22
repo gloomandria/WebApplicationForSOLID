@@ -1,0 +1,100 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.PermissionMatrixViewModel
+@{
+    ViewData["Title"] = "Matrice de permissions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>🔐 Matrice de permissions</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Back-office</a>
+</div>
+
+<p class="text-muted small">Les cases cochées sont sauvegardées automatiquement via AJAX.</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered align-middle text-center" id="permTable">
+        <thead class="table-dark">
+            <tr>
+                <th class="text-start">Rôle</th>
+                @foreach (var r in Model.Ressources)
+                {
+                    <th colspan="3">@r</th>
+                }
+            </tr>
+            <tr class="table-secondary">
+                <th></th>
+                @foreach (var r in Model.Ressources)
+                {
+                    <th title="Voir">👁</th>
+                    <th title="Éditer">✏️</th>
+                    <th title="Supprimer">🗑️</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.Rows)
+        {
+            <tr>
+                <td class="text-start fw-bold">@row.RoleName</td>
+                @foreach (var ressource in Model.Ressources)
+                {
+                    var perm = row.Permissions[ressource];
+                    <td>
+                        <input type="checkbox" class="form-check-input perm-check"
+                               @(perm.PeutVoir ? "checked" : "")
+                               data-role="@row.RoleId" data-ressource="@ressource" data-action="voir" />
+                    </td>
+                    <td>
+                        <input type="checkbox" class="form-check-input perm-check"
+                               @(perm.PeutEditer ? "checked" : "")
+                               data-role="@row.RoleId" data-ressource="@ressource" data-action="editer" />
+                    </td>
+                    <td>
+                        <input type="checkbox" class="form-check-input perm-check"
+                               @(perm.PeutSupprimer ? "checked" : "")
+                               data-role="@row.RoleId" data-ressource="@ressource" data-action="supprimer" />
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div id="saveStatus" class="text-success small mt-2" style="display:none">✓ Sauvegardé</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.perm-check').forEach(cb => {
+    cb.addEventListener('change', function () {
+        const roleId    = this.dataset.role;
+        const ressource = this.dataset.ressource;
+        // collect all 3 checkboxes for same role+ressource
+        const checks = document.querySelectorAll(
+            `.perm-check[data-role="${roleId}"][data-ressource="${ressource}"]`);
+        let voir = false, editer = false, supprimer = false;
+        checks.forEach(c => {
+            if (c.dataset.action === 'voir')      voir      = c.checked;
+            if (c.dataset.action === 'editer')    editer    = c.checked;
+            if (c.dataset.action === 'supprimer') supprimer = c.checked;
+        });
+
+        const form = new FormData();
+        form.append('roleId',        roleId);
+        form.append('ressource',     ressource);
+        form.append('peutVoir',      voir);
+        form.append('peutEditer',    editer);
+        form.append('peutSupprimer', supprimer);
+        form.append('__RequestVerificationToken',
+            document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '');
+
+        fetch('@Url.Action("SavePermissions", "Admin")', { method: 'POST', body: form })
+            .then(() => {
+                const st = document.getElementById('saveStatus');
+                st.style.display = 'inline';
+                setTimeout(() => st.style.display = 'none', 2000);
+            });
+    });
+});
+</script>
+@Html.AntiForgeryToken()
+}

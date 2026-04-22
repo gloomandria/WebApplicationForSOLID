@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetScolariteSOLID.Application.CQRS.Classes.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
@@ -8,6 +9,7 @@ using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize]
 public sealed class HomeController : Controller
 {
     private readonly IMediator _mediator;

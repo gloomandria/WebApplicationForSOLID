@@ -14,20 +14,23 @@ public sealed class EfEtudiantRepository : IEtudiantRepository
 
     public async Task<Etudiant?> GetByIdAsync(int id, CancellationToken ct = default)
         => await _context.Etudiants
+                         .Include(e => e.User)
                          .AsNoTracking()
                          .FirstOrDefaultAsync(e => e.Id == id, ct);
 
     public async Task<IReadOnlyList<Etudiant>> GetAllAsync(CancellationToken ct = default)
         => await _context.Etudiants
+                         .Include(e => e.User)
                          .AsNoTracking()
-                         .OrderBy(e => e.Nom).ThenBy(e => e.Prenom)
+                         .OrderBy(e => e.User!.Nom).ThenBy(e => e.User!.Prenom)
                          .ToListAsync(ct);
 
     public async Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var query = _context.Etudiants
+                            .Include(e => e.User)
                             .AsNoTracking()
-                            .OrderBy(e => e.Nom).ThenBy(e => e.Prenom);
+                            .OrderBy(e => e.User!.Nom).ThenBy(e => e.User!.Prenom);
 
         var totalCount = await query.CountAsync(ct);
         var items = await query
@@ -47,18 +50,14 @@ public sealed class EfEtudiantRepository : IEtudiantRepository
     public Task<bool> ExistsAsync(int id, CancellationToken ct = default)
         => _context.Etudiants.AnyAsync(e => e.Id == id, ct);
 
-    public Task<bool> EmailExistsAsync(string email, int? excludeId = null, CancellationToken ct = default)
-        => _context.Etudiants.AnyAsync(
-               e => e.Email == email && e.Id != excludeId, ct);
-
     public async Task<IReadOnlyList<Etudiant>> GetByClasseAsync(int classeId, CancellationToken ct = default)
         => await _context.Inscriptions
                          .AsNoTracking()
                          .Where(i => i.ClasseId == classeId
                                 && i.Statut != null && i.Statut.Libelle == "Active")
-                         .Include(i => i.Etudiant)
+                         .Include(i => i.Etudiant!.User)
                          .Select(i => i.Etudiant!)
-                         .OrderBy(e => e.Nom)
+                         .OrderBy(e => e.User!.Nom)
                          .ToListAsync(ct);
 
     public async Task<Etudiant> AddAsync(Etudiant entity, CancellationToken ct = default)

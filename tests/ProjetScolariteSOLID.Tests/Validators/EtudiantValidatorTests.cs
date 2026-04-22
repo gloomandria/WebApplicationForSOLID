@@ -12,46 +12,6 @@ public sealed class EtudiantValidatorTests
     }
 
     [Fact]
-    public void Nom_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EtudiantBuilder.SansNom());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("nom"));
-    }
-
-    [Fact]
-    public void Nom_trop_long_retourne_erreur()
-    {
-        var result = _sut.Validate(EtudiantBuilder.NomTropLong());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("100"));
-    }
-
-    [Fact]
-    public void Prenom_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EtudiantBuilder.SansPrenom());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("prénom"));
-    }
-
-    [Fact]
-    public void Email_vide_retourne_erreur()
-    {
-        var result = _sut.Validate(EtudiantBuilder.SansEmail());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("email"));
-    }
-
-    [Fact]
-    public void Email_sans_arobase_retourne_erreur()
-    {
-        var result = _sut.Validate(EtudiantBuilder.EmailInvalide());
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.Contains("valide"));
-    }
-
-    [Fact]
     public void DateNaissance_defaut_retourne_erreur()
     {
         var result = _sut.Validate(EtudiantBuilder.DateNaissanceDefaut());
@@ -65,13 +25,5 @@ public sealed class EtudiantValidatorTests
         var result = _sut.Validate(EtudiantBuilder.DateNaissanceFuture());
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.Contains("futur"));
-    }
-
-    [Fact]
-    public void Plusieurs_erreurs_sont_toutes_retournees()
-    {
-        var etudiant = new Etudiant { Id = 1, Nom = "", Prenom = "", Email = "alice@test.com", DateNaissance = new DateOnly(2000, 6, 15) };
-        var result = _sut.Validate(etudiant);
-        Assert.True(result.Errors.Count >= 2);
     }
 }
