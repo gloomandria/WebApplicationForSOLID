@@ -1,0 +1,23 @@
+@model ProjetScolariteSOLID.ViewModels.ReferentielViewModel
+@{
+    var type = ViewData["Type"] as string ?? string.Empty;
+}
+
+@if (!Model.Items.Any())
+{
+    <tr><td colspan="3"><div class="alert alert-info mb-0">Aucun élément enregistré.</div></td></tr>
+}
+else
+{
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td><span class="badge bg-secondary">@item.Id</span></td>
+            <td>@item.Libelle</td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@item.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@item.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

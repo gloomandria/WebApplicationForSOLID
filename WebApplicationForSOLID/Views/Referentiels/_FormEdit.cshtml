@@ -1,0 +1,11 @@
+@model ProjetScolariteSOLID.ViewModels.ReferentielViewModel
+@{
+    var type = ViewData["Type"] as string ?? string.Empty;
+}
+
+<input type="hidden" name="type" value="@type" />
+<input type="hidden" name="id" value="@Model.SelectedItem?.Id" />
+<div class="mb-3">
+    <label class="form-label fw-semibold">Libellé</label>
+    <input name="libelle" class="form-control" value="@Model.SelectedItem?.Libelle" required autofocus />
+</div>
