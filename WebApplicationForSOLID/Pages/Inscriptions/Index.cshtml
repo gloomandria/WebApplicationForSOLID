@@ -35,14 +35,15 @@ else
                         <td>@i.DateInscription.ToString("dd/MM/yyyy")</td>
                         <td>
                             @{
-                                var badgeClass = i.Statut switch
-                                {
-                                    ProjetScolariteSOLID.Domain.Models.StatutInscription.Active    => "bg-success",
-                                    ProjetScolariteSOLID.Domain.Models.StatutInscription.Suspendue => "bg-warning text-dark",
-                                    _                                                               => "bg-danger"
-                                };
-                            }
-                            <span class="badge @badgeClass">@i.Statut</span>
+                                    var libelle    = i.Statut?.Libelle ?? "";
+                                    var badgeClass = libelle switch
+                                    {
+                                        "Active"    => "bg-success",
+                                        "Suspendue" => "bg-warning text-dark",
+                                        _           => "bg-danger"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@libelle</span>
                         </td>
                         <td class="text-end">
                             <a asp-page="EditStatut" asp-route-id="@i.Id" class="btn btn-sm btn-outline-warning">Statut</a>

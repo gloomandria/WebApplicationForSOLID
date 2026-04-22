@@ -19,24 +19,29 @@ public sealed class ClasseConfiguration : IEntityTypeConfiguration<Classe>
                .IsRequired()
                .HasMaxLength(100);
 
-        builder.Property(c => c.Niveau)
-               .IsRequired()
-               .HasConversion<string>()
-               .HasMaxLength(30);
-
-        builder.Property(c => c.AnneeAcademique)
-               .IsRequired()
-               .HasMaxLength(20);
-
         builder.Property(c => c.CapaciteMax)
                .IsRequired()
                .HasDefaultValue(30);
 
-        builder.Property(c => c.Filiere)
+        builder.HasOne(c => c.Niveau)
+               .WithMany()
+               .HasForeignKey(c => c.NiveauId)
                .IsRequired()
-               .HasMaxLength(150);
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(c => new { c.Nom, c.AnneeAcademique })
+        builder.HasOne(c => c.AnneeAcademique)
+               .WithMany()
+               .HasForeignKey(c => c.AnneeAcademiqueId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(c => c.Filiere)
+               .WithMany()
+               .HasForeignKey(c => c.FiliereId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(c => new { c.Nom, c.AnneeAcademiqueId })
                .IsUnique();
     }
 }

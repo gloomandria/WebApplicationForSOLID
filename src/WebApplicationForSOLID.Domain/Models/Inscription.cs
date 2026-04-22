@@ -20,12 +20,7 @@ public sealed class Inscription
     public DateTime DateInscription { get; init; } = DateTime.UtcNow;
 
     [Display(Name = "Statut")]
-    public StatutInscription Statut { get; set; } = StatutInscription.Active;
-}
+    public int StatutId { get; set; }
 
-public enum StatutInscription
-{
-    [Display(Name = "Active")] Active,
-    [Display(Name = "Suspendue")] Suspendue,
-    [Display(Name = "Annulée")] Annulee
+    public StatutInscriptionRef? Statut { get; set; }
 }

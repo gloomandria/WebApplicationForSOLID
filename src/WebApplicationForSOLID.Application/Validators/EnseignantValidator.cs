@@ -17,11 +17,14 @@ public sealed class EnseignantValidator : IValidator<Enseignant>
         else if (!enseignant.Email.Contains('@'))
             result.AddError("L'adresse email n'est pas valide.");
 
-        if (string.IsNullOrWhiteSpace(enseignant.Specialite))
-            result.AddError("La spécialité est obligatoire.");
-
         if (string.IsNullOrWhiteSpace(enseignant.Matricule))
             result.AddError("Le matricule est obligatoire.");
+
+        if (enseignant.SpecialiteId <= 0)
+            result.AddError("La spécialité est obligatoire.");
+
+        if (enseignant.GradeId <= 0)
+            result.AddError("Le grade est obligatoire.");
 
         return result;
     }

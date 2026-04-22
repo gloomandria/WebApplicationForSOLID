@@ -27,8 +27,10 @@
             <input asp-for="Note.Valeur" class="form-control" type="number" step="0.01" min="0" max="20" />
         </div>
         <div class="col-md-4">
-            <label asp-for="Note.TypeEvaluation" class="form-label"></label>
-            <select asp-for="Note.TypeEvaluation" asp-items="Html.GetEnumSelectList<ProjetScolariteSOLID.Domain.Models.TypeEvaluation>()" class="form-select"></select>
+            <label asp-for="Note.TypeEvaluationId" class="form-label">Type d'évaluation</label>
+            <select asp-for="Note.TypeEvaluationId" asp-items="Model.TypesEvalList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
         <div class="col-md-4">
             <label asp-for="Note.Date" class="form-label"></label>

@@ -40,18 +40,21 @@ public sealed class EnseignantConfiguration : IEntityTypeConfiguration<Enseignan
         builder.Property(e => e.Telephone)
                .HasMaxLength(20);
 
-        builder.Property(e => e.Specialite)
-               .IsRequired()
-               .HasMaxLength(200);
-
-        builder.Property(e => e.Grade)
-               .IsRequired()
-               .HasConversion<string>()
-               .HasMaxLength(50);
-
         builder.Property(e => e.DateEmbauche)
                .IsRequired()
                .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.HasOne(e => e.Specialite)
+               .WithMany()
+               .HasForeignKey(e => e.SpecialiteId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Grade)
+               .WithMany()
+               .HasForeignKey(e => e.GradeId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
 
         // Propriété calculée — non mappée en base
         builder.Ignore(e => e.NomComplet);

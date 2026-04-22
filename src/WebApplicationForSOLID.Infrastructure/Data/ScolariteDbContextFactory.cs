@@ -12,11 +12,24 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
     public ScolariteDbContext CreateDbContext(string[] args)
     {
         var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..");
 
-        // Charger appsettings.json manuellement
-        var appsettingsPath = Path.Combine(basePath, "WebApplicationForSOLID", "appsettings.json");
-        var appsettingsEnvPath = Path.Combine(basePath, "WebApplicationForSOLID", $"appsettings.{environmentName}.json");
+        // Chercher appsettings.json en remontant depuis le répertoire courant
+        string? webAppDir = null;
+        var candidates = new[]
+        {
+            Path.Combine(Directory.GetCurrentDirectory(), "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "WebApplicationForSOLID"),
+        };
+        foreach (var c in candidates)
+        {
+            if (File.Exists(Path.Combine(c, "appsettings.json"))) { webAppDir = c; break; }
+        }
+        if (webAppDir is null)
+            throw new InvalidOperationException("Impossible de localiser appsettings.json.");
+
+        var appsettingsPath    = Path.Combine(webAppDir, "appsettings.json");
+        var appsettingsEnvPath = Path.Combine(webAppDir, $"appsettings.{environmentName}.json");
 
         var config = new System.Collections.Generic.Dictionary<string, string>();
 

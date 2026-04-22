@@ -1,11 +1,11 @@
-Ôªøusing Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetScolariteSOLID.Domain.Models;
 
 namespace ProjetScolariteSOLID.Infrastructure.Data;
 
 /// <summary>
-/// SRP ‚Äî Responsabilit√© unique : ins√©rer les donn√©es de r√©f√©rence initiales.
-/// Idempotent : ne r√©ins√®re pas si les donn√©es existent d√©j√† (safe pour re-run).
+/// SRP ó ResponsabilitÈ unique : insÈrer les donnÈes de rÈfÈrence initiales.
+/// Idempotent : ne rÈinsËre pas si les donnÈes existent dÈj‡ (safe pour re-run).
 /// </summary>
 public sealed class DataSeeder : IDataSeeder
 {
@@ -23,12 +23,13 @@ public sealed class DataSeeder : IDataSeeder
         // Idempotence : on ne seed que si la base est vide
         if (await _context.Enseignants.AnyAsync(ct))
         {
-            _logger.LogInformation("DataSeeder : donn√©es d√©j√† pr√©sentes, seed ignor√©.");
+            _logger.LogInformation("DataSeeder : donnÈes dÈj‡ prÈsentes, seed ignorÈ.");
             return;
         }
 
-        _logger.LogInformation("DataSeeder : insertion des donn√©es initiales...");
+        _logger.LogInformation("DataSeeder : insertion des donnÈes initiales...");
 
+        await SeedReferentielsAsync(ct);
         await SeedEnseignantsAsync(ct);
         await SeedClassesAsync(ct);
         await SeedEtudiantsAsync(ct);
@@ -36,23 +37,116 @@ public sealed class DataSeeder : IDataSeeder
         await SeedInscriptionsAsync(ct);
         await SeedNotesAsync(ct);
 
-        _logger.LogInformation("DataSeeder : seed termin√© avec succ√®s.");
+        _logger.LogInformation("DataSeeder : seed terminÈ avec succËs.");
+    }
+
+    private async Task SeedReferentielsAsync(CancellationToken ct)
+    {
+        // FiliËres
+        await _context.Filieres.AddRangeAsync(new[]
+        {
+            new Filiere { Libelle = "Informatique" },
+            new Filiere { Libelle = "MathÈmatiques" },
+            new Filiere { Libelle = "Physique" },
+            new Filiere { Libelle = "Chimie" },
+            new Filiere { Libelle = "Biologie" },
+        }, ct);
+
+        // AnnÈes acadÈmiques
+        await _context.AnneesAcademiques.AddRangeAsync(new[]
+        {
+            new AnneeAcademique { Libelle = "2023-2024" },
+            new AnneeAcademique { Libelle = "2024-2025" },
+            new AnneeAcademique { Libelle = "2025-2026" },
+        }, ct);
+
+        // Niveaux
+        await _context.Niveaux.AddRangeAsync(new[]
+        {
+            new Niveau { Libelle = "Licence 1" },
+            new Niveau { Libelle = "Licence 2" },
+            new Niveau { Libelle = "Licence 3" },
+            new Niveau { Libelle = "Master 1" },
+            new Niveau { Libelle = "Master 2" },
+            new Niveau { Libelle = "Doctorat" },
+        }, ct);
+
+        // SpÈcialitÈs
+        await _context.Specialites.AddRangeAsync(new[]
+        {
+            new Specialite { Libelle = "MathÈmatiques" },
+            new Specialite { Libelle = "Informatique" },
+            new Specialite { Libelle = "Physique" },
+            new Specialite { Libelle = "Chimie" },
+            new Specialite { Libelle = "Biologie" },
+            new Specialite { Libelle = "FranÁais" },
+            new Specialite { Libelle = "Anglais" },
+            new Specialite { Libelle = "Histoire-GÈographie" },
+            new Specialite { Libelle = "…ducation Physique" },
+            new Specialite { Libelle = "Arts plastiques" },
+        }, ct);
+
+        // Grades
+        await _context.Grades.AddRangeAsync(new[]
+        {
+            new Grade { Libelle = "Assistant" },
+            new Grade { Libelle = "MaÓtre-assistant" },
+            new Grade { Libelle = "MaÓtre de confÈrences" },
+            new Grade { Libelle = "Professeur" },
+        }, ct);
+
+        // Statuts d'inscription
+        await _context.StatutsInscription.AddRangeAsync(new[]
+        {
+            new StatutInscriptionRef { Libelle = "Active" },
+            new StatutInscriptionRef { Libelle = "Suspendue" },
+            new StatutInscriptionRef { Libelle = "AnnulÈe" },
+        }, ct);
+
+        // Types d'Èvaluation
+        await _context.TypesEvaluation.AddRangeAsync(new[]
+        {
+            new TypeEvaluationRef { Libelle = "ContrÙle continu" },
+            new TypeEvaluationRef { Libelle = "Examen partiel" },
+            new TypeEvaluationRef { Libelle = "Examen final" },
+            new TypeEvaluationRef { Libelle = "Rattrapage" },
+        }, ct);
+
+        await _context.SaveChangesAsync(ct);
     }
 
     private async Task SeedEnseignantsAsync(CancellationToken ct)
     {
+        var specialites = await _context.Specialites.ToListAsync(ct);
+        var grades      = await _context.Grades.ToListAsync(ct);
+
+        int idSpMath   = specialites.First(s => s.Libelle == "MathÈmatiques").Id;
+        int idSpInfo   = specialites.First(s => s.Libelle == "Informatique").Id;
+        int idSpPhys   = specialites.First(s => s.Libelle == "Physique").Id;
+        int idSpChim   = specialites.First(s => s.Libelle == "Chimie").Id;
+        int idSpBio    = specialites.First(s => s.Libelle == "Biologie").Id;
+        int idSpFr     = specialites.First(s => s.Libelle == "FranÁais").Id;
+        int idSpAng    = specialites.First(s => s.Libelle == "Anglais").Id;
+        int idSpHist   = specialites.First(s => s.Libelle == "Histoire-GÈographie").Id;
+        int idSpEps    = specialites.First(s => s.Libelle == "…ducation Physique").Id;
+        int idSpArts   = specialites.First(s => s.Libelle == "Arts plastiques").Id;
+
+        int idGrProf   = grades.First(g => g.Libelle == "Professeur").Id;
+        int idGrMC     = grades.First(g => g.Libelle == "MaÓtre de confÈrences").Id;
+        int idGrMA     = grades.First(g => g.Libelle == "MaÓtre-assistant").Id;
+
         var enseignants = new[]
         {
-            new Enseignant { Matricule = "ENS0001", Nom = "Petit",      Prenom = "Jean",     Email = "j.petit@ecole.fr",       Telephone = "0611111111", Specialite = "Math√©matiques",           Grade = GradeEnseignant.Professeur },
-            new Enseignant { Matricule = "ENS0002", Nom = "Roux",       Prenom = "Marie",    Email = "m.roux@ecole.fr",        Telephone = "0622222222", Specialite = "Informatique",             Grade = GradeEnseignant.MaitreDeConferences },
-            new Enseignant { Matricule = "ENS0003", Nom = "Simon",      Prenom = "Paul",     Email = "p.simon@ecole.fr",       Telephone = "0633333333", Specialite = "Physique",                 Grade = GradeEnseignant.MaitreAssistant },
-            new Enseignant { Matricule = "ENS0004", Nom = "Durand",     Prenom = "Sophie",   Email = "s.durand@ecole.fr",      Telephone = "0644444444", Specialite = "Chimie",                   Grade = GradeEnseignant.Professeur },
-            new Enseignant { Matricule = "ENS0005", Nom = "Gauthier",   Prenom = "Pierre",   Email = "p.gauthier@ecole.fr",    Telephone = "0655555555", Specialite = "Biologie",                 Grade = GradeEnseignant.MaitreDeConferences },
-            new Enseignant { Matricule = "ENS0006", Nom = "Laurent",    Prenom = "Isabelle", Email = "i.laurent@ecole.fr",     Telephone = "0666666666", Specialite = "Fran√ßais",                 Grade = GradeEnseignant.MaitreAssistant },
-            new Enseignant { Matricule = "ENS0007", Nom = "Renault",    Prenom = "Marc",     Email = "m.renault@ecole.fr",     Telephone = "0677777777", Specialite = "Anglais",                  Grade = GradeEnseignant.MaitreDeConferences },
-            new Enseignant { Matricule = "ENS0008", Nom = "Leclerc",    Prenom = "Christine",Email = "c.leclerc@ecole.fr",     Telephone = "0688888888", Specialite = "Histoire-G√©ographie",      Grade = GradeEnseignant.Professeur },
-            new Enseignant { Matricule = "ENS0009", Nom = "Fontaine",   Prenom = "Georges",  Email = "g.fontaine@ecole.fr",    Telephone = "0699999999", Specialite = "√âducation Physique",       Grade = GradeEnseignant.MaitreAssistant },
-            new Enseignant { Matricule = "ENS0010", Nom = "Bertrand",   Prenom = "Sylvie",   Email = "s.bertrand@ecole.fr",    Telephone = "0610101010", Specialite = "Arts plastiques",          Grade = GradeEnseignant.MaitreDeConferences },
+            new Enseignant { Matricule = "ENS0001", Nom = "Petit",      Prenom = "Jean",      Email = "j.petit@ecole.fr",        Telephone = "0611111111", SpecialiteId = idSpMath, GradeId = idGrProf },
+            new Enseignant { Matricule = "ENS0002", Nom = "Roux",       Prenom = "Marie",     Email = "m.roux@ecole.fr",         Telephone = "0622222222", SpecialiteId = idSpInfo, GradeId = idGrMC },
+            new Enseignant { Matricule = "ENS0003", Nom = "Simon",      Prenom = "Paul",      Email = "p.simon@ecole.fr",        Telephone = "0633333333", SpecialiteId = idSpPhys, GradeId = idGrMA },
+            new Enseignant { Matricule = "ENS0004", Nom = "Durand",     Prenom = "Sophie",    Email = "s.durand@ecole.fr",       Telephone = "0644444444", SpecialiteId = idSpChim, GradeId = idGrProf },
+            new Enseignant { Matricule = "ENS0005", Nom = "Gauthier",   Prenom = "Pierre",    Email = "p.gauthier@ecole.fr",     Telephone = "0655555555", SpecialiteId = idSpBio,  GradeId = idGrMC },
+            new Enseignant { Matricule = "ENS0006", Nom = "Laurent",    Prenom = "Isabelle",  Email = "i.laurent@ecole.fr",      Telephone = "0666666666", SpecialiteId = idSpFr,   GradeId = idGrMA },
+            new Enseignant { Matricule = "ENS0007", Nom = "Renault",    Prenom = "Marc",      Email = "m.renault@ecole.fr",      Telephone = "0677777777", SpecialiteId = idSpAng,  GradeId = idGrMC },
+            new Enseignant { Matricule = "ENS0008", Nom = "Leclerc",    Prenom = "Christine", Email = "c.leclerc@ecole.fr",      Telephone = "0688888888", SpecialiteId = idSpHist, GradeId = idGrProf },
+            new Enseignant { Matricule = "ENS0009", Nom = "Fontaine",   Prenom = "Georges",   Email = "g.fontaine@ecole.fr",     Telephone = "0699999999", SpecialiteId = idSpEps,  GradeId = idGrMA },
+            new Enseignant { Matricule = "ENS0010", Nom = "Bertrand",   Prenom = "Sylvie",    Email = "s.bertrand@ecole.fr",     Telephone = "0610101010", SpecialiteId = idSpArts, GradeId = idGrMC },
         };
         await _context.Enseignants.AddRangeAsync(enseignants, ct);
         await _context.SaveChangesAsync(ct);
@@ -60,18 +154,31 @@ public sealed class DataSeeder : IDataSeeder
 
     private async Task SeedClassesAsync(CancellationToken ct)
     {
+        var filieres  = await _context.Filieres.ToListAsync(ct);
+        var annees    = await _context.AnneesAcademiques.ToListAsync(ct);
+        var niveaux   = await _context.Niveaux.ToListAsync(ct);
+
+        int fInfo = filieres.First(f => f.Libelle == "Informatique").Id;
+        int fMath = filieres.First(f => f.Libelle == "MathÈmatiques").Id;
+        int a2425 = annees.First(a => a.Libelle == "2024-2025").Id;
+        int nL1   = niveaux.First(n => n.Libelle == "Licence 1").Id;
+        int nL2   = niveaux.First(n => n.Libelle == "Licence 2").Id;
+        int nL3   = niveaux.First(n => n.Libelle == "Licence 3").Id;
+        int nM1   = niveaux.First(n => n.Libelle == "Master 1").Id;
+        int nM2   = niveaux.First(n => n.Libelle == "Master 2").Id;
+
         var classes = new[]
         {
-            new Classe { Nom = "L1-INFO-A", Niveau = NiveauClasse.L1, AnneeAcademique = "2024-2025", CapaciteMax = 35, Filiere = "Informatique" },
-            new Classe { Nom = "L1-INFO-B", Niveau = NiveauClasse.L1, AnneeAcademique = "2024-2025", CapaciteMax = 35, Filiere = "Informatique" },
-            new Classe { Nom = "L1-MATH-A", Niveau = NiveauClasse.L1, AnneeAcademique = "2024-2025", CapaciteMax = 30, Filiere = "Math√©matiques" },
-            new Classe { Nom = "L2-INFO-A", Niveau = NiveauClasse.L2, AnneeAcademique = "2024-2025", CapaciteMax = 30, Filiere = "Informatique" },
-            new Classe { Nom = "L2-INFO-B", Niveau = NiveauClasse.L2, AnneeAcademique = "2024-2025", CapaciteMax = 30, Filiere = "Informatique" },
-            new Classe { Nom = "L2-MATH-A", Niveau = NiveauClasse.L2, AnneeAcademique = "2024-2025", CapaciteMax = 25, Filiere = "Math√©matiques" },
-            new Classe { Nom = "L3-INFO-A", Niveau = NiveauClasse.L3, AnneeAcademique = "2024-2025", CapaciteMax = 25, Filiere = "Informatique" },
-            new Classe { Nom = "L3-MATH-A", Niveau = NiveauClasse.L3, AnneeAcademique = "2024-2025", CapaciteMax = 20, Filiere = "Math√©matiques" },
-            new Classe { Nom = "M1-INFO-A", Niveau = NiveauClasse.M1, AnneeAcademique = "2024-2025", CapaciteMax = 25, Filiere = "Informatique" },
-            new Classe { Nom = "M2-INFO-A", Niveau = NiveauClasse.M2, AnneeAcademique = "2024-2025", CapaciteMax = 20, Filiere = "Informatique" },
+            new Classe { Nom = "L1-INFO-A", NiveauId = nL1, AnneeAcademiqueId = a2425, CapaciteMax = 35, FiliereId = fInfo },
+            new Classe { Nom = "L1-INFO-B", NiveauId = nL1, AnneeAcademiqueId = a2425, CapaciteMax = 35, FiliereId = fInfo },
+            new Classe { Nom = "L1-MATH-A", NiveauId = nL1, AnneeAcademiqueId = a2425, CapaciteMax = 30, FiliereId = fMath },
+            new Classe { Nom = "L2-INFO-A", NiveauId = nL2, AnneeAcademiqueId = a2425, CapaciteMax = 30, FiliereId = fInfo },
+            new Classe { Nom = "L2-INFO-B", NiveauId = nL2, AnneeAcademiqueId = a2425, CapaciteMax = 30, FiliereId = fInfo },
+            new Classe { Nom = "L2-MATH-A", NiveauId = nL2, AnneeAcademiqueId = a2425, CapaciteMax = 25, FiliereId = fMath },
+            new Classe { Nom = "L3-INFO-A", NiveauId = nL3, AnneeAcademiqueId = a2425, CapaciteMax = 25, FiliereId = fInfo },
+            new Classe { Nom = "L3-MATH-A", NiveauId = nL3, AnneeAcademiqueId = a2425, CapaciteMax = 20, FiliereId = fMath },
+            new Classe { Nom = "M1-INFO-A", NiveauId = nM1, AnneeAcademiqueId = a2425, CapaciteMax = 25, FiliereId = fInfo },
+            new Classe { Nom = "M2-INFO-A", NiveauId = nM2, AnneeAcademiqueId = a2425, CapaciteMax = 20, FiliereId = fInfo },
         };
         await _context.Classes.AddRangeAsync(classes, ct);
         await _context.SaveChangesAsync(ct);
@@ -82,43 +189,43 @@ public sealed class DataSeeder : IDataSeeder
         var etudiants = new[]
         {
             // L1-INFO
-            new Etudiant { NumeroEtudiant = "ETU0001", Nom = "Dupont",     Prenom = "Alice",    Email = "alice.dupont@ecole.fr",    DateNaissance = new DateOnly(2002, 3,  15), Telephone = "0612345678", Adresse = "12 rue des Lilas, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0002", Nom = "Martin",     Prenom = "Bob",      Email = "bob.martin@ecole.fr",      DateNaissance = new DateOnly(2001, 7,  22), Telephone = "0623456789", Adresse = "5 av. Victor Hugo, Lyon" },
-            new Etudiant { NumeroEtudiant = "ETU0003", Nom = "Bernard",    Prenom = "Clara",    Email = "clara.bernard@ecole.fr",   DateNaissance = new DateOnly(2003, 1,  10), Telephone = "0634567890", Adresse = "8 bd Gambetta, Bordeaux" },
-            new Etudiant { NumeroEtudiant = "ETU0004", Nom = "Leroy",      Prenom = "David",    Email = "david.leroy@ecole.fr",    DateNaissance = new DateOnly(2000, 9,  5),  Telephone = "0645678901", Adresse = "23 rue Pasteur, Lille" },
-            new Etudiant { NumeroEtudiant = "ETU0005", Nom = "Moreau",     Prenom = "Emma",     Email = "emma.moreau@ecole.fr",    DateNaissance = new DateOnly(2002, 11, 28), Telephone = "0656789012", Adresse = "17 rue de la Paix, Nantes" },
-            new Etudiant { NumeroEtudiant = "ETU0006", Nom = "Girard",     Prenom = "Franck",   Email = "franck.girard@ecole.fr",  DateNaissance = new DateOnly(2001, 5,  12), Telephone = "0667890123", Adresse = "34 rue Colbert, Strasbourg" },
-            new Etudiant { NumeroEtudiant = "ETU0007", Nom = "Dubois",     Prenom = "Ga√´lle",   Email = "gaelle.dubois@ecole.fr",  DateNaissance = new DateOnly(2003, 4,  8),  Telephone = "0678901234", Adresse = "9 av. de la R√©publique, Marseille" },
-            new Etudiant { NumeroEtudiant = "ETU0008", Nom = "Noel",       Prenom = "Herv√©",    Email = "herve.noel@ecole.fr",     DateNaissance = new DateOnly(2002, 8,  20), Telephone = "0689012345", Adresse = "15 bd de Belgique, Toulouse" },
-            new Etudiant { NumeroEtudiant = "ETU0009", Nom = "Olivier",    Prenom = "Ingrid",   Email = "ingrid.olivier@ecole.fr", DateNaissance = new DateOnly(2001, 10, 3),  Telephone = "0690123456", Adresse = "42 rue Montgolfier, Nice" },
-            new Etudiant { NumeroEtudiant = "ETU0010", Nom = "Laurent",    Prenom = "J√©r√¥me",   Email = "jerome.laurent@ecole.fr", DateNaissance = new DateOnly(2003, 2,  25), Telephone = "0601234567", Adresse = "11 rue Saint-Michel, N√Æmes" },
+            new Etudiant { NumeroEtudiant = "ETU0001", Nom = "Dupont",     Prenom = "Alice",     Email = "alice.dupont@ecole.fr",     DateNaissance = new DateOnly(2002, 3,  15), Telephone = "0612345678", Adresse = "12 rue des Lilas, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0002", Nom = "Martin",     Prenom = "Bob",       Email = "bob.martin@ecole.fr",       DateNaissance = new DateOnly(2001, 7,  22), Telephone = "0623456789", Adresse = "5 av. Victor Hugo, Lyon" },
+            new Etudiant { NumeroEtudiant = "ETU0003", Nom = "Bernard",    Prenom = "Clara",     Email = "clara.bernard@ecole.fr",    DateNaissance = new DateOnly(2003, 1,  10), Telephone = "0634567890", Adresse = "8 bd Gambetta, Bordeaux" },
+            new Etudiant { NumeroEtudiant = "ETU0004", Nom = "Leroy",      Prenom = "David",     Email = "david.leroy@ecole.fr",      DateNaissance = new DateOnly(2000, 9,  5),  Telephone = "0645678901", Adresse = "23 rue Pasteur, Lille" },
+            new Etudiant { NumeroEtudiant = "ETU0005", Nom = "Moreau",     Prenom = "Emma",      Email = "emma.moreau@ecole.fr",      DateNaissance = new DateOnly(2002, 11, 28), Telephone = "0656789012", Adresse = "17 rue de la Paix, Nantes" },
+            new Etudiant { NumeroEtudiant = "ETU0006", Nom = "Girard",     Prenom = "Franck",    Email = "franck.girard@ecole.fr",    DateNaissance = new DateOnly(2001, 5,  12), Telephone = "0667890123", Adresse = "34 rue Colbert, Strasbourg" },
+            new Etudiant { NumeroEtudiant = "ETU0007", Nom = "Dubois",     Prenom = "GaÎlle",    Email = "gaelle.dubois@ecole.fr",    DateNaissance = new DateOnly(2003, 4,  8),  Telephone = "0678901234", Adresse = "9 av. de la RÈpublique, Marseille" },
+            new Etudiant { NumeroEtudiant = "ETU0008", Nom = "Noel",       Prenom = "HervÈ",     Email = "herve.noel@ecole.fr",       DateNaissance = new DateOnly(2002, 8,  20), Telephone = "0689012345", Adresse = "15 bd de Belgique, Toulouse" },
+            new Etudiant { NumeroEtudiant = "ETU0009", Nom = "Olivier",    Prenom = "Ingrid",    Email = "ingrid.olivier@ecole.fr",   DateNaissance = new DateOnly(2001, 10, 3),  Telephone = "0690123456", Adresse = "42 rue Montgolfier, Nice" },
+            new Etudiant { NumeroEtudiant = "ETU0010", Nom = "Laurent",    Prenom = "JÈrÙme",    Email = "jerome.laurent@ecole.fr",   DateNaissance = new DateOnly(2003, 2,  25), Telephone = "0601234567", Adresse = "11 rue Saint-Michel, NÓmes" },
             // L1-MATH
-            new Etudiant { NumeroEtudiant = "ETU0011", Nom = "Arnaud",     Prenom = "Katia",    Email = "katia.arnaud@ecole.fr",   DateNaissance = new DateOnly(2002, 6,  14), Telephone = "0612345670", Adresse = "28 rue Voltaire, Angers" },
-            new Etudiant { NumeroEtudiant = "ETU0012", Nom = "Blanc",      Prenom = "Ludovic",  Email = "ludovic.blanc@ecole.fr",  DateNaissance = new DateOnly(2001, 12, 11), Telephone = "0623456790", Adresse = "7 bd Saint-Denis, Le Havre" },
-            new Etudiant { NumeroEtudiant = "ETU0013", Nom = "Charrier",   Prenom = "Madeleine",Email = "madeleine.charrier@ecole.fr",DateNaissance = new DateOnly(2003, 3,  30), Telephone = "0634567890", Adresse = "55 av. Foch, Grenoble" },
+            new Etudiant { NumeroEtudiant = "ETU0011", Nom = "Arnaud",     Prenom = "Katia",     Email = "katia.arnaud@ecole.fr",     DateNaissance = new DateOnly(2002, 6,  14), Telephone = "0612345670", Adresse = "28 rue Voltaire, Angers" },
+            new Etudiant { NumeroEtudiant = "ETU0012", Nom = "Blanc",      Prenom = "Ludovic",   Email = "ludovic.blanc@ecole.fr",    DateNaissance = new DateOnly(2001, 12, 11), Telephone = "0623456790", Adresse = "7 bd Saint-Denis, Le Havre" },
+            new Etudiant { NumeroEtudiant = "ETU0013", Nom = "Charrier",   Prenom = "Madeleine", Email = "madeleine.charrier@ecole.fr", DateNaissance = new DateOnly(2003, 3, 30), Telephone = "0634567890", Adresse = "55 av. Foch, Grenoble" },
             // L2-INFO
-            new Etudiant { NumeroEtudiant = "ETU0014", Nom = "Deschamps",  Prenom = "Nathan",   Email = "nathan.deschamps@ecole.fr",DateNaissance = new DateOnly(2000, 8,  17), Telephone = "0645678901", Adresse = "21 rue de Prague, Montpellier" },
-            new Etudiant { NumeroEtudiant = "ETU0015", Nom = "Emond",      Prenom = "Oc√©ane",   Email = "oceane.emond@ecole.fr",   DateNaissance = new DateOnly(2000, 11, 6),  Telephone = "0656789012", Adresse = "18 bd Michelet, Saint-√âtienne" },
-            new Etudiant { NumeroEtudiant = "ETU0016", Nom = "Foucault",   Prenom = "Philippe", Email = "philippe.foucault@ecole.fr",DateNaissance = new DateOnly(2000, 4,  19), Telephone = "0667890123", Adresse = "66 rue Caulaincourt, Toulouse" },
-            new Etudiant { NumeroEtudiant = "ETU0017", Nom = "G√©rard",     Prenom = "Quentine", Email = "quentine.gerard@ecole.fr",  DateNaissance = new DateOnly(2000, 9,  28), Telephone = "0678901234", Adresse = "3 rue du Ch√¢teau, Bordeaux" },
-            new Etudiant { NumeroEtudiant = "ETU0018", Nom = "Henri",      Prenom = "Rapha√´l",  Email = "raphael.henri@ecole.fr",  DateNaissance = new DateOnly(2000, 7,  10), Telephone = "0689012345", Adresse = "99 rue Soufflot, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0014", Nom = "Deschamps",  Prenom = "Nathan",    Email = "nathan.deschamps@ecole.fr", DateNaissance = new DateOnly(2000, 8,  17), Telephone = "0645678901", Adresse = "21 rue de Prague, Montpellier" },
+            new Etudiant { NumeroEtudiant = "ETU0015", Nom = "Emond",      Prenom = "OcÈane",    Email = "oceane.emond@ecole.fr",     DateNaissance = new DateOnly(2000, 11, 6),  Telephone = "0656789012", Adresse = "18 bd Michelet, Saint-…tienne" },
+            new Etudiant { NumeroEtudiant = "ETU0016", Nom = "Foucault",   Prenom = "Philippe",  Email = "philippe.foucault@ecole.fr", DateNaissance = new DateOnly(2000, 4, 19), Telephone = "0667890123", Adresse = "66 rue Caulaincourt, Toulouse" },
+            new Etudiant { NumeroEtudiant = "ETU0017", Nom = "GÈrard",     Prenom = "Quentine",  Email = "quentine.gerard@ecole.fr",  DateNaissance = new DateOnly(2000, 9,  28), Telephone = "0678901234", Adresse = "3 rue du Ch‚teau, Bordeaux" },
+            new Etudiant { NumeroEtudiant = "ETU0018", Nom = "Henri",      Prenom = "RaphaÎl",   Email = "raphael.henri@ecole.fr",    DateNaissance = new DateOnly(2000, 7,  10), Telephone = "0689012345", Adresse = "99 rue Soufflot, Paris" },
             // L2-MATH
-            new Etudiant { NumeroEtudiant = "ETU0019", Nom = "Izard",      Prenom = "St√©phanie",Email = "stephanie.izard@ecole.fr", DateNaissance = new DateOnly(2000, 5,  22), Telephone = "0690123456", Adresse = "44 av. Montaigne, Lyon" },
-            new Etudiant { NumeroEtudiant = "ETU0020", Nom = "Jacquet",    Prenom = "Thibault", Email = "thibault.jacquet@ecole.fr",DateNaissance = new DateOnly(2000, 2,  7),  Telephone = "0601234567", Adresse = "13 rue Mouffetard, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0019", Nom = "Izard",      Prenom = "StÈphanie", Email = "stephanie.izard@ecole.fr",  DateNaissance = new DateOnly(2000, 5,  22), Telephone = "0690123456", Adresse = "44 av. Montaigne, Lyon" },
+            new Etudiant { NumeroEtudiant = "ETU0020", Nom = "Jacquet",    Prenom = "Thibault",  Email = "thibault.jacquet@ecole.fr", DateNaissance = new DateOnly(2000, 2,  7),  Telephone = "0601234567", Adresse = "13 rue Mouffetard, Paris" },
             // L3-INFO
-            new Etudiant { NumeroEtudiant = "ETU0021", Nom = "Keller",     Prenom = "Val√©rie",  Email = "valerie.keller@ecole.fr", DateNaissance = new DateOnly(1999, 10, 31), Telephone = "0612345679", Adresse = "82 bd Raspail, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0022", Nom = "Leconte",    Prenom = "William",  Email = "william.leconte@ecole.fr",DateNaissance = new DateOnly(1999, 6,  14), Telephone = "0623456791", Adresse = "27 rue Dauphine, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0023", Nom = "Maillard",   Prenom = "Ximena",   Email = "ximena.maillard@ecole.fr",DateNaissance = new DateOnly(1999, 8,  23), Telephone = "0634567891", Adresse = "50 quai de la Tournelle, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0021", Nom = "Keller",     Prenom = "ValÈrie",   Email = "valerie.keller@ecole.fr",   DateNaissance = new DateOnly(1999, 10, 31), Telephone = "0612345679", Adresse = "82 bd Raspail, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0022", Nom = "Leconte",    Prenom = "William",   Email = "william.leconte@ecole.fr",  DateNaissance = new DateOnly(1999, 6,  14), Telephone = "0623456791", Adresse = "27 rue Dauphine, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0023", Nom = "Maillard",   Prenom = "Ximena",    Email = "ximena.maillard@ecole.fr",  DateNaissance = new DateOnly(1999, 8,  23), Telephone = "0634567891", Adresse = "50 quai de la Tournelle, Paris" },
             // L3-MATH
-            new Etudiant { NumeroEtudiant = "ETU0024", Nom = "Naudin",     Prenom = "Yves",     Email = "yves.naudin@ecole.fr",    DateNaissance = new DateOnly(1999, 12, 5),  Telephone = "0645678902", Adresse = "36 rue de Rivoli, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0025", Nom = "Orban",      Prenom = "Zoe",      Email = "zoe.orban@ecole.fr",      DateNaissance = new DateOnly(1999, 3,  18), Telephone = "0656789013", Adresse = "81 bd Saint-Germain, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0024", Nom = "Naudin",     Prenom = "Yves",      Email = "yves.naudin@ecole.fr",      DateNaissance = new DateOnly(1999, 12, 5),  Telephone = "0645678902", Adresse = "36 rue de Rivoli, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0025", Nom = "Orban",      Prenom = "Zoe",       Email = "zoe.orban@ecole.fr",        DateNaissance = new DateOnly(1999, 3,  18), Telephone = "0656789013", Adresse = "81 bd Saint-Germain, Paris" },
             // M1-INFO
-            new Etudiant { NumeroEtudiant = "ETU0026", Nom = "Pichon",     Prenom = "Andr√©",    Email = "andre.pichon@ecole.fr",   DateNaissance = new DateOnly(1999, 1,  9),  Telephone = "0667890124", Adresse = "14 rue de l'Od√©on, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0027", Nom = "Quantin",    Prenom = "B√©atrice", Email = "beatrice.quantin@ecole.fr",DateNaissance = new DateOnly(1998, 11, 20), Telephone = "0678901235", Adresse = "57 rue Cassette, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0028", Nom = "Racine",     Prenom = "C√©dric",   Email = "cedric.racine@ecole.fr",  DateNaissance = new DateOnly(1998, 9,  12), Telephone = "0689012346", Adresse = "70 rue Monsieur-le-Prince, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0026", Nom = "Pichon",     Prenom = "AndrÈ",     Email = "andre.pichon@ecole.fr",     DateNaissance = new DateOnly(1999, 1,  9),  Telephone = "0667890124", Adresse = "14 rue de l'OdÈon, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0027", Nom = "Quantin",    Prenom = "BÈatrice",  Email = "beatrice.quantin@ecole.fr", DateNaissance = new DateOnly(1998, 11, 20), Telephone = "0678901235", Adresse = "57 rue Cassette, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0028", Nom = "Racine",     Prenom = "CÈdric",    Email = "cedric.racine@ecole.fr",    DateNaissance = new DateOnly(1998, 9,  12), Telephone = "0689012346", Adresse = "70 rue Monsieur-le-Prince, Paris" },
             // M2-INFO
-            new Etudiant { NumeroEtudiant = "ETU0029", Nom = "Saule",      Prenom = "Denise",   Email = "denise.saule@ecole.fr",   DateNaissance = new DateOnly(1998, 4,  27), Telephone = "0690123457", Adresse = "2 passage des Panoramas, Paris" },
-            new Etudiant { NumeroEtudiant = "ETU0030", Nom = "Thibault",   Prenom = "√âdouard",  Email = "edouard.thibault@ecole.fr",DateNaissance = new DateOnly(1998, 7,  16), Telephone = "0601234568", Adresse = "101 rue de Turenne, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0029", Nom = "Saule",      Prenom = "Denise",    Email = "denise.saule@ecole.fr",     DateNaissance = new DateOnly(1998, 4,  27), Telephone = "0690123457", Adresse = "2 passage des Panoramas, Paris" },
+            new Etudiant { NumeroEtudiant = "ETU0030", Nom = "Thibault",   Prenom = "…douard",   Email = "edouard.thibault@ecole.fr", DateNaissance = new DateOnly(1998, 7,  16), Telephone = "0601234568", Adresse = "101 rue de Turenne, Paris" },
         };
         await _context.Etudiants.AddRangeAsync(etudiants, ct);
         await _context.SaveChangesAsync(ct);
@@ -127,39 +234,39 @@ public sealed class DataSeeder : IDataSeeder
     private async Task SeedMatieresAsync(CancellationToken ct)
     {
         var enseignants = await _context.Enseignants.ToListAsync(ct);
-        int idJean    = enseignants.First(e => e.Matricule == "ENS0001").Id;
-        int idMarie   = enseignants.First(e => e.Matricule == "ENS0002").Id;
-        int idPaul    = enseignants.First(e => e.Matricule == "ENS0003").Id;
-        int idSophie  = enseignants.First(e => e.Matricule == "ENS0004").Id;
-        int idPierre  = enseignants.First(e => e.Matricule == "ENS0005").Id;
-        int idIsabelle= enseignants.First(e => e.Matricule == "ENS0006").Id;
+        int idJean     = enseignants.First(e => e.Matricule == "ENS0001").Id;
+        int idMarie    = enseignants.First(e => e.Matricule == "ENS0002").Id;
+        int idPaul     = enseignants.First(e => e.Matricule == "ENS0003").Id;
+        int idSophie   = enseignants.First(e => e.Matricule == "ENS0004").Id;
+        int idPierre   = enseignants.First(e => e.Matricule == "ENS0005").Id;
+        int idIsabelle = enseignants.First(e => e.Matricule == "ENS0006").Id;
 
         var matieres = new[]
         {
-            // Math√©matiques
-            new Matiere { Code = "MATH101", Intitule = "Analyse math√©matique",         Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
-            new Matiere { Code = "MATH102", Intitule = "Alg√®bre lin√©aire",             Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
-            new Matiere { Code = "MATH201", Intitule = "Calcul diff√©rentiel int√©gral",  Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
-            new Matiere { Code = "MATH202", Intitule = "Th√©orie des groupes",          Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
-            new Matiere { Code = "MATH301", Intitule = "Analyse r√©elle avanc√©e",       Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            // MathÈmatiques
+            new Matiere { Code = "MATH101", Intitule = "Analyse mathÈmatique",          Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            new Matiere { Code = "MATH102", Intitule = "AlgËbre linÈaire",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
+            new Matiere { Code = "MATH201", Intitule = "Calcul diffÈrentiel intÈgral",  Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            new Matiere { Code = "MATH202", Intitule = "ThÈorie des groupes",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
+            new Matiere { Code = "MATH301", Intitule = "Analyse rÈelle avancÈe",        Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
             // Informatique
-            new Matiere { Code = "INFO101", Intitule = "Algorithmique",                Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO102", Intitule = "Programmation orient√©e objet", Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO201", Intitule = "Structures de donn√©es",        Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO202", Intitule = "Bases de donn√©es",             Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
-            new Matiere { Code = "INFO301", Intitule = "Programmation Web",            Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
-            new Matiere { Code = "INFO302", Intitule = "Architecture Logicielle",      Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO101", Intitule = "Algorithmique",                 Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO102", Intitule = "Programmation orientÈe objet",  Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO201", Intitule = "Structures de donnÈes",         Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO202", Intitule = "Bases de donnÈes",              Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
+            new Matiere { Code = "INFO301", Intitule = "Programmation Web",             Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
+            new Matiere { Code = "INFO302", Intitule = "Architecture Logicielle",       Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
             // Physique
-            new Matiere { Code = "PHYS101", Intitule = "M√©canique classique",          Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
-            new Matiere { Code = "PHYS102", Intitule = "√âlectricit√© et magn√©tisme",   Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
-            new Matiere { Code = "PHYS201", Intitule = "Thermodynamique",             Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
+            new Matiere { Code = "PHYS101", Intitule = "MÈcanique classique",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
+            new Matiere { Code = "PHYS102", Intitule = "…lectricitÈ et magnÈtisme",     Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
+            new Matiere { Code = "PHYS201", Intitule = "Thermodynamique",               Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
             // Chimie
-            new Matiere { Code = "CHIM101", Intitule = "Chimie g√©n√©rale",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
-            new Matiere { Code = "CHIM102", Intitule = "Chimie organique",             Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
+            new Matiere { Code = "CHIM101", Intitule = "Chimie gÈnÈrale",               Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
+            new Matiere { Code = "CHIM102", Intitule = "Chimie organique",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
             // Biologie
-            new Matiere { Code = "BIO101", Intitule = "Biologie cellulaire",          Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPierre },
+            new Matiere { Code = "BIO101",  Intitule = "Biologie cellulaire",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPierre },
             // Langues
-            new Matiere { Code = "LANG101", Intitule = "Anglais LV1",                 Coefficient = 2, VolumeHoraire = 30, EnseignantId = idIsabelle },
+            new Matiere { Code = "LANG101", Intitule = "Anglais LV1",                  Coefficient = 2, VolumeHoraire = 30, EnseignantId = idIsabelle },
         };
         await _context.Matieres.AddRangeAsync(matieres, ct);
         await _context.SaveChangesAsync(ct);
@@ -169,6 +276,9 @@ public sealed class DataSeeder : IDataSeeder
     {
         var etudiants = await _context.Etudiants.ToListAsync(ct);
         var classes   = await _context.Classes.ToListAsync(ct);
+        var statuts   = await _context.StatutsInscription.ToListAsync(ct);
+
+        int statutActive = statuts.First(s => s.Libelle == "Active").Id;
 
         int classeL1InfoA = classes.First(c => c.Nom == "L1-INFO-A").Id;
         int classeL1InfoB = classes.First(c => c.Nom == "L1-INFO-B").Id;
@@ -184,54 +294,54 @@ public sealed class DataSeeder : IDataSeeder
         var inscriptions = new List<Inscription>();
 
         // L1-INFO-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[0].Id,  ClasseId = classeL1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[1].Id,  ClasseId = classeL1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[2].Id,  ClasseId = classeL1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[3].Id,  ClasseId = classeL1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[4].Id,  ClasseId = classeL1InfoA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[0].Id,  ClasseId = classeL1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[1].Id,  ClasseId = classeL1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[2].Id,  ClasseId = classeL1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[3].Id,  ClasseId = classeL1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[4].Id,  ClasseId = classeL1InfoA, StatutId = statutActive });
 
         // L1-INFO-B
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[5].Id,  ClasseId = classeL1InfoB, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[6].Id,  ClasseId = classeL1InfoB, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[7].Id,  ClasseId = classeL1InfoB, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[8].Id,  ClasseId = classeL1InfoB, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[9].Id,  ClasseId = classeL1InfoB, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[5].Id,  ClasseId = classeL1InfoB, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[6].Id,  ClasseId = classeL1InfoB, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[7].Id,  ClasseId = classeL1InfoB, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[8].Id,  ClasseId = classeL1InfoB, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[9].Id,  ClasseId = classeL1InfoB, StatutId = statutActive });
 
         // L1-MATH-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[10].Id, ClasseId = classeL1MathA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[11].Id, ClasseId = classeL1MathA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[12].Id, ClasseId = classeL1MathA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[10].Id, ClasseId = classeL1MathA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[11].Id, ClasseId = classeL1MathA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[12].Id, ClasseId = classeL1MathA, StatutId = statutActive });
 
         // L2-INFO-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[13].Id, ClasseId = classeL2InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[14].Id, ClasseId = classeL2InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[15].Id, ClasseId = classeL2InfoA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[13].Id, ClasseId = classeL2InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[14].Id, ClasseId = classeL2InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[15].Id, ClasseId = classeL2InfoA, StatutId = statutActive });
 
         // L2-INFO-B
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[16].Id, ClasseId = classeL2InfoB, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[17].Id, ClasseId = classeL2InfoB, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[16].Id, ClasseId = classeL2InfoB, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[17].Id, ClasseId = classeL2InfoB, StatutId = statutActive });
 
         // L2-MATH-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[18].Id, ClasseId = classeL2MathA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[19].Id, ClasseId = classeL2MathA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[18].Id, ClasseId = classeL2MathA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[19].Id, ClasseId = classeL2MathA, StatutId = statutActive });
 
         // L3-INFO-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[20].Id, ClasseId = classeL3InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[21].Id, ClasseId = classeL3InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[22].Id, ClasseId = classeL3InfoA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[20].Id, ClasseId = classeL3InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[21].Id, ClasseId = classeL3InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[22].Id, ClasseId = classeL3InfoA, StatutId = statutActive });
 
         // L3-MATH-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[23].Id, ClasseId = classeL3MathA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[24].Id, ClasseId = classeL3MathA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[23].Id, ClasseId = classeL3MathA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[24].Id, ClasseId = classeL3MathA, StatutId = statutActive });
 
         // M1-INFO-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[25].Id, ClasseId = classeM1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[26].Id, ClasseId = classeM1InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[27].Id, ClasseId = classeM1InfoA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[25].Id, ClasseId = classeM1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[26].Id, ClasseId = classeM1InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[27].Id, ClasseId = classeM1InfoA, StatutId = statutActive });
 
         // M2-INFO-A
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[28].Id, ClasseId = classeM2InfoA, Statut = StatutInscription.Active });
-        inscriptions.Add(new Inscription { EtudiantId = etudiants[29].Id, ClasseId = classeM2InfoA, Statut = StatutInscription.Active });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[28].Id, ClasseId = classeM2InfoA, StatutId = statutActive });
+        inscriptions.Add(new Inscription { EtudiantId = etudiants[29].Id, ClasseId = classeM2InfoA, StatutId = statutActive });
 
         await _context.Inscriptions.AddRangeAsync(inscriptions, ct);
         await _context.SaveChangesAsync(ct);
@@ -239,24 +349,24 @@ public sealed class DataSeeder : IDataSeeder
 
     private async Task SeedNotesAsync(CancellationToken ct)
     {
-        var etudiants = await _context.Etudiants.ToListAsync(ct);
-        var matieres  = await _context.Matieres.ToListAsync(ct);
+        var etudiants    = await _context.Etudiants.ToListAsync(ct);
+        var matieres     = await _context.Matieres.ToListAsync(ct);
+        var typesEval    = await _context.TypesEvaluation.ToListAsync(ct);
 
-        var math101 = matieres.First(m => m.Code == "MATH101").Id;
-        var info101 = matieres.First(m => m.Code == "INFO101").Id;
-        var info102 = matieres.First(m => m.Code == "INFO102").Id;
-        var phys101 = matieres.First(m => m.Code == "PHYS101").Id;
-        var math102 = matieres.First(m => m.Code == "MATH102").Id;
-        var info201 = matieres.First(m => m.Code == "INFO201").Id;
-        var lang101 = matieres.First(m => m.Code == "LANG101").Id;
+        int math101 = matieres.First(m => m.Code == "MATH101").Id;
+        int info101 = matieres.First(m => m.Code == "INFO101").Id;
+        int info102 = matieres.First(m => m.Code == "INFO102").Id;
+        int info201 = matieres.First(m => m.Code == "INFO201").Id;
+        int lang101 = matieres.First(m => m.Code == "LANG101").Id;
 
-        var notes = new List<Note>();
+        int typeExamenFinal    = typesEval.First(t => t.Libelle == "Examen final").Id;
+        int typeControleCon    = typesEval.First(t => t.Libelle == "ContrÙle continu").Id;
+
+        var notes  = new List<Note>();
         var random = new Random(42);
 
-        // G√©n√©rer des notes pour les 30 √©tudiants sur diff√©rentes mati√®res
         foreach (var etudiant in etudiants)
         {
-            // Mati√®res selon le niveau
             var matiereIds = new List<int> { math101, info101 };
             if (etudiant.NumeroEtudiant != null && etudiant.NumeroEtudiant.CompareTo("ETU0013") >= 0)
                 matiereIds.Add(info102);
@@ -265,38 +375,35 @@ public sealed class DataSeeder : IDataSeeder
 
             foreach (var matiereId in matiereIds)
             {
-                // Examen final
                 decimal note1 = (decimal)(8 + random.NextDouble() * 12);
                 notes.Add(new Note
                 {
-                    EtudiantId = etudiant.Id,
-                    MatiereId = matiereId,
-                    Valeur = Math.Round(note1, 1),
-                    TypeEvaluation = TypeEvaluation.ExamenFinal,
-                    Date = new DateOnly(2025, 1, 15)
+                    EtudiantId        = etudiant.Id,
+                    MatiereId         = matiereId,
+                    Valeur            = Math.Round(note1, 1),
+                    TypeEvaluationId  = typeExamenFinal,
+                    Date              = new DateOnly(2025, 1, 15)
                 });
 
-                // Contr√¥le continu
                 decimal note2 = (decimal)(7 + random.NextDouble() * 13);
                 notes.Add(new Note
                 {
-                    EtudiantId = etudiant.Id,
-                    MatiereId = matiereId,
-                    Valeur = Math.Round(note2, 1),
-                    TypeEvaluation = TypeEvaluation.ControleContinu,
-                    Date = new DateOnly(2025, 1, 10)
+                    EtudiantId        = etudiant.Id,
+                    MatiereId         = matiereId,
+                    Valeur            = Math.Round(note2, 1),
+                    TypeEvaluationId  = typeControleCon,
+                    Date              = new DateOnly(2025, 1, 10)
                 });
             }
 
-            // Ajouter Anglais pour tous
             decimal noteAnglais = (decimal)(10 + random.NextDouble() * 10);
             notes.Add(new Note
             {
-                EtudiantId = etudiant.Id,
-                MatiereId = lang101,
-                Valeur = Math.Round(noteAnglais, 1),
-                TypeEvaluation = TypeEvaluation.ExamenFinal,
-                Date = new DateOnly(2025, 1, 20)
+                EtudiantId       = etudiant.Id,
+                MatiereId        = lang101,
+                Valeur           = Math.Round(noteAnglais, 1),
+                TypeEvaluationId = typeExamenFinal,
+                Date             = new DateOnly(2025, 1, 20)
             });
         }
 

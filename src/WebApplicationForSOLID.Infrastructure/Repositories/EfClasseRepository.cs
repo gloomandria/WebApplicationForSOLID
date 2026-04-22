@@ -23,7 +23,8 @@ public sealed class EfClasseRepository : IClasseRepository
 
     public Task<int> GetNombreEtudiantsAsync(int classeId, CancellationToken ct = default)
         => _context.Inscriptions
-                   .CountAsync(i => i.ClasseId == classeId && i.Statut == StatutInscription.Active, ct);
+                   .CountAsync(i => i.ClasseId == classeId
+                               && i.Statut != null && i.Statut.Libelle == "Active", ct);
 
     public async Task<IReadOnlyList<(int ClasseId, string ClasseNom, double? Moyenne)>> GetMoyennesParClasseAsync(CancellationToken ct = default)
     {
@@ -36,7 +37,8 @@ public sealed class EfClasseRepository : IClasseRepository
                 c.Nom,
                 Moyenne = _context.Notes
                     .Where(n => _context.Inscriptions
-                        .Any(i => i.ClasseId == c.Id && i.EtudiantId == n.EtudiantId && i.Statut == StatutInscription.Active))
+                        .Any(i => i.ClasseId == c.Id && i.EtudiantId == n.EtudiantId
+                              && i.Statut != null && i.Statut.Libelle == "Active"))
                     .Average(n => (double?)n.Valeur)
             })
             .ToListAsync(ct);

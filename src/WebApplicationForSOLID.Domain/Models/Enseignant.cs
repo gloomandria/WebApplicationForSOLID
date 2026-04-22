@@ -22,21 +22,17 @@ public sealed class Enseignant
     public string Telephone { get; set; } = string.Empty;
 
     [Display(Name = "Spécialité")]
-    public string Specialite { get; set; } = string.Empty;
+    public int SpecialiteId { get; set; }
+
+    public Specialite? Specialite { get; set; }
 
     [Display(Name = "Grade")]
-    public GradeEnseignant Grade { get; set; }
+    public int GradeId { get; set; }
+
+    public Grade? Grade { get; set; }
 
     [Display(Name = "Date d'embauche")]
     public DateTime DateEmbauche { get; init; } = DateTime.UtcNow;
 
     public string NomComplet => $"{Prenom} {Nom}";
-}
-
-public enum GradeEnseignant
-{
-    [Display(Name = "Assistant")] Assistant,
-    [Display(Name = "Maître-assistant")] MaitreAssistant,
-    [Display(Name = "Maître de conférences")] MaitreDeConferences,
-    [Display(Name = "Professeur")] Professeur
 }

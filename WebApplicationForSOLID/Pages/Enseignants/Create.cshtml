@@ -1,6 +1,5 @@
 ﻿@page
 @model ProjetScolariteSOLID.Pages.Enseignants.CreateModel
-@using ProjetScolariteSOLID.Domain.Models
 @{
     ViewData["Title"] = "Nouvel enseignant";
 }
@@ -28,13 +27,16 @@
             <input asp-for="Enseignant.Telephone" class="form-control" />
         </div>
         <div class="col-md-6">
-            <label asp-for="Enseignant.Specialite" class="form-label"></label>
-            <input asp-for="Enseignant.Specialite" class="form-control" />
+            <label asp-for="Enseignant.SpecialiteId" class="form-label">Spécialité</label>
+            <select asp-for="Enseignant.SpecialiteId" asp-items="Model.SpecialitesList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
         <div class="col-md-6">
-            <label asp-for="Enseignant.Grade" class="form-label"></label>
-            <select asp-for="Enseignant.Grade" class="form-select"
-                    asp-items="Html.GetEnumSelectList<GradeEnseignant>()"></select>
+            <label asp-for="Enseignant.GradeId" class="form-label">Grade</label>
+            <select asp-for="Enseignant.GradeId" asp-items="Model.GradesList" class="form-select">
+                <option value="">— Choisir —</option>
+            </select>
         </div>
     </div>
 
