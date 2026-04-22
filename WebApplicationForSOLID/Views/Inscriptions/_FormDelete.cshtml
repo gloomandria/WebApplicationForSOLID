@@ -1,0 +1,19 @@
+@model ProjetScolariteSOLID.ViewModels.InscriptionsViewModel
+
+<input type="hidden" name="InscriptionId" value="@Model.InscriptionId" />
+<div class="alert alert-warning">
+    Êtes-vous sûr de vouloir supprimer cette inscription ? Cette action est irréversible.
+</div>
+@if (Model.SelectedInscription is not null)
+{
+    <dl class="row">
+        <dt class="col-sm-5">Étudiant</dt>
+        <dd class="col-sm-7">@(Model.SelectedInscription.Etudiant?.NomComplet ?? $"Id={Model.SelectedInscription.EtudiantId}")</dd>
+        <dt class="col-sm-5">Classe</dt>
+        <dd class="col-sm-7">@(Model.SelectedInscription.Classe?.Nom ?? $"Id={Model.SelectedInscription.ClasseId}")</dd>
+        <dt class="col-sm-5">Date</dt>
+        <dd class="col-sm-7">@Model.SelectedInscription.DateInscription.ToString("dd/MM/yyyy")</dd>
+        <dt class="col-sm-5">Statut</dt>
+        <dd class="col-sm-7">@Model.SelectedInscription.Statut?.Libelle</dd>
+    </dl>
+}

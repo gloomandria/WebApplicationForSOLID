@@ -1,0 +1,23 @@
+@model ProjetScolariteSOLID.ViewModels.EnseignantsViewModel
+
+@if (!Model.Enseignants.Items.Any())
+{
+    <tr><td colspan="6"><div class="alert alert-info mb-0">Aucun enseignant enregistré.</div></td></tr>
+}
+else
+{
+    @foreach (var e in Model.Enseignants.Items)
+    {
+        <tr>
+            <td><span class="badge bg-secondary">@e.Matricule</span></td>
+            <td>@e.NomComplet</td>
+            <td>@e.Email</td>
+            <td>@e.Specialite</td>
+            <td><span class="badge bg-info text-dark">@e.Grade</span></td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@e.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@e.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

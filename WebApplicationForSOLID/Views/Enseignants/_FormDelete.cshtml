@@ -1,0 +1,13 @@
+@model ProjetScolariteSOLID.ViewModels.EnseignantsViewModel
+
+<input type="hidden" name="EnseignantId" value="@Model.EnseignantId" />
+@if (Model.SelectedEnseignant is not null)
+{
+    <div class="alert alert-warning">
+        Supprimer <strong>@Model.SelectedEnseignant.NomComplet</strong> (@Model.SelectedEnseignant.Matricule) ? Action irréversible.
+    </div>
+    <dl class="row">
+        <dt class="col-sm-5">Spécialité</dt><dd class="col-sm-7">@Model.SelectedEnseignant.Specialite</dd>
+        <dt class="col-sm-5">Grade</dt><dd class="col-sm-7">@Model.SelectedEnseignant.Grade</dd>
+    </dl>
+}

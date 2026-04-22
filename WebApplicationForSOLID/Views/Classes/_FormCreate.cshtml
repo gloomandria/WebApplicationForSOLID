@@ -1,0 +1,33 @@
+@model ProjetScolariteSOLID.ViewModels.ClassesViewModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Nom</label>
+        <input name="Classe.Nom" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Niveau</label>
+        <select name="Classe.NiveauId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.NiveauxList) { <option value="@item.Value">@item.Text</option> }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Filière</label>
+        <select name="Classe.FiliereId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.FilieresList) { <option value="@item.Value">@item.Text</option> }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Année académique</label>
+        <select name="Classe.AnneeAcademiqueId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.AnneesAcadList) { <option value="@item.Value">@item.Text</option> }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Capacité max</label>
+        <input name="Classe.CapaciteMax" class="form-control" type="number" min="1" required />
+    </div>
+</div>

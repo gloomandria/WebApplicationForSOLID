@@ -1,0 +1,185 @@
+@model ProjetScolariteSOLID.ViewModels.InscriptionsViewModel
+@{
+    ViewData["Title"] = "Inscriptions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>📋 Inscriptions</h1>
+    <button type="button" class="btn btn-primary" id="btn-open-create">+ Nouvelle inscription</button>
+</div>
+
+<div id="alert-zone"></div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle" id="inscriptions-table">
+        <thead class="table-primary">
+            <tr>
+                <th>Étudiant</th>
+                <th>Classe</th>
+                <th>Date d'inscription</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            @await Html.PartialAsync("_InscriptionsTable", Model)
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex justify-content-between align-items-center" id="pagination-zone">
+    <small class="text-muted" id="pagination-info">
+        @Model.Inscriptions.TotalCount inscription(s) — Page @Model.Inscriptions.Page / @Model.Inscriptions.TotalPages
+    </small>
+    <nav>
+        <ul class="pagination mb-0" id="pagination-links">
+            @if (Model.Inscriptions.HasPreviousPage)
+            {
+                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage - 1)">‹</a></li>
+            }
+            @for (int p = 1; p <= Model.Inscriptions.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link ajax-page" href="#" data-page="@p">@p</a>
+                </li>
+            }
+            @if (Model.Inscriptions.HasNextPage)
+            {
+                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage + 1)">›</a></li>
+            }
+        </ul>
+    </nav>
+</div>
+
+<!-- Modal : Nouvelle inscription -->
+<div class="modal fade" id="modal-create" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">📋 Nouvelle inscription</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="form-create">
+                @Html.AntiForgeryToken()
+                <div class="modal-body" id="modal-create-body"><div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div></div>
+                <div class="modal-footer">
+                    <div id="modal-create-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Inscrire</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : Modifier le statut -->
+<div class="modal fade" id="modal-edit-statut" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">✏️ Modifier le statut</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="form-edit-statut">
+                @Html.AntiForgeryToken()
+                <div class="modal-body" id="modal-edit-body"><div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div></div>
+                <div class="modal-footer">
+                    <div id="modal-edit-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : Supprimer -->
+<div class="modal fade" id="modal-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title text-danger">🗑️ Supprimer l'inscription</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="form-delete">
+                @Html.AntiForgeryToken()
+                <div class="modal-body" id="modal-delete-body"><div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div></div>
+                <div class="modal-footer">
+                    <div id="modal-delete-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function ($) {
+    let currentPage = @Model.CurrentPage;
+    const token = () => $('input[name="__RequestVerificationToken"]').val() ?? '';
+
+    function showAlert(msg, ok) {
+        $('#alert-zone').html(
+            `<div class="alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`
+        );
+    }
+
+    function refreshTable(page) {
+        return $.get('/Inscriptions/Table', { page })
+            .done(html => { $('#table-body').html(html); bindRowButtons(); });
+    }
+
+    function loadModal(modalId, bodyId, url) {
+        $('#' + bodyId).html('<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId)).show();
+        return $.get(url)
+            .done(html => $('#' + bodyId).html(html))
+            .fail(() => {
+                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+                showAlert('Impossible de charger le formulaire.', false);
+            });
+    }
+
+    function wireForm(formId, alertId, actionUrl, modalId) {
+        const $form = $('#' + formId);
+        $form[0].onsubmit = function (e) {
+            e.preventDefault();
+            $('#' + alertId).text('');
+            const fd = new FormData($form[0]);
+            $('#' + modalId + '-body').find('input,select,textarea').each(function () {
+                if (this.name) fd.set(this.name, this.value);
+            });
+            $.ajax({
+                url: actionUrl, method: 'POST', data: fd, processData: false, contentType: false,
+                headers: { 'RequestVerificationToken': token() }
+            }).done(data => {
+                if (!data.success) { $('#' + alertId).text(data.message); return; }
+                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+                showAlert(data.message, true);
+                refreshTable(currentPage);
+            }).fail(() => $('#' + alertId).text('Erreur serveur inattendue.'));
+        };
+    }
+
+    $('#btn-open-create').on('click', function () {
+        $('#modal-create-alert').text('');
+        loadModal('modal-create', 'modal-create-body', '/Inscriptions/FormCreate')
+            .done(() => wireForm('form-create', 'modal-create-alert', '/Inscriptions/CreateAjax', 'modal-create'));
+    });
+
+    $('#pagination-links').on('click', '.ajax-page', function (e) {
+        e.preventDefault();
+        currentPage = parseInt($(this).data('page'), 10);
+        refreshTable(currentPage);
+    });
+
+    function bindRowButtons() {
+        $('.btn-edit-statut').off('click').on('click', function () {
+            $('#modal-edit-alert').text('');
+            loadModal('modal-edit-statut', 'modal-edit-body', '/Inscriptions/FormEditStatut?id=' + $(this).data('id'))
+                .done(() => wireForm('form-edit-statut', 'modal-edit-alert', '/Inscriptions/EditStatutAjax', 'modal-edit-statut'));
+        });
+        $('.btn-delete').off('click').on('click', function () {
+            $('#modal-delete-alert').text('');
+            loadModal('modal-delete', 'modal-delete-body', '/Inscriptions/FormDelete?id=' + $(this).data('id'))
+                .done(() => wireForm('form-delete', 'modal-delete-alert', '/Inscriptions/DeleteAjax', 'modal-delete'));
+        });
+    }
+
+    bindRowButtons();
+}(jQuery));
+</script>
+}

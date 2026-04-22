@@ -1,0 +1,22 @@
+@model ProjetScolariteSOLID.ViewModels.InscriptionsViewModel
+
+<div class="mb-3">
+    <label class="form-label">Étudiant</label>
+    <select name="EtudiantId" class="form-select" required>
+        <option value="">— Choisir un étudiant —</option>
+        @foreach (var item in Model.EtudiantsList)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+</div>
+<div class="mb-3">
+    <label class="form-label">Classe</label>
+    <select name="ClasseId" class="form-select" required>
+        <option value="">— Choisir une classe —</option>
+        @foreach (var item in Model.ClassesList)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+</div>

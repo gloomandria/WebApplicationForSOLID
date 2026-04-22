@@ -1,0 +1,51 @@
+@model ProjetScolariteSOLID.ViewModels.NotesViewModel
+
+<input type="hidden" name="Note.Id" value="@Model.Note.Id" />
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Étudiant</label>
+        <select name="Note.EtudiantId" class="form-select" required>
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.EtudiantsList)
+            {
+                if (item.Value == Model.Note.EtudiantId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Matière</label>
+        <select name="Note.MatiereId" class="form-select" required>
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.MatieresList)
+            {
+                if (item.Value == Model.Note.MatiereId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Note /20</label>
+        <input name="Note.Valeur" value="@Model.Note.Valeur.ToString("0.##")" class="form-control" type="number" step="0.01" min="0" max="20" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Type d'évaluation</label>
+        <select name="Note.TypeEvaluationId" class="form-select" required>
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.TypesEvalList)
+            {
+                if (item.Value == Model.Note.TypeEvaluationId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Date</label>
+        <input name="Note.Date" value="@Model.Note.Date.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
+    </div>
+    <div class="col-12">
+        <label class="form-label">Commentaire</label>
+        <input name="Note.Commentaire" value="@Model.Note.Commentaire" class="form-control" />
+    </div>
+</div>

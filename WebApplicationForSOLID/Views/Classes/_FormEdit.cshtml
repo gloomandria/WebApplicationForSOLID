@@ -1,0 +1,47 @@
+@model ProjetScolariteSOLID.ViewModels.ClassesViewModel
+
+<input type="hidden" name="Classe.Id" value="@Model.Classe.Id" />
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Nom</label>
+        <input name="Classe.Nom" value="@Model.Classe.Nom" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Niveau</label>
+        <select name="Classe.NiveauId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.NiveauxList)
+            {
+                if (item.Value == Model.Classe.NiveauId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Filière</label>
+        <select name="Classe.FiliereId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.FilieresList)
+            {
+                if (item.Value == Model.Classe.FiliereId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Année académique</label>
+        <select name="Classe.AnneeAcademiqueId" class="form-select">
+            <option value="">— Choisir —</option>
+            @foreach (var item in Model.AnneesAcadList)
+            {
+                if (item.Value == Model.Classe.AnneeAcademiqueId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+                else { <option value="@item.Value">@item.Text</option> }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Capacité max</label>
+        <input name="Classe.CapaciteMax" value="@Model.Classe.CapaciteMax" class="form-control" type="number" min="1" required />
+    </div>
+</div>

@@ -1,0 +1,11 @@
+@model ProjetScolariteSOLID.ViewModels.NotesViewModel
+
+<input type="hidden" name="NoteId" value="@Model.NoteId" />
+@if (Model.SelectedNote is not null)
+{
+    <div class="alert alert-warning">
+        Supprimer la note de <strong>@(Model.SelectedNote.Etudiant?.NomComplet ?? $"Id={Model.SelectedNote.EtudiantId}")</strong>
+        en <strong>@(Model.SelectedNote.Matiere?.Intitule ?? $"Id={Model.SelectedNote.MatiereId}")</strong>
+        (@Model.SelectedNote.Valeur.ToString("0.##")/20) ? Action irréversible.
+    </div>
+}

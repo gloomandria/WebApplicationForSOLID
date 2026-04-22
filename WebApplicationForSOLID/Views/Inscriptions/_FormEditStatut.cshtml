@@ -1,0 +1,22 @@
+@model ProjetScolariteSOLID.ViewModels.InscriptionsViewModel
+
+@if (Model.SelectedInscription is not null)
+{
+    <dl class="row mb-3">
+        <dt class="col-sm-5">Étudiant</dt>
+        <dd class="col-sm-7">@(Model.SelectedInscription.Etudiant?.NomComplet ?? $"Id={Model.SelectedInscription.EtudiantId}")</dd>
+        <dt class="col-sm-5">Classe</dt>
+        <dd class="col-sm-7">@(Model.SelectedInscription.Classe?.Nom ?? $"Id={Model.SelectedInscription.ClasseId}")</dd>
+    </dl>
+}
+<input type="hidden" name="InscriptionId" value="@Model.InscriptionId" />
+<div class="mb-3">
+    <label class="form-label">Nouveau statut</label>
+    <select name="StatutId" class="form-select">
+        @foreach (var item in Model.StatutsList)
+        {
+            if (item.Value == Model.StatutId.ToString()) { <option value="@item.Value" selected>@item.Text</option> }
+            else { <option value="@item.Value">@item.Text</option> }
+        }
+    </select>
+</div>

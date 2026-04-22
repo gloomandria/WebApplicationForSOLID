@@ -1,0 +1,9 @@
+@model ProjetScolariteSOLID.ViewModels.MatieresViewModel
+
+<input type="hidden" name="MatiereId" value="@Model.MatiereId" />
+@if (Model.SelectedMatiere is not null)
+{
+    <div class="alert alert-warning">
+        Supprimer la matière <strong>@Model.SelectedMatiere.Intitule</strong> (@Model.SelectedMatiere.Code) ? Action irréversible.
+    </div>
+}
