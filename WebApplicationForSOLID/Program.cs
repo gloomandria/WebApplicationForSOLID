@@ -40,7 +40,10 @@ builder.Host.UseSerilog((ctx, services, cfg) =>
     }
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+});
 builder.Services.AddApplicationServices();                          // Application : MediatR + Services + Validators
 builder.Services.AddInfrastructureServices(builder.Configuration); // Infrastructure : DbContext + Repositories + Identity
 

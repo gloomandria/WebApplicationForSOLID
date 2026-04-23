@@ -2,43 +2,113 @@
     ViewData["Title"] = "Back-office Administrateur";
 }
 
-<h2 class="mb-4">⚙️ Back-office Administrateur</h2>
+<div class="d-flex align-items-center mb-4 gap-3">
+    <div class="fs-1">⚙️</div>
+    <div>
+        <h2 class="mb-0">Back-office Administrateur</h2>
+        <small class="text-muted">Gestion des utilisateurs, permissions, emails et audit</small>
+    </div>
+</div>
 
 <div class="row g-4">
-    <div class="col-md-3">
+    <div class="col-xl-3 col-md-4 col-sm-6">
         <a asp-action="Users" class="text-decoration-none">
-            <div class="card border-primary h-100 text-center p-3 hover-shadow">
-                <div style="font-size:2.5rem">👥</div>
-                <h5 class="mt-2">Utilisateurs</h5>
-                <p class="text-muted small">Gérer les comptes et assigner les rôles</p>
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:64px;height:64px;background:rgba(13,110,253,.1)">
+                        <span style="font-size:1.8rem">👥</span>
+                    </div>
+                    <h5 class="fw-semibold mb-1">Utilisateurs</h5>
+                    <p class="text-muted small mb-0">Gérer les comptes, rôles et activation</p>
+                </div>
+                <div class="card-footer text-center border-0 bg-primary bg-opacity-10 py-2">
+                    <small class="text-primary fw-semibold">Gérer →</small>
+                </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <div class="col-xl-3 col-md-4 col-sm-6">
         <a asp-action="Permissions" class="text-decoration-none">
-            <div class="card border-warning h-100 text-center p-3">
-                <div style="font-size:2.5rem">🔐</div>
-                <h5 class="mt-2">Permissions</h5>
-                <p class="text-muted small">Matrice d'accès par rôle et ressource</p>
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:64px;height:64px;background:rgba(255,193,7,.1)">
+                        <span style="font-size:1.8rem">🔐</span>
+                    </div>
+                    <h5 class="fw-semibold mb-1">Permissions</h5>
+                    <p class="text-muted small mb-0">Matrice d'accès par rôle et ressource</p>
+                </div>
+                <div class="card-footer text-center border-0 bg-warning bg-opacity-10 py-2">
+                    <small class="text-warning fw-semibold">Configurer →</small>
+                </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <div class="col-xl-3 col-md-4 col-sm-6">
         <a asp-action="EmailQueue" class="text-decoration-none">
-            <div class="card border-info h-100 text-center p-3">
-                <div style="font-size:2.5rem">📧</div>
-                <h5 class="mt-2">File d'emails</h5>
-                <p class="text-muted small">Suivi des emails en attente / envoyés</p>
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:64px;height:64px;background:rgba(13,202,240,.1)">
+                        <span style="font-size:1.8rem">📬</span>
+                    </div>
+                    <h5 class="fw-semibold mb-1">File d'emails</h5>
+                    <p class="text-muted small mb-0">Suivi des emails en attente et envoyés</p>
+                </div>
+                <div class="card-footer text-center border-0 bg-info bg-opacity-10 py-2">
+                    <small class="text-info fw-semibold">Consulter →</small>
+                </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <div class="col-xl-3 col-md-4 col-sm-6">
+        <a asp-controller="EmailTemplates" asp-action="Index" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:64px;height:64px;background:rgba(25,135,84,.1)">
+                        <span style="font-size:1.8rem">📝</span>
+                    </div>
+                    <h5 class="fw-semibold mb-1">Templates Email</h5>
+                    <p class="text-muted small mb-0">Gérer les modèles d'emails envoyés</p>
+                </div>
+                <div class="card-footer text-center border-0 bg-success bg-opacity-10 py-2">
+                    <small class="text-success fw-semibold">Éditer →</small>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-4 col-sm-6">
         <a asp-controller="Audit" asp-action="Index" class="text-decoration-none">
-            <div class="card border-dark h-100 text-center p-3">
-                <div style="font-size:2.5rem">🕵️</div>
-                <h5 class="mt-2">Journal d'audit</h5>
-                <p class="text-muted small">Historique de toutes les modifications</p>
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:64px;height:64px;background:rgba(33,37,41,.08)">
+                        <span style="font-size:1.8rem">🕵️</span>
+                    </div>
+                    <h5 class="fw-semibold mb-1">Journal d'audit</h5>
+                    <p class="text-muted small mb-0">Historique de toutes les modifications</p>
+                </div>
+                <div class="card-footer text-center border-0 bg-secondary bg-opacity-10 py-2">
+                    <small class="text-secondary fw-semibold">Consulter →</small>
+                </div>
             </div>
         </a>
     </div>
 </div>
+
+<style>
+    .card-hover {
+        transition: transform .18s ease, box-shadow .18s ease;
+        cursor: pointer;
+    }
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12) !important;
+    }
+</style>

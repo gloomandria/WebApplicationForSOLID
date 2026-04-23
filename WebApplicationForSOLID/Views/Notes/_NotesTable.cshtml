@@ -13,7 +13,7 @@ else
             <td>@(n.Etudiant?.NomComplet ?? $"Id={n.EtudiantId}")</td>
             <td>@(n.Matiere?.Intitule ?? $"Id={n.MatiereId}")</td>
             <td class="text-center"><span class="badge @noteClass">@n.Valeur.ToString("0.##")</span></td>
-            <td><span class="badge bg-secondary">@n.TypeEvaluation</span></td>
+            <td><span class="badge bg-secondary">@n.TypeEvaluation?.Libelle</span></td>
             <td>@n.Date.ToString("dd/MM/yyyy")</td>
             <td>@n.Commentaire</td>
             <td class="text-end">

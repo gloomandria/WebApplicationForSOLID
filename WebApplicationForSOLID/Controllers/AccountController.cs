@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjetScolariteSOLID.Application.Contracts;
+using ProjetScolariteSOLID.Domain.Models;
 using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.ViewModels.Auth;
 
@@ -9,21 +10,24 @@ namespace ProjetScolariteSOLID.Controllers;
 
 public sealed class AccountController : Controller
 {
-    private readonly UserManager<ApplicationUser>  _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IEmailQueueService            _emailQueue;
-    private readonly IConfiguration               _configuration;
+    private readonly UserManager<ApplicationUser>   _userManager;
+    private readonly SignInManager<ApplicationUser>  _signInManager;
+    private readonly IEmailQueueService             _emailQueue;
+    private readonly IEmailTemplateService          _emailTemplateService;
+    private readonly IConfiguration                _configuration;
 
     public AccountController(
-        UserManager<ApplicationUser>  userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IEmailQueueService            emailQueue,
-        IConfiguration               configuration)
+        UserManager<ApplicationUser>   userManager,
+        SignInManager<ApplicationUser>  signInManager,
+        IEmailQueueService             emailQueue,
+        IEmailTemplateService          emailTemplateService,
+        IConfiguration                configuration)
     {
-        _userManager   = userManager;
-        _signInManager = signInManager;
-        _emailQueue    = emailQueue;
-        _configuration = configuration;
+        _userManager          = userManager;
+        _signInManager        = signInManager;
+        _emailQueue           = emailQueue;
+        _emailTemplateService = emailTemplateService;
+        _configuration        = configuration;
     }
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -111,17 +115,20 @@ public sealed class AccountController : Controller
         var confirmUrl = Url.Action("ConfirmEmail", "Account",
                             new { userId = user.Id, token }, Request.Scheme)!;
 
-        await _emailQueue.EnqueueAsync(
-            destinataire: user.Email!,
-            sujet:        "Confirmation de votre compte — Gestion Scolarité",
-            corps:        BuildConfirmEmailHtml(user.NomComplet, confirmUrl));
+        await EnqueueFromTemplateAsync(
+            EmailTemplateCode.ConfirmationEmail,
+            user.Email!,
+            new() { ["NomComplet"] = user.NomComplet, ["Email"] = user.Email!, ["Lien"] = confirmUrl },
+            "Confirmation de votre compte - Gestion Scolarite",
+            $"""<h2>Bienvenue {user.NomComplet} !</h2><p>Confirmez votre email : <a href="{confirmUrl}">ici</a></p>""");
 
-        // Notifier l'administrateur qu'un nouveau compte attend sa validation
         var adminEmail = _configuration["AdminDefault:Email"] ?? "admin@scolarite.local";
-        await _emailQueue.EnqueueAsync(
-            destinataire: adminEmail,
-            sujet:        "Nouvelle inscription en attente de validation",
-            corps:        BuildAdminValidationEmailHtml(user.NomComplet, user.Email!, model.Role));
+        await EnqueueFromTemplateAsync(
+            EmailTemplateCode.NouvelleInscriptionAdmin,
+            adminEmail,
+            new() { ["NomComplet"] = user.NomComplet, ["Email"] = user.Email!, ["Role"] = model.Role },
+            "Nouvelle inscription en attente de validation",
+            $"""<p>Nouvelle inscription : {user.NomComplet} ({user.Email}) — Rôle : {model.Role}</p>""");
 
         TempData["Success"] = "Compte créé ! Vérifiez votre boîte email pour confirmer votre inscription. Votre compte sera activé après validation par un administrateur.";
         return RedirectToAction("Login");
@@ -160,10 +167,12 @@ public sealed class AccountController : Controller
             var token      = await _userManager.GeneratePasswordResetTokenAsync(user);
             var resetUrl   = Url.Action("ResetPassword", "Account",
                                 new { email = user.Email, token }, Request.Scheme)!;
-            await _emailQueue.EnqueueAsync(
-                destinataire: user.Email!,
-                sujet:        "Réinitialisation de mot de passe — Gestion Scolarité",
-                corps:        BuildResetPasswordHtml(user.NomComplet, resetUrl));
+            await EnqueueFromTemplateAsync(
+                EmailTemplateCode.ResetMotDePasse,
+                user.Email!,
+                new() { ["NomComplet"] = user.NomComplet, ["Email"] = user.Email!, ["Lien"] = resetUrl },
+                "Reinitialisation de mot de passe - Gestion Scolarite",
+                $"""<h2>Bonjour {user.NomComplet},</h2><p>Réinitialisez votre mot de passe : <a href="{resetUrl}">ici</a></p>""");
         }
 
         TempData["Success"] = "Si cet email existe, un lien de réinitialisation a été envoyé.";
@@ -207,6 +216,30 @@ public sealed class AccountController : Controller
     }
 
     // ── Accès refusé ──────────────────────────────────────────────────────────
+        // Activation de compte
+    [HttpGet, AllowAnonymous]
+    public async Task<IActionResult> ActivateAccount(string userId, string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) return BadRequest();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return NotFound();
+        return View(new ActivateAccountViewModel { UserId = userId, Token = token });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, AllowAnonymous]
+    public async Task<IActionResult> ActivateAccount(ActivateAccountViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user is null) { TempData["Error"] = "Utilisateur introuvable."; return RedirectToAction("Login"); }
+        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+        if (!result.Succeeded) { foreach (var e in result.Errors) ModelState.AddModelError(string.Empty, e.Description); return View(model); }
+        user.EstActif = true; user.EmailConfirmed = true;
+        await _userManager.UpdateAsync(user);
+        TempData["Success"] = "Votre compte a ete active avec succes ! Vous pouvez maintenant vous connecter.";
+        return RedirectToAction("Login");
+    }
+
     public IActionResult AccessDenied() => View();
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -217,35 +250,26 @@ public sealed class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    private static string BuildConfirmEmailHtml(string nom, string url) => $"""
-        <h2>Bienvenue {nom} !</h2>
-        <p>Merci de vous être inscrit sur le portail Gestion Scolarité.</p>
-        <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
-        <p><a href="{url}" style="background:#0d6efd;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none">Confirmer mon email</a></p>
-        <p>Ce lien est valable 24 heures.</p>
-        """;
-
-    private static string BuildResetPasswordHtml(string nom, string url) => $"""
-        <h2>Bonjour {nom},</h2>
-        <p>Une demande de réinitialisation de mot de passe a été effectuée pour votre compte.</p>
-        <p><a href="{url}" style="background:#dc3545;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none">Réinitialiser mon mot de passe</a></p>
-        <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
-        """;
-
-    private static string BuildAdminValidationEmailHtml(string nomComplet, string email, string role) => $"""
-        <h2>Nouvelle inscription en attente de validation</h2>
-        <p>Un nouvel utilisateur s'est inscrit sur le portail Gestion Scolarité et attend votre validation :</p>
-        <ul>
-          <li><strong>Nom :</strong> {nomComplet}</li>
-          <li><strong>Email :</strong> {email}</li>
-          <li><strong>Rôle demandé :</strong> {role}</li>
-        </ul>
-        <p>Connectez-vous à l'interface d'administration pour activer ou refuser ce compte.</p>
-        """;
-
-    private static string BuildAccountActivatedEmailHtml(string nomComplet) => $"""
-        <h2>Bonjour {nomComplet},</h2>
-        <p>Votre compte sur le portail <strong>Gestion Scolarité</strong> a été <strong>activé</strong> par un administrateur.</p>
-        <p>Vous pouvez désormais vous connecter avec vos identifiants.</p>
-        """;
+    /// <summary>
+    /// Envoie via le template en base si disponible, sinon utilise le fallback.
+    /// </summary>
+    private async Task EnqueueFromTemplateAsync(
+        string templateCode,
+        string destinataire,
+        Dictionary<string, string> variables,
+        string fallbackSujet,
+        string fallbackCorps,
+        CancellationToken ct = default)
+    {
+        var template = await _emailTemplateService.GetByCodeAsync(templateCode, ct);
+        if (template is not null)
+        {
+            var (sujet, corps) = template.Appliquer(variables);
+            await _emailQueue.EnqueueAsync(destinataire, sujet, corps, ct: ct);
+        }
+        else
+        {
+            await _emailQueue.EnqueueAsync(destinataire, fallbackSujet, fallbackCorps, ct: ct);
+        }
+    }
 }

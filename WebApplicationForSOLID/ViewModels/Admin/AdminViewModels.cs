@@ -1,3 +1,4 @@
+using ProjetScolariteSOLID.Domain.Models;
 using ProjetScolariteSOLID.Domain.Models.Auth;
 
 namespace ProjetScolariteSOLID.ViewModels.Admin;
@@ -50,4 +51,34 @@ public sealed class EmailQueueListViewModel
     public int PageSize { get; set; }
     public int Total    { get; set; }
     public int TotalPages => (int)Math.Ceiling((double)Total / PageSize);
+}
+
+public sealed class EmailTemplateListViewModel
+{
+    public IReadOnlyList<EmailTemplate> Templates { get; set; } = [];
+}
+
+public sealed class EmailTemplateFormModel
+{
+    public int Id { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le code est obligatoire")]
+    [System.ComponentModel.DataAnnotations.MaxLength(100)]
+    public string Code { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le nom est obligatoire")]
+    [System.ComponentModel.DataAnnotations.MaxLength(200)]
+    public string Nom { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le sujet est obligatoire")]
+    [System.ComponentModel.DataAnnotations.MaxLength(500)]
+    public string Sujet { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le corps est obligatoire")]
+    public string Corps { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.MaxLength(500)]
+    public string? Description { get; set; }
+
+    public bool EstActif { get; set; } = true;
 }

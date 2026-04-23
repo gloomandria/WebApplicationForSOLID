@@ -68,6 +68,7 @@ public static class InfrastructureServiceExtensions
 
         // ── Email Queue ───────────────────────────────────────────────────────────
         services.AddScoped<IEmailQueueService, EfEmailQueueService>();
+        services.AddScoped<IEmailTemplateService, EfEmailTemplateService>();
         services.AddScoped<ISmtpEmailSender,   SmtpEmailSender>();
         services.AddHostedService<EmailQueueBackgroundService>();
 

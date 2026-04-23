@@ -1,0 +1,37 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.EmailTemplateFormModel
+
+<input type="hidden" name="Id" value="@Model.Id" />
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label fw-semibold">Code</label>
+        <input name="Code" value="@Model.Code" class="form-control font-monospace" required placeholder="COMPTE_ACTIVE" />
+        <div class="form-text">Identifiant unique du template</div>
+    </div>
+    <div class="col-md-8">
+        <label class="form-label fw-semibold">Nom</label>
+        <input name="Nom" value="@Model.Nom" class="form-control" required placeholder="Ex : Activation de compte" />
+    </div>
+    <div class="col-md-12">
+        <label class="form-label fw-semibold">Sujet</label>
+        <input name="Sujet" value="@Model.Sujet" class="form-control" required placeholder="Votre compte a été activé — Gestion Scolarité" />
+        <div class="form-text">Placeholders disponibles : <code>{{NomComplet}}</code> <code>{{Email}}</code> <code>{{Lien}}</code> <code>{{Role}}</code></div>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label fw-semibold">Corps (HTML)</label>
+        <div id="quill-corps" style="height:260px; background:#fff;"></div>
+        <input type="hidden" name="Corps" value="@Model.Corps" />
+        <div class="form-text mt-1">Même placeholders que le sujet. Le contenu est sauvegardé en HTML.</div>
+    </div>
+    <div class="col-md-9">
+        <label class="form-label fw-semibold">Description</label>
+        <input name="Description" value="@Model.Description" class="form-control" placeholder="Description interne (non envoyée)" />
+    </div>
+    <div class="col-md-3 d-flex align-items-end pb-1">
+        <div class="form-check form-switch ms-2">
+            <input type="hidden" name="EstActif" value="false" />
+            <input name="EstActif" type="checkbox" class="form-check-input" role="switch" value="true" @(Model.EstActif ? "checked" : "") id="chk-actif" />
+            <label class="form-check-label fw-semibold" for="chk-actif">Actif</label>
+        </div>
+    </div>
+</div>

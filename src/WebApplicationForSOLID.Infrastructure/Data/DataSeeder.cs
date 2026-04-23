@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Identity;
+Ôªøusing Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjetScolariteSOLID.Domain.Models;
 using ProjetScolariteSOLID.Domain.Models.Auth;
 namespace ProjetScolariteSOLID.Infrastructure.Data;
 
 /// <summary>
-/// SRP ó ResponsabilitÈ unique : insÈrer les donnÈes de rÈfÈrence initiales.
-/// Idempotent : ne rÈinsËre pas si les donnÈes existent dÈj‡ (safe pour re-run).
+/// SRP ‚Äì Responsabilit√© unique : ins√©rer les donn√©es de r√©f√©rence initiales.
+/// Idempotent : ne r√©ins√®re pas si les donn√©es existent d√©j√† (safe pour re-run).
 /// </summary>
 public sealed class DataSeeder : IDataSeeder
 {
@@ -23,15 +23,17 @@ public sealed class DataSeeder : IDataSeeder
 
     public async Task SeedAsync(CancellationToken ct = default)
     {
+        // Les templates email sont toujours upsert√©s (corrige aussi les accents manquants).
+        await SeedEmailTemplatesAsync(ct);
+
         // Idempotence : on ne seed que si les enseignants sont absents.
-        // Les rÈfÈrentiels (SpÈcialitÈs, Grades, etc.) sont insÈrÈs par la migration AddReferentiels.
         if (await _context.Enseignants.AnyAsync(ct))
         {
-            _logger.LogInformation("DataSeeder : donnÈes dÈj‡ prÈsentes, seed ignorÈ.");
+            _logger.LogInformation("DataSeeder : donn√©es d√©j√† pr√©sentes, seed ignor√©.");
             return;
         }
 
-        _logger.LogInformation("DataSeeder : insertion des donnÈes initiales...");
+        _logger.LogInformation("DataSeeder : insertion des donnÔøΩes initiales...");
 
         await SeedEnseignantsAsync(ct);
         await SeedClassesAsync(ct);
@@ -40,7 +42,7 @@ public sealed class DataSeeder : IDataSeeder
         await SeedInscriptionsAsync(ct);
         await SeedNotesAsync(ct);
 
-        _logger.LogInformation("DataSeeder : seed terminÈ avec succËs.");
+        _logger.LogInformation("DataSeeder : seed termin√© avec succ√®s.");
     }
 
     private async Task SeedEnseignantsAsync(CancellationToken ct)
@@ -48,20 +50,20 @@ public sealed class DataSeeder : IDataSeeder
         var specialites = await _context.Specialites.ToListAsync(ct);
         var grades      = await _context.Grades.ToListAsync(ct);
 
-        int idSpMath   = specialites.First(s => s.Libelle == "MathÈmatiques").Id;
+        int idSpMath   = specialites.First(s => s.Libelle == "Math√©matiques").Id;
         int idSpInfo   = specialites.First(s => s.Libelle == "Informatique").Id;
         int idSpPhys   = specialites.First(s => s.Libelle == "Physique").Id;
         int idSpChim   = specialites.First(s => s.Libelle == "Chimie").Id;
         int idSpBio    = specialites.First(s => s.Libelle == "Biologie").Id;
-        int idSpFr     = specialites.First(s => s.Libelle == "FranÁais").Id;
+        int idSpFr     = specialites.First(s => s.Libelle == "Fran√ßais").Id;
         int idSpAng    = specialites.First(s => s.Libelle == "Anglais").Id;
-        int idSpHist   = specialites.First(s => s.Libelle == "Histoire-GÈographie").Id;
-        int idSpEps    = specialites.First(s => s.Libelle == "…ducation Physique").Id;
+        int idSpHist   = specialites.First(s => s.Libelle == "Histoire-G√©ographie").Id;
+        int idSpEps    = specialites.First(s => s.Libelle == "√âducation Physique").Id;
         int idSpArts   = specialites.First(s => s.Libelle == "Arts plastiques").Id;
 
         int idGrProf   = grades.First(g => g.Libelle == "Professeur").Id;
-        int idGrMC     = grades.First(g => g.Libelle == "MaÓtre de confÈrences").Id;
-        int idGrMA     = grades.First(g => g.Libelle == "MaÓtre-assistant").Id;
+        int idGrMC     = grades.First(g => g.Libelle == "Ma√Ætre de conf√©rences").Id;
+        int idGrMA     = grades.First(g => g.Libelle == "Ma√Ætre-assistant").Id;
 
         var seedData = new[]
         {
@@ -93,7 +95,7 @@ public sealed class DataSeeder : IDataSeeder
             var createResult = await _userManager.CreateAsync(user, "Scolarite@2024");
             if (!createResult.Succeeded)
             {
-                _logger.LogError("…chec crÈation user enseignant {Email}: {Errors}", d.Email,
+                _logger.LogError("ÔøΩchec crÔøΩation user enseignant {Email}: {Errors}", d.Email,
                     string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 idx++;
                 continue;
@@ -123,7 +125,7 @@ public sealed class DataSeeder : IDataSeeder
         var niveaux   = await _context.Niveaux.ToListAsync(ct);
 
         int fInfo = filieres.First(f => f.Libelle == "Informatique").Id;
-        int fMath = filieres.First(f => f.Libelle == "MathÈmatiques").Id;
+        int fMath = filieres.First(f => f.Libelle == "Math√©matiques").Id;
         int a2425 = annees.First(a => a.Libelle == "2024-2025").Id;
         int nL1   = niveaux.First(n => n.Libelle == "Licence 1").Id;
         int nL2   = niveaux.First(n => n.Libelle == "Licence 2").Id;
@@ -159,37 +161,37 @@ public sealed class DataSeeder : IDataSeeder
             (Nom:"Leroy",     Prenom:"David",     Email:"david.leroy@ecole.fr",        Tel:"0645678901", Naissance:new DateOnly(2000, 9,  5),  Adresse:"23 rue Pasteur, Lille"),
             (Nom:"Moreau",    Prenom:"Emma",      Email:"emma.moreau@ecole.fr",        Tel:"0656789012", Naissance:new DateOnly(2002, 11, 28), Adresse:"17 rue de la Paix, Nantes"),
             (Nom:"Girard",    Prenom:"Franck",    Email:"franck.girard@ecole.fr",      Tel:"0667890123", Naissance:new DateOnly(2001, 5,  12), Adresse:"34 rue Colbert, Strasbourg"),
-            (Nom:"Dubois",    Prenom:"GaÎlle",    Email:"gaelle.dubois@ecole.fr",      Tel:"0678901234", Naissance:new DateOnly(2003, 4,  8),  Adresse:"9 av. de la RÈpublique, Marseille"),
-            (Nom:"Noel",      Prenom:"HervÈ",     Email:"herve.noel@ecole.fr",         Tel:"0689012345", Naissance:new DateOnly(2002, 8,  20), Adresse:"15 bd de Belgique, Toulouse"),
+            (Nom:"Dubois",    Prenom:"GaÔøΩlle",    Email:"gaelle.dubois@ecole.fr",      Tel:"0678901234", Naissance:new DateOnly(2003, 4,  8),  Adresse:"9 av. de la RÔøΩpublique, Marseille"),
+            (Nom:"Noel",      Prenom:"HervÔøΩ",     Email:"herve.noel@ecole.fr",         Tel:"0689012345", Naissance:new DateOnly(2002, 8,  20), Adresse:"15 bd de Belgique, Toulouse"),
             (Nom:"Olivier",   Prenom:"Ingrid",    Email:"ingrid.olivier@ecole.fr",     Tel:"0690123456", Naissance:new DateOnly(2001, 10, 3),  Adresse:"42 rue Montgolfier, Nice"),
-            (Nom:"Laurent",   Prenom:"JÈrÙme",    Email:"jerome.laurent@ecole.fr",     Tel:"0601234567", Naissance:new DateOnly(2003, 2,  25), Adresse:"11 rue Saint-Michel, NÓmes"),
+            (Nom:"Laurent",   Prenom:"JÔøΩrÔøΩme",    Email:"jerome.laurent@ecole.fr",     Tel:"0601234567", Naissance:new DateOnly(2003, 2,  25), Adresse:"11 rue Saint-Michel, NÔøΩmes"),
             // L1-MATH
             (Nom:"Arnaud",    Prenom:"Katia",     Email:"katia.arnaud@ecole.fr",       Tel:"0612345670", Naissance:new DateOnly(2002, 6,  14), Adresse:"28 rue Voltaire, Angers"),
             (Nom:"Blanc",     Prenom:"Ludovic",   Email:"ludovic.blanc@ecole.fr",      Tel:"0623456790", Naissance:new DateOnly(2001, 12, 11), Adresse:"7 bd Saint-Denis, Le Havre"),
             (Nom:"Charrier",  Prenom:"Madeleine", Email:"madeleine.charrier@ecole.fr", Tel:"0634567890", Naissance:new DateOnly(2003, 3,  30), Adresse:"55 av. Foch, Grenoble"),
             // L2-INFO
             (Nom:"Deschamps", Prenom:"Nathan",    Email:"nathan.deschamps@ecole.fr",   Tel:"0645678901", Naissance:new DateOnly(2000, 8,  17), Adresse:"21 rue de Prague, Montpellier"),
-            (Nom:"Emond",     Prenom:"OcÈane",    Email:"oceane.emond@ecole.fr",       Tel:"0656789012", Naissance:new DateOnly(2000, 11, 6),  Adresse:"18 bd Michelet, Saint-…tienne"),
+            (Nom:"Emond",     Prenom:"OcÔøΩane",    Email:"oceane.emond@ecole.fr",       Tel:"0656789012", Naissance:new DateOnly(2000, 11, 6),  Adresse:"18 bd Michelet, Saint-ÔøΩtienne"),
             (Nom:"Foucault",  Prenom:"Philippe",  Email:"philippe.foucault@ecole.fr",  Tel:"0667890123", Naissance:new DateOnly(2000, 4,  19), Adresse:"66 rue Caulaincourt, Toulouse"),
-            (Nom:"GÈrard",    Prenom:"Quentine",  Email:"quentine.gerard@ecole.fr",    Tel:"0678901234", Naissance:new DateOnly(2000, 9,  28), Adresse:"3 rue du Ch‚teau, Bordeaux"),
-            (Nom:"Henri",     Prenom:"RaphaÎl",   Email:"raphael.henri@ecole.fr",      Tel:"0689012345", Naissance:new DateOnly(2000, 7,  10), Adresse:"99 rue Soufflot, Paris"),
+            (Nom:"GÔøΩrard",    Prenom:"Quentine",  Email:"quentine.gerard@ecole.fr",    Tel:"0678901234", Naissance:new DateOnly(2000, 9,  28), Adresse:"3 rue du ChÔøΩteau, Bordeaux"),
+            (Nom:"Henri",     Prenom:"RaphaÔøΩl",   Email:"raphael.henri@ecole.fr",      Tel:"0689012345", Naissance:new DateOnly(2000, 7,  10), Adresse:"99 rue Soufflot, Paris"),
             // L2-MATH
-            (Nom:"Izard",     Prenom:"StÈphanie", Email:"stephanie.izard@ecole.fr",    Tel:"0690123456", Naissance:new DateOnly(2000, 5,  22), Adresse:"44 av. Montaigne, Lyon"),
+            (Nom:"Izard",     Prenom:"StÔøΩphanie", Email:"stephanie.izard@ecole.fr",    Tel:"0690123456", Naissance:new DateOnly(2000, 5,  22), Adresse:"44 av. Montaigne, Lyon"),
             (Nom:"Jacquet",   Prenom:"Thibault",  Email:"thibault.jacquet@ecole.fr",   Tel:"0601234567", Naissance:new DateOnly(2000, 2,  7),  Adresse:"13 rue Mouffetard, Paris"),
             // L3-INFO
-            (Nom:"Keller",    Prenom:"ValÈrie",   Email:"valerie.keller@ecole.fr",     Tel:"0612345679", Naissance:new DateOnly(1999, 10, 31), Adresse:"82 bd Raspail, Paris"),
+            (Nom:"Keller",    Prenom:"ValÔøΩrie",   Email:"valerie.keller@ecole.fr",     Tel:"0612345679", Naissance:new DateOnly(1999, 10, 31), Adresse:"82 bd Raspail, Paris"),
             (Nom:"Leconte",   Prenom:"William",   Email:"william.leconte@ecole.fr",    Tel:"0623456791", Naissance:new DateOnly(1999, 6,  14), Adresse:"27 rue Dauphine, Paris"),
             (Nom:"Maillard",  Prenom:"Ximena",    Email:"ximena.maillard@ecole.fr",    Tel:"0634567891", Naissance:new DateOnly(1999, 8,  23), Adresse:"50 quai de la Tournelle, Paris"),
             // L3-MATH
             (Nom:"Naudin",    Prenom:"Yves",      Email:"yves.naudin@ecole.fr",        Tel:"0645678902", Naissance:new DateOnly(1999, 12, 5),  Adresse:"36 rue de Rivoli, Paris"),
             (Nom:"Orban",     Prenom:"Zoe",       Email:"zoe.orban@ecole.fr",          Tel:"0656789013", Naissance:new DateOnly(1999, 3,  18), Adresse:"81 bd Saint-Germain, Paris"),
             // M1-INFO
-            (Nom:"Pichon",    Prenom:"AndrÈ",     Email:"andre.pichon@ecole.fr",       Tel:"0667890124", Naissance:new DateOnly(1999, 1,  9),  Adresse:"14 rue de l'OdÈon, Paris"),
-            (Nom:"Quantin",   Prenom:"BÈatrice",  Email:"beatrice.quantin@ecole.fr",   Tel:"0678901235", Naissance:new DateOnly(1998, 11, 20), Adresse:"57 rue Cassette, Paris"),
-            (Nom:"Racine",    Prenom:"CÈdric",    Email:"cedric.racine@ecole.fr",      Tel:"0689012346", Naissance:new DateOnly(1998, 9,  12), Adresse:"70 rue Monsieur-le-Prince, Paris"),
+            (Nom:"Pichon",    Prenom:"AndrÔøΩ",     Email:"andre.pichon@ecole.fr",       Tel:"0667890124", Naissance:new DateOnly(1999, 1,  9),  Adresse:"14 rue de l'OdÔøΩon, Paris"),
+            (Nom:"Quantin",   Prenom:"BÔøΩatrice",  Email:"beatrice.quantin@ecole.fr",   Tel:"0678901235", Naissance:new DateOnly(1998, 11, 20), Adresse:"57 rue Cassette, Paris"),
+            (Nom:"Racine",    Prenom:"CÔøΩdric",    Email:"cedric.racine@ecole.fr",      Tel:"0689012346", Naissance:new DateOnly(1998, 9,  12), Adresse:"70 rue Monsieur-le-Prince, Paris"),
             // M2-INFO
             (Nom:"Saule",     Prenom:"Denise",    Email:"denise.saule@ecole.fr",       Tel:"0690123457", Naissance:new DateOnly(1998, 4,  27), Adresse:"2 passage des Panoramas, Paris"),
-            (Nom:"Thibault",  Prenom:"…douard",   Email:"edouard.thibault@ecole.fr",   Tel:"0601234568", Naissance:new DateOnly(1998, 7,  16), Adresse:"101 rue de Turenne, Paris"),
+            (Nom:"Thibault",  Prenom:"ÔøΩdouard",   Email:"edouard.thibault@ecole.fr",   Tel:"0601234568", Naissance:new DateOnly(1998, 7,  16), Adresse:"101 rue de Turenne, Paris"),
         };
 
         int idx = 1;
@@ -208,7 +210,7 @@ public sealed class DataSeeder : IDataSeeder
             var createResult = await _userManager.CreateAsync(user, "Scolarite@2024");
             if (!createResult.Succeeded)
             {
-                _logger.LogError("…chec crÈation user Ètudiant {Email}: {Errors}", d.Email,
+                _logger.LogError("ÔøΩchec crÔøΩation user ÔøΩtudiant {Email}: {Errors}", d.Email,
                     string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 idx++;
                 continue;
@@ -243,25 +245,25 @@ public sealed class DataSeeder : IDataSeeder
 
         var matieres = new[]
         {
-            // MathÈmatiques
-            new Matiere { Code = "MATH101", Intitule = "Analyse mathÈmatique",          Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
-            new Matiere { Code = "MATH102", Intitule = "AlgËbre linÈaire",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
-            new Matiere { Code = "MATH201", Intitule = "Calcul diffÈrentiel intÈgral",  Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
-            new Matiere { Code = "MATH202", Intitule = "ThÈorie des groupes",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
-            new Matiere { Code = "MATH301", Intitule = "Analyse rÈelle avancÈe",        Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            // Math√©matiques
+            new Matiere { Code = "MATH101", Intitule = "Analyse math√©matique",          Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            new Matiere { Code = "MATH102", Intitule = "Alg√®bre lin√©aire",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
+            new Matiere { Code = "MATH201", Intitule = "Calcul diff√©rentiel int√©gral",  Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
+            new Matiere { Code = "MATH202", Intitule = "Th√©orie des groupes",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idJean },
+            new Matiere { Code = "MATH301", Intitule = "Analyse r√©elle avanc√©e",        Coefficient = 4, VolumeHoraire = 60, EnseignantId = idJean },
             // Informatique
             new Matiere { Code = "INFO101", Intitule = "Algorithmique",                 Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO102", Intitule = "Programmation orientÈe objet",  Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO201", Intitule = "Structures de donnÈes",         Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
-            new Matiere { Code = "INFO202", Intitule = "Bases de donnÈes",              Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
+            new Matiere { Code = "INFO102", Intitule = "Programmation orient√©e objet",  Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO201", Intitule = "Structures de donn√©es",         Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
+            new Matiere { Code = "INFO202", Intitule = "Bases de donn√©es",              Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
             new Matiere { Code = "INFO301", Intitule = "Programmation Web",             Coefficient = 4, VolumeHoraire = 60, EnseignantId = idMarie },
             new Matiere { Code = "INFO302", Intitule = "Architecture Logicielle",       Coefficient = 3, VolumeHoraire = 45, EnseignantId = idMarie },
             // Physique
-            new Matiere { Code = "PHYS101", Intitule = "MÈcanique classique",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
-            new Matiere { Code = "PHYS102", Intitule = "…lectricitÈ et magnÈtisme",     Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
+            new Matiere { Code = "PHYS101", Intitule = "M√©canique classique",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
+            new Matiere { Code = "PHYS102", Intitule = "√âlectricit√© et magn√©tisme",     Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
             new Matiere { Code = "PHYS201", Intitule = "Thermodynamique",               Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPaul },
             // Chimie
-            new Matiere { Code = "CHIM101", Intitule = "Chimie gÈnÈrale",               Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
+            new Matiere { Code = "CHIM101", Intitule = "Chimie g√©n√©rale",               Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
             new Matiere { Code = "CHIM102", Intitule = "Chimie organique",              Coefficient = 3, VolumeHoraire = 45, EnseignantId = idSophie },
             // Biologie
             new Matiere { Code = "BIO101",  Intitule = "Biologie cellulaire",           Coefficient = 3, VolumeHoraire = 45, EnseignantId = idPierre },
@@ -360,7 +362,7 @@ public sealed class DataSeeder : IDataSeeder
         int lang101 = matieres.First(m => m.Code == "LANG101").Id;
 
         int typeExamenFinal    = typesEval.First(t => t.Libelle == "Examen final").Id;
-        int typeControleCon    = typesEval.First(t => t.Libelle == "ContrÙle continu").Id;
+        int typeControleCon    = typesEval.First(t => t.Libelle == "Contr√¥le continu").Id;
 
         var notes  = new List<Note>();
         var random = new Random(42);
@@ -409,5 +411,79 @@ public sealed class DataSeeder : IDataSeeder
 
         await _context.Notes.AddRangeAsync(notes, ct);
         await _context.SaveChangesAsync(ct);
+    }
+    private async Task SeedEmailTemplatesAsync(CancellationToken ct)
+    {
+        var definitions = new List<EmailTemplate>
+        {
+            new()
+            {
+                Code        = EmailTemplateCode.ConfirmationEmail,
+                Nom         = "Confirmation d'email",
+                Sujet       = "Confirmation de votre compte ‚Äî Gestion Scolarit√©",
+                Description = "Envoy√© lors de l'inscription pour confirmer l'adresse email.",
+                Corps       = "<h2>Bienvenue {{NomComplet}} !</h2><p>Merci de vous √™tre inscrit sur le portail <strong>Gestion Scolarit√©</strong>.</p><p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p><p><a href=\"{{Lien}}\" style=\"background:#0d6efd;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none\">Confirmer mon email</a></p><p>Ce lien est valable 24 heures.</p>"
+            },
+            new()
+            {
+                Code        = EmailTemplateCode.ResetMotDePasse,
+                Nom         = "R√©initialisation de mot de passe",
+                Sujet       = "R√©initialisation de mot de passe ‚Äî Gestion Scolarit√©",
+                Description = "Envoy√© lorsque l'utilisateur demande une r√©initialisation de mot de passe.",
+                Corps       = "<h2>Bonjour {{NomComplet}},</h2><p>Une demande de r√©initialisation de mot de passe a √©t√© effectu√©e pour votre compte.</p><p><a href=\"{{Lien}}\" style=\"background:#dc3545;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none\">R√©initialiser mon mot de passe</a></p><p>Si vous n'√™tes pas √† l'origine de cette demande, ignorez cet email.</p>"
+            },
+            new()
+            {
+                Code        = EmailTemplateCode.NouvelleInscriptionAdmin,
+                Nom         = "Nouvelle inscription (admin)",
+                Sujet       = "Nouvelle inscription en attente de validation",
+                Description = "Envoy√© √† l'admin pour signaler une nouvelle inscription en attente.",
+                Corps       = "<h2>Nouvelle inscription en attente de validation</h2><p>Un nouvel utilisateur s'est inscrit sur le portail <strong>Gestion Scolarit√©</strong> et attend votre validation :</p><ul><li><strong>Nom :</strong> {{NomComplet}}</li><li><strong>Email :</strong> {{Email}}</li><li><strong>R√¥le demand√© :</strong> {{Role}}</li></ul><p>Connectez-vous √† l'interface d'administration pour activer ou refuser ce compte.</p>"
+            },
+            new()
+            {
+                Code        = EmailTemplateCode.CompteActive,
+                Nom         = "Compte activ√©",
+                Sujet       = "Votre compte a √©t√© activ√© ‚Äî Gestion Scolarit√©",
+                Description = "Envoy√© lorsque le compte est activ√© par un administrateur.",
+                Corps       = "<h2>Bonjour {{NomComplet}},</h2><p>Votre compte sur le portail <strong>Gestion Scolarit√©</strong> a √©t√© <strong>activ√©</strong> par un administrateur.</p><p>Vous pouvez d√©sormais vous connecter avec vos identifiants.</p>"
+            },
+            new()
+            {
+                Code        = EmailTemplateCode.CompteDesactive,
+                Nom         = "Compte d√©sactiv√©",
+                Sujet       = "Votre compte a √©t√© d√©sactiv√© ‚Äî Gestion Scolarit√©",
+                Description = "Envoy√© lorsque le compte est d√©sactiv√© par un administrateur.",
+                Corps       = "<h2>Bonjour {{NomComplet}},</h2><p>Votre compte sur le portail <strong>Gestion Scolarit√©</strong> a √©t√© <strong>d√©sactiv√©</strong> par un administrateur.</p><p>Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administration.</p>"
+            },
+            new()
+            {
+                Code        = EmailTemplateCode.ValidationCompte,
+                Nom         = "Validation de compte (lien d'activation)",
+                Sujet       = "Activation de votre compte ‚Äî Gestion Scolarit√©",
+                Description = "Envoy√© par l'admin pour inviter l'utilisateur √† d√©finir son mot de passe.",
+                Corps       = "<h2>Bonjour {{NomComplet}},</h2><p>Un administrateur vous invite √† activer votre compte sur le portail <strong>Gestion Scolarit√©</strong>.</p><p>Cliquez sur le lien ci-dessous pour d√©finir votre mot de passe et activer votre compte :</p><p><a href=\"{{Lien}}\" style=\"background:#0d6efd;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none\">Activer mon compte</a></p><p>Ce lien est valable 24 heures.</p>"
+            },
+        };
+
+        var existing = await _context.EmailTemplates.ToListAsync(ct);
+        foreach (var def in definitions)
+        {
+            var found = existing.FirstOrDefault(t => t.Code == def.Code);
+            if (found is null)
+            {
+                _context.EmailTemplates.Add(def);
+            }
+            else
+            {
+                found.Nom         = def.Nom;
+                found.Sujet       = def.Sujet;
+                found.Description = def.Description;
+                found.Corps       = def.Corps;
+            }
+        }
+
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("DataSeeder : templates email v√©rifi√©s/mis √† jour.");
     }
 }

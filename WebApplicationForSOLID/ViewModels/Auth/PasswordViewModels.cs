@@ -27,3 +27,22 @@ public sealed class ResetPasswordViewModel
     [Display(Name = "Confirmer le mot de passe")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
+
+public sealed class ActivateAccountViewModel
+{
+    [Required]
+    public string UserId { get; set; } = string.Empty;
+
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required, StringLength(100, MinimumLength = 8)]
+    [DataType(DataType.Password)]
+    [Display(Name = "Mot de passe")]
+    public string Password { get; set; } = string.Empty;
+
+    [DataType(DataType.Password)]
+    [Compare("Password", ErrorMessage = "Les mots de passe ne correspondent pas")]
+    [Display(Name = "Confirmer le mot de passe")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}

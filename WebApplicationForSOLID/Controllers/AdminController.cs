@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjetScolariteSOLID.Application.Contracts;
+using ProjetScolariteSOLID.Domain.Models;
 using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.ViewModels.Admin;
 
@@ -14,6 +15,7 @@ public sealed class AdminController : Controller
     private readonly RoleManager<ApplicationRole>  _roleManager;
     private readonly IPermissionService            _permissionService;
     private readonly IEmailQueueService            _emailQueue;
+    private readonly IEmailTemplateService         _emailTemplateService;
 
     // Ressources gérées par la matrice de permissions
     private static readonly string[] Ressources =
@@ -23,12 +25,14 @@ public sealed class AdminController : Controller
         UserManager<ApplicationUser>  userManager,
         RoleManager<ApplicationRole>  roleManager,
         IPermissionService            permissionService,
-        IEmailQueueService            emailQueue)
+        IEmailQueueService            emailQueue,
+        IEmailTemplateService         emailTemplateService)
     {
-        _userManager       = userManager;
-        _roleManager       = roleManager;
-        _permissionService = permissionService;
-        _emailQueue        = emailQueue;
+        _userManager          = userManager;
+        _roleManager          = roleManager;
+        _permissionService    = permissionService;
+        _emailQueue           = emailQueue;
+        _emailTemplateService = emailTemplateService;
     }
 
     // ── Dashboard back-office ─────────────────────────────────────────────────
@@ -64,20 +68,57 @@ public sealed class AdminController : Controller
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null) return NotFound();
 
-        var wasInactive = !user.EstActif;
         user.EstActif = !user.EstActif;
         await _userManager.UpdateAsync(user);
 
-        // Envoyer un email à l'utilisateur lorsque son compte est activé
-        if (wasInactive && user.EstActif && user.Email is not null)
+        if (user.Email is not null)
         {
-            await _emailQueue.EnqueueAsync(
-                destinataire: user.Email,
-                sujet:        "Votre compte a été validé — Gestion Scolarité",
-                corps:        BuildAccountActivatedEmailHtml(user.NomComplet));
+            var templateCode = user.EstActif ? EmailTemplateCode.CompteActive : EmailTemplateCode.CompteDesactive;
+            var variables = new Dictionary<string, string>
+            {
+                ["NomComplet"] = user.NomComplet,
+                ["Email"]      = user.Email
+            };
+            var fallbackSujet = user.EstActif
+                ? "Votre compte a ete active - Gestion Scolarite"
+                : "Votre compte a ete desactive - Gestion Scolarite";
+            var fallbackCorps = user.EstActif
+                ? $"""<h2>Bonjour {user.NomComplet},</h2><p>Votre compte a été <strong>activé</strong>.</p>"""
+                : $"""<h2>Bonjour {user.NomComplet},</h2><p>Votre compte a été <strong>désactivé</strong>.</p>""";
+            await EnqueueFromTemplateAsync(templateCode, user.Email, variables, fallbackSujet, fallbackCorps);
         }
 
         TempData["Success"] = $"Compte {(user.EstActif ? "activé" : "désactivé")}.";
+        return RedirectToAction("Users");
+    }
+
+    // ── Envoyer un email de validation (activation + assignation mdp) ─────────
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendValidation(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return NotFound();
+        if (user.Email is null) { TempData["Error"] = "L'utilisateur n'a pas d'email."; return RedirectToAction("Users"); }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var activateUrl = Url.Action("ActivateAccount", "Account",
+                            new { userId = user.Id, token }, Request.Scheme)!;
+
+        var variables = new Dictionary<string, string>
+        {
+            ["NomComplet"] = user.NomComplet,
+            ["Email"]      = user.Email,
+            ["Lien"]       = activateUrl
+        };
+
+        await EnqueueFromTemplateAsync(
+            EmailTemplateCode.ValidationCompte,
+            user.Email,
+            variables,
+            "Activation de votre compte - Gestion Scolarite",
+            $"""<h2>Bonjour {user.NomComplet},</h2><p>Activez votre compte : <a href="{activateUrl}">cliquez ici</a></p>""");
+
+        TempData["Success"] = $"Email de validation envoyé à {user.Email}.";
         return RedirectToAction("Users");
     }
 
@@ -162,9 +203,23 @@ public sealed class AdminController : Controller
         });
     }
 
-    private static string BuildAccountActivatedEmailHtml(string nomComplet) => $"""
-        <h2>Bonjour {nomComplet},</h2>
-        <p>Votre compte sur le portail <strong>Gestion Scolarité</strong> a été <strong>activé</strong> par un administrateur.</p>
-        <p>Vous pouvez désormais vous connecter avec vos identifiants.</p>
-        """;
+    private async Task EnqueueFromTemplateAsync(
+        string templateCode,
+        string destinataire,
+        Dictionary<string, string> variables,
+        string fallbackSujet,
+        string fallbackCorps,
+        CancellationToken ct = default)
+    {
+        var template = await _emailTemplateService.GetByCodeAsync(templateCode, ct);
+        if (template is not null)
+        {
+            var (sujet, corps) = template.Appliquer(variables);
+            await _emailQueue.EnqueueAsync(destinataire, sujet, corps, ct: ct);
+        }
+        else
+        {
+            await _emailQueue.EnqueueAsync(destinataire, fallbackSujet, fallbackCorps, ct: ct);
+        }
+    }
 }

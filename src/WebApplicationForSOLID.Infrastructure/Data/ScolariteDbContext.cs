@@ -50,6 +50,7 @@ public sealed class ScolariteDbContext : IdentityDbContext<ApplicationUser, Appl
 
     // Auth
     public DbSet<EmailQueue>     EmailQueue      => Set<EmailQueue>();
+    public DbSet<EmailTemplate>  EmailTemplates  => Set<EmailTemplate>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     // Audit
