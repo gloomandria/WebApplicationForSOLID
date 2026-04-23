@@ -33,7 +33,7 @@ public sealed class DataSeeder : IDataSeeder
             return;
         }
 
-        _logger.LogInformation("DataSeeder : insertion des donn�es initiales...");
+        _logger.LogInformation("DataSeeder : insertion des données initiales...");
 
         await SeedEnseignantsAsync(ct);
         await SeedClassesAsync(ct);
@@ -95,7 +95,7 @@ public sealed class DataSeeder : IDataSeeder
             var createResult = await _userManager.CreateAsync(user, "Scolarite@2024");
             if (!createResult.Succeeded)
             {
-                _logger.LogError("�chec cr�ation user enseignant {Email}: {Errors}", d.Email,
+                _logger.LogError("Echec création user enseignant {Email}: {Errors}", d.Email,
                     string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 idx++;
                 continue;
@@ -161,37 +161,37 @@ public sealed class DataSeeder : IDataSeeder
             (Nom:"Leroy",     Prenom:"David",     Email:"david.leroy@ecole.fr",        Tel:"0645678901", Naissance:new DateOnly(2000, 9,  5),  Adresse:"23 rue Pasteur, Lille"),
             (Nom:"Moreau",    Prenom:"Emma",      Email:"emma.moreau@ecole.fr",        Tel:"0656789012", Naissance:new DateOnly(2002, 11, 28), Adresse:"17 rue de la Paix, Nantes"),
             (Nom:"Girard",    Prenom:"Franck",    Email:"franck.girard@ecole.fr",      Tel:"0667890123", Naissance:new DateOnly(2001, 5,  12), Adresse:"34 rue Colbert, Strasbourg"),
-            (Nom:"Dubois",    Prenom:"Ga�lle",    Email:"gaelle.dubois@ecole.fr",      Tel:"0678901234", Naissance:new DateOnly(2003, 4,  8),  Adresse:"9 av. de la R�publique, Marseille"),
-            (Nom:"Noel",      Prenom:"Herv�",     Email:"herve.noel@ecole.fr",         Tel:"0689012345", Naissance:new DateOnly(2002, 8,  20), Adresse:"15 bd de Belgique, Toulouse"),
+            (Nom:"Dubois",    Prenom:"Gaëlle",    Email:"gaelle.dubois@ecole.fr",      Tel:"0678901234", Naissance:new DateOnly(2003, 4,  8),  Adresse:"9 av. de la République, Marseille"),
+            (Nom:"Noel",      Prenom:"Hervé",     Email:"herve.noel@ecole.fr",         Tel:"0689012345", Naissance:new DateOnly(2002, 8,  20), Adresse:"15 bd de Belgique, Toulouse"),
             (Nom:"Olivier",   Prenom:"Ingrid",    Email:"ingrid.olivier@ecole.fr",     Tel:"0690123456", Naissance:new DateOnly(2001, 10, 3),  Adresse:"42 rue Montgolfier, Nice"),
-            (Nom:"Laurent",   Prenom:"J�r�me",    Email:"jerome.laurent@ecole.fr",     Tel:"0601234567", Naissance:new DateOnly(2003, 2,  25), Adresse:"11 rue Saint-Michel, N�mes"),
+            (Nom:"Laurent",   Prenom:"Jérôme",    Email:"jerome.laurent@ecole.fr",     Tel:"0601234567", Naissance:new DateOnly(2003, 2,  25), Adresse:"11 rue Saint-Michel, Nimes"),
             // L1-MATH
             (Nom:"Arnaud",    Prenom:"Katia",     Email:"katia.arnaud@ecole.fr",       Tel:"0612345670", Naissance:new DateOnly(2002, 6,  14), Adresse:"28 rue Voltaire, Angers"),
             (Nom:"Blanc",     Prenom:"Ludovic",   Email:"ludovic.blanc@ecole.fr",      Tel:"0623456790", Naissance:new DateOnly(2001, 12, 11), Adresse:"7 bd Saint-Denis, Le Havre"),
             (Nom:"Charrier",  Prenom:"Madeleine", Email:"madeleine.charrier@ecole.fr", Tel:"0634567890", Naissance:new DateOnly(2003, 3,  30), Adresse:"55 av. Foch, Grenoble"),
             // L2-INFO
             (Nom:"Deschamps", Prenom:"Nathan",    Email:"nathan.deschamps@ecole.fr",   Tel:"0645678901", Naissance:new DateOnly(2000, 8,  17), Adresse:"21 rue de Prague, Montpellier"),
-            (Nom:"Emond",     Prenom:"Oc�ane",    Email:"oceane.emond@ecole.fr",       Tel:"0656789012", Naissance:new DateOnly(2000, 11, 6),  Adresse:"18 bd Michelet, Saint-�tienne"),
+            (Nom:"Emond",     Prenom:"Océane",    Email:"oceane.emond@ecole.fr",       Tel:"0656789012", Naissance:new DateOnly(2000, 11, 6),  Adresse:"18 bd Michelet, Saint-Étienne"),
             (Nom:"Foucault",  Prenom:"Philippe",  Email:"philippe.foucault@ecole.fr",  Tel:"0667890123", Naissance:new DateOnly(2000, 4,  19), Adresse:"66 rue Caulaincourt, Toulouse"),
-            (Nom:"G�rard",    Prenom:"Quentine",  Email:"quentine.gerard@ecole.fr",    Tel:"0678901234", Naissance:new DateOnly(2000, 9,  28), Adresse:"3 rue du Ch�teau, Bordeaux"),
-            (Nom:"Henri",     Prenom:"Rapha�l",   Email:"raphael.henri@ecole.fr",      Tel:"0689012345", Naissance:new DateOnly(2000, 7,  10), Adresse:"99 rue Soufflot, Paris"),
+            (Nom:"Gérard",    Prenom:"Quentine",  Email:"quentine.gerard@ecole.fr",    Tel:"0678901234", Naissance:new DateOnly(2000, 9,  28), Adresse:"3 rue du Château, Bordeaux"),
+            (Nom:"Henri",     Prenom:"Raphaël",   Email:"raphael.henri@ecole.fr",      Tel:"0689012345", Naissance:new DateOnly(2000, 7,  10), Adresse:"99 rue Soufflot, Paris"),
             // L2-MATH
-            (Nom:"Izard",     Prenom:"St�phanie", Email:"stephanie.izard@ecole.fr",    Tel:"0690123456", Naissance:new DateOnly(2000, 5,  22), Adresse:"44 av. Montaigne, Lyon"),
+            (Nom:"Izard",     Prenom:"Stéphanie", Email:"stephanie.izard@ecole.fr",    Tel:"0690123456", Naissance:new DateOnly(2000, 5,  22), Adresse:"44 av. Montaigne, Lyon"),
             (Nom:"Jacquet",   Prenom:"Thibault",  Email:"thibault.jacquet@ecole.fr",   Tel:"0601234567", Naissance:new DateOnly(2000, 2,  7),  Adresse:"13 rue Mouffetard, Paris"),
             // L3-INFO
-            (Nom:"Keller",    Prenom:"Val�rie",   Email:"valerie.keller@ecole.fr",     Tel:"0612345679", Naissance:new DateOnly(1999, 10, 31), Adresse:"82 bd Raspail, Paris"),
+            (Nom:"Keller",    Prenom:"Valérie",   Email:"valerie.keller@ecole.fr",     Tel:"0612345679", Naissance:new DateOnly(1999, 10, 31), Adresse:"82 bd Raspail, Paris"),
             (Nom:"Leconte",   Prenom:"William",   Email:"william.leconte@ecole.fr",    Tel:"0623456791", Naissance:new DateOnly(1999, 6,  14), Adresse:"27 rue Dauphine, Paris"),
             (Nom:"Maillard",  Prenom:"Ximena",    Email:"ximena.maillard@ecole.fr",    Tel:"0634567891", Naissance:new DateOnly(1999, 8,  23), Adresse:"50 quai de la Tournelle, Paris"),
             // L3-MATH
             (Nom:"Naudin",    Prenom:"Yves",      Email:"yves.naudin@ecole.fr",        Tel:"0645678902", Naissance:new DateOnly(1999, 12, 5),  Adresse:"36 rue de Rivoli, Paris"),
             (Nom:"Orban",     Prenom:"Zoe",       Email:"zoe.orban@ecole.fr",          Tel:"0656789013", Naissance:new DateOnly(1999, 3,  18), Adresse:"81 bd Saint-Germain, Paris"),
             // M1-INFO
-            (Nom:"Pichon",    Prenom:"Andr�",     Email:"andre.pichon@ecole.fr",       Tel:"0667890124", Naissance:new DateOnly(1999, 1,  9),  Adresse:"14 rue de l'Od�on, Paris"),
-            (Nom:"Quantin",   Prenom:"B�atrice",  Email:"beatrice.quantin@ecole.fr",   Tel:"0678901235", Naissance:new DateOnly(1998, 11, 20), Adresse:"57 rue Cassette, Paris"),
-            (Nom:"Racine",    Prenom:"C�dric",    Email:"cedric.racine@ecole.fr",      Tel:"0689012346", Naissance:new DateOnly(1998, 9,  12), Adresse:"70 rue Monsieur-le-Prince, Paris"),
+            (Nom:"Pichon",    Prenom:"André",     Email:"andre.pichon@ecole.fr",       Tel:"0667890124", Naissance:new DateOnly(1999, 1,  9),  Adresse:"14 rue de l'Odéon, Paris"),
+            (Nom:"Quantin",   Prenom:"Béatrice",  Email:"beatrice.quantin@ecole.fr",   Tel:"0678901235", Naissance:new DateOnly(1998, 11, 20), Adresse:"57 rue Cassette, Paris"),
+            (Nom:"Racine",    Prenom:"Cédric",    Email:"cedric.racine@ecole.fr",      Tel:"0689012346", Naissance:new DateOnly(1998, 9,  12), Adresse:"70 rue Monsieur-le-Prince, Paris"),
             // M2-INFO
             (Nom:"Saule",     Prenom:"Denise",    Email:"denise.saule@ecole.fr",       Tel:"0690123457", Naissance:new DateOnly(1998, 4,  27), Adresse:"2 passage des Panoramas, Paris"),
-            (Nom:"Thibault",  Prenom:"�douard",   Email:"edouard.thibault@ecole.fr",   Tel:"0601234568", Naissance:new DateOnly(1998, 7,  16), Adresse:"101 rue de Turenne, Paris"),
+            (Nom:"Thibault",  Prenom:"Édouard",   Email:"edouard.thibault@ecole.fr",   Tel:"0601234568", Naissance:new DateOnly(1998, 7,  16), Adresse:"101 rue de Turenne, Paris"),
         };
 
         int idx = 1;
@@ -210,7 +210,7 @@ public sealed class DataSeeder : IDataSeeder
             var createResult = await _userManager.CreateAsync(user, "Scolarite@2024");
             if (!createResult.Succeeded)
             {
-                _logger.LogError("�chec cr�ation user �tudiant {Email}: {Errors}", d.Email,
+                _logger.LogError("Échec création user étudiant {Email}: {Errors}", d.Email,
                     string.Join(", ", createResult.Errors.Select(e => e.Description)));
                 idx++;
                 continue;

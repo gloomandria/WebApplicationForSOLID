@@ -58,4 +58,33 @@ public sealed class EfEmailQueueService : IEmailQueueService
 
     public async Task<int> CountAsync(CancellationToken ct = default)
         => await _db.EmailQueue.CountAsync(ct);
+
+    public async Task<(IReadOnlyList<EmailQueue> Items, int FilteredTotal)> GetAllPagedAsync(
+        int skip, int take,
+        string search, int sortCol, string sortDir,
+        CancellationToken ct = default)
+    {
+        var q = _db.EmailQueue.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+            q = q.Where(e => e.Destinataire.Contains(search) || e.Sujet.Contains(search));
+
+        var total = await q.CountAsync(ct);
+
+        q = (sortCol, sortDir.ToLower()) switch
+        {
+            (1, "asc")  => q.OrderBy(e => e.Destinataire),
+            (1, _)      => q.OrderByDescending(e => e.Destinataire),
+            (2, "asc")  => q.OrderBy(e => e.Sujet),
+            (2, _)      => q.OrderByDescending(e => e.Sujet),
+            (3, "asc")  => q.OrderBy(e => e.Statut),
+            (3, _)      => q.OrderByDescending(e => e.Statut),
+            (5, "asc")  => q.OrderBy(e => e.DateCreation),
+            (5, _)      => q.OrderByDescending(e => e.DateCreation),
+            _           => q.OrderByDescending(e => e.DateCreation)
+        };
+
+        var items = await q.Skip(skip).Take(take).ToListAsync(ct);
+        return (items, total);
+    }
 }

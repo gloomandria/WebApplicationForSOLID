@@ -39,27 +39,59 @@ public sealed class AdminController : Controller
     // ── Dashboard back-office ─────────────────────────────────────────────────
     public IActionResult Index() => View();
 
-    // ── Liste des utilisateurs ────────────────────────────────────────────────
-    public async Task<IActionResult> Users()
-    {
-        var users = await _userManager.Users.ToListAsync();
-        var rows  = new List<UserRowViewModel>();
+    // ── Liste des utilisateurs (shell DataTables) ─────────────────────────────
+    public IActionResult Users() => View();
 
-        foreach (var u in users)
+    // ── Endpoint DataJson Utilisateurs ────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> UsersDataJson(
+        int    draw        = 1,
+        int    start       = 0,
+        int    length      = 10,
+        string searchValue = "",
+        int    sortCol     = 0,
+        string sortDir     = "asc")
+    {
+        length = length is 10 or 20 or 50 ? length : 10;
+
+        var users = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+            users = users.Where(u => u.NomComplet.Contains(searchValue)
+                                  || (u.Email != null && u.Email.Contains(searchValue)));
+
+        var total = await users.CountAsync();
+
+        users = (sortCol, sortDir.ToLower()) switch
+        {
+            (0, "asc")  => users.OrderBy(u => u.NomComplet),
+            (0, _)      => users.OrderByDescending(u => u.NomComplet),
+            (1, "asc")  => users.OrderBy(u => u.Email),
+            (1, _)      => users.OrderByDescending(u => u.Email),
+            (4, "asc")  => users.OrderBy(u => u.DateCreation),
+            (4, _)      => users.OrderByDescending(u => u.DateCreation),
+            _           => users.OrderBy(u => u.NomComplet)
+        };
+
+        var paged = await users.Skip(start).Take(length).ToListAsync();
+
+        var data = new List<object>();
+        foreach (var u in paged)
         {
             var roles = await _userManager.GetRolesAsync(u);
-            rows.Add(new UserRowViewModel
+            data.Add(new
             {
-                Id           = u.Id,
-                NomComplet   = u.NomComplet,
-                Email        = u.Email ?? string.Empty,
-                Role         = roles.FirstOrDefault() ?? "-",
-                EstActif     = u.EstActif,
-                EmailConfirme = u.EmailConfirmed,
-                DateCreation = u.DateCreation
+                id            = u.Id,
+                nomComplet    = u.NomComplet,
+                email         = u.Email ?? string.Empty,
+                role          = roles.FirstOrDefault() ?? "-",
+                emailConfirme = u.EmailConfirmed,
+                estActif      = u.EstActif,
+                dateCreation  = u.DateCreation.ToString("dd/MM/yyyy")
             });
         }
-        return View(new UserListViewModel { Users = rows });
+
+        return Json(new { draw, recordsTotal = total, recordsFiltered = total, data });
     }
 
     // ── Activer / Désactiver un utilisateur ───────────────────────────────────
@@ -89,8 +121,7 @@ public sealed class AdminController : Controller
             await EnqueueFromTemplateAsync(templateCode, user.Email, variables, fallbackSujet, fallbackCorps);
         }
 
-        TempData["Success"] = $"Compte {(user.EstActif ? "activé" : "désactivé")}.";
-        return RedirectToAction("Users");
+        return Json(new { success = true, message = $"Compte {(user.EstActif ? "activé" : "désactivé")}." });
     }
 
     // ── Envoyer un email de validation (activation + assignation mdp) ─────────
@@ -99,7 +130,7 @@ public sealed class AdminController : Controller
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null) return NotFound();
-        if (user.Email is null) { TempData["Error"] = "L'utilisateur n'a pas d'email."; return RedirectToAction("Users"); }
+        if (user.Email is null) return Json(new { success = false, message = "L'utilisateur n'a pas d'email." });
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var activateUrl = Url.Action("ActivateAccount", "Account",
@@ -119,8 +150,7 @@ public sealed class AdminController : Controller
             "Activation de votre compte — Gestion Scolarité",
             $"""<h2>Bonjour {user.NomComplet},</h2><p>Activez votre compte : <a href="{activateUrl}">cliquez ici</a></p>""");
 
-        TempData["Success"] = $"Email de validation envoyé à {user.Email}.";
-        return RedirectToAction("Users");
+        return Json(new { success = true, message = $"Email de validation envoyé à {user.Email}." });
     }
 
     // ── Assigner un rôle ──────────────────────────────────────────────────────
@@ -189,19 +219,38 @@ public sealed class AdminController : Controller
         return Ok();
     }
 
-    // ── File d'emails ─────────────────────────────────────────────────────────
-    public async Task<IActionResult> EmailQueue(int page = 1, CancellationToken ct = default)
+    // ── File d'emails (shell DataTables) ──────────────────────────────────────
+    public IActionResult EmailQueue() => View();
+
+    // ── Endpoint DataJson EmailQueue ──────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> EmailQueueDataJson(
+        int    draw        = 1,
+        int    start       = 0,
+        int    length      = 20,
+        string searchValue = "",
+        int    sortCol     = 0,
+        string sortDir     = "desc",
+        CancellationToken ct = default)
     {
-        const int pageSize = 20;
-        var emails = await _emailQueue.GetAllAsync(page, pageSize, ct);
-        var total  = await _emailQueue.CountAsync(ct);
-        return View(new EmailQueueListViewModel
+        length = length is 10 or 20 or 50 or 100 ? length : 20;
+
+        var (items, filteredTotal) = await _emailQueue.GetAllPagedAsync(start, length, searchValue, sortCol, sortDir, ct);
+        var grandTotal             = await _emailQueue.CountAsync(ct);
+
+        var data = items.Select(e => new
         {
-            Emails   = emails,
-            Page     = page,
-            PageSize = pageSize,
-            Total    = total
+            id            = e.Id,
+            destinataire  = e.Destinataire,
+            sujet         = e.Sujet,
+            statut        = e.Statut.ToString(),
+            nbTentatives  = e.NbTentatives,
+            dateCreation  = e.DateCreation.ToString("dd/MM/yyyy HH:mm"),
+            dateEnvoi     = e.DateEnvoi?.ToString("dd/MM/yyyy HH:mm") ?? "-",
+            messageErreur = e.MessageErreur ?? string.Empty
         });
+
+        return Json(new { draw, recordsTotal = grandTotal, recordsFiltered = filteredTotal, data });
     }
 
     private async Task EnqueueFromTemplateAsync(

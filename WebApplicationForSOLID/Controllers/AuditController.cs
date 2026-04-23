@@ -10,42 +10,47 @@ namespace ProjetScolariteSOLID.Controllers;
 public sealed class AuditController : Controller
 {
     private readonly IAuditLogRepository _auditRepo;
-    private const int PageSize = 50;
 
     public AuditController(IAuditLogRepository auditRepo) => _auditRepo = auditRepo;
 
-    // ── Liste paginée avec filtres ────────────────────────────────────────────
-    public async Task<IActionResult> Index(
-        string? table   = null,
-        string? userId  = null,
-        int     page    = 1,
+    // ── Page principale (shell vide pour DataTables) ───────────────────────────
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        var tables = await _auditRepo.GetDistinctTablesAsync(ct);
+        return View(new AuditListViewModel { Tables = tables });
+    }
+
+    // ── Endpoint DataTables server-side ───────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> DataJson(
+        int     draw         = 1,
+        int     start        = 0,
+        int     length       = 20,
+        string  searchValue  = "",
+        string? tableFilter  = null,
+        string? userFilter   = null,
+        int     sortCol      = 0,
+        string  sortDir      = "desc",
         CancellationToken ct = default)
     {
-        var logs = string.IsNullOrWhiteSpace(table) && string.IsNullOrWhiteSpace(userId)
-            ? await _auditRepo.GetRecentAsync(PageSize * page, ct)
-            : !string.IsNullOrWhiteSpace(table)
-                ? await _auditRepo.GetByTableAsync(table, ct)
-                : await _auditRepo.GetByUserAsync(userId!, ct);
+        length = length is 10 or 20 or 50 or 100 ? length : 20;
 
-        // Tables distinctes pour le filtre
-        var allRecent = await _auditRepo.GetRecentAsync(500, ct);
-        var tables    = allRecent.Select(l => l.TableName).Distinct().OrderBy(t => t).ToList();
+        var (items, total) = await _auditRepo.GetPagedAsync(
+            start, length, searchValue, tableFilter, userFilter, sortCol, sortDir, ct);
 
-        var paged = logs
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-
-        return View(new AuditListViewModel
+        var data = items.Select(a => new
         {
-            Logs        = paged,
-            TableFilter = table,
-            UserFilter  = userId,
-            Page        = page,
-            PageSize    = PageSize,
-            Total       = logs.Count,
-            Tables      = tables
+            id        = a.Id,
+            timestamp = a.Timestamp.ToString("dd/MM/yyyy HH:mm:ss"),
+            tableName = a.TableName,
+            action    = a.Action,
+            keyValues = a.KeyValues,
+            userId    = a.UserId is not null
+                            ? a.UserId[..Math.Min(8, a.UserId.Length)] + "…"
+                            : null
         });
+
+        return Json(new { draw, recordsTotal = total, recordsFiltered = total, data });
     }
 
     // ── Détail d'un log ───────────────────────────────────────────────────────
@@ -56,3 +61,4 @@ public sealed class AuditController : Controller
         return View(new AuditDetailViewModel { Log = log });
     }
 }
+

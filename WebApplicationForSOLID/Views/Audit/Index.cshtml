@@ -1,40 +1,41 @@
-@model ProjetScolariteSOLID.ViewModels.Admin.AuditListViewModel
+﻿@model ProjetScolariteSOLID.ViewModels.Admin.AuditListViewModel
 @{
     ViewData["Title"] = "Journal d'audit";
 }
+
+<div id="app-data" data-controller="Audit"></div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>🕵️ Journal d'audit</h2>
     <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary btn-sm">← Back-office</a>
 </div>
 
-@* ── Filtres ──────────────────────────────────────────────────────────────── *@
-<form method="get" class="row g-2 mb-3">
+<div id="alert-zone"></div>
+
+<div class="row g-2 mb-3">
     <div class="col-md-4">
-        <select name="table" class="form-select form-select-sm">
+        <select id="filter-table" class="form-select form-select-sm">
             <option value="">— Toutes les tables —</option>
             @foreach (var t in Model.Tables)
             {
-                <option value="@t" selected="@(t == Model.TableFilter)">@t</option>
+                <option value="@t">@t</option>
             }
         </select>
     </div>
     <div class="col-md-4">
-        <input type="text" name="userId" class="form-control form-control-sm"
-               placeholder="Filtrer par UserId…" value="@Model.UserFilter" />
+        <input type="text" id="filter-user" class="form-control form-control-sm"
+               placeholder="Filtrer par UserId…" />
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-sm btn-primary w-100">Filtrer</button>
+        <button type="button" id="btn-filter" class="btn btn-sm btn-primary w-100">Filtrer</button>
     </div>
     <div class="col-md-2">
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary w-100">Réinitialiser</a>
+        <button type="button" id="btn-reset" class="btn btn-sm btn-outline-secondary w-100">Réinitialiser</button>
     </div>
-</form>
-
-<p class="text-muted small">@Model.Total entrée(s) — page @Model.Page / @(Model.TotalPages == 0 ? 1 : Model.TotalPages)</p>
+</div>
 
 <div class="table-responsive">
-    <table class="table table-sm table-hover align-middle">
+    <table class="table table-sm table-hover align-middle" id="dt-audit">
         <thead class="table-dark">
             <tr>
                 <th>#</th>
@@ -43,82 +44,13 @@
                 <th>Action</th>
                 <th>Clé(s)</th>
                 <th>Utilisateur</th>
-                <th></th>
+                <th class="nosort"></th>
             </tr>
         </thead>
-        <tbody>
-        @foreach (var log in Model.Logs)
-        {
-            <tr>
-                <td>@log.Id</td>
-                <td class="text-nowrap">@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                <td><code>@log.TableName</code></td>
-                <td>
-                    @switch (log.Action)
-                    {
-                        case "INSERT":
-                            <span class="badge bg-success">INSERT</span>
-                            break;
-                        case "UPDATE":
-                            <span class="badge bg-warning text-dark">UPDATE</span>
-                            break;
-                        case "DELETE":
-                            <span class="badge bg-danger">DELETE</span>
-                            break;
-                        default:
-                            <span class="badge bg-secondary">@log.Action</span>
-                            break;
-                    }
-                </td>
-                <td><small class="text-muted">@log.KeyValues</small></td>
-                <td>
-                    @if (log.UserId is not null)
-                    {
-                        <small class="text-muted">@log.UserId[..Math.Min(8, log.UserId.Length)]…</small>
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@log.Id"
-                       class="btn btn-sm btn-outline-info">Détail</a>
-                </td>
-            </tr>
-        }
-        </tbody>
+        <tbody></tbody>
     </table>
 </div>
 
-@if (Model.TotalPages > 1)
-{
-    <nav>
-        <ul class="pagination pagination-sm">
-            @{
-                var pagesToShow = new System.Collections.Generic.HashSet<int>();
-                for (int i = 1; i <= Math.Min(2, Model.TotalPages); i++) pagesToShow.Add(i);
-                for (int i = Math.Max(1, Model.TotalPages - 1); i <= Model.TotalPages; i++) pagesToShow.Add(i);
-                for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++) pagesToShow.Add(i);
-                var sorted = pagesToShow.OrderBy(p => p).ToList();
-                int? prev = null;
-
-                foreach (var p in sorted)
-                {
-                    if (prev.HasValue && p - prev.Value > 1)
-                    {
-                        <li class="page-item disabled"><span class="page-link">…</span></li>
-                    }
-                    <li class="page-item @(p == Model.Page ? "active" : "")">
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-page="@p"
-                           asp-route-table="@Model.TableFilter"
-                           asp-route-userId="@Model.UserFilter">@p</a>
-                    </li>
-                    prev = p;
-                }
-            }
-        </ul>
-    </nav>
+@section Scripts {
+    <script src="~/js/audit.js" asp-append-version="true"></script>
 }
