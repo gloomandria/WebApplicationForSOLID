@@ -95,15 +95,29 @@
 {
     <nav>
         <ul class="pagination pagination-sm">
-            @for (int i = 1; i <= Model.TotalPages; i++)
-            {
-                <li class="page-item @(i == Model.Page ? "active" : "")">
-                    <a class="page-link"
-                       asp-action="Index"
-                       asp-route-page="@i"
-                       asp-route-table="@Model.TableFilter"
-                       asp-route-userId="@Model.UserFilter">@i</a>
-                </li>
+            @{
+                var pagesToShow = new System.Collections.Generic.HashSet<int>();
+                for (int i = 1; i <= Math.Min(2, Model.TotalPages); i++) pagesToShow.Add(i);
+                for (int i = Math.Max(1, Model.TotalPages - 1); i <= Model.TotalPages; i++) pagesToShow.Add(i);
+                for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++) pagesToShow.Add(i);
+                var sorted = pagesToShow.OrderBy(p => p).ToList();
+                int? prev = null;
+
+                foreach (var p in sorted)
+                {
+                    if (prev.HasValue && p - prev.Value > 1)
+                    {
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@p"
+                           asp-route-table="@Model.TableFilter"
+                           asp-route-userId="@Model.UserFilter">@p</a>
+                    </li>
+                    prev = p;
+                }
             }
         </ul>
     </nav>

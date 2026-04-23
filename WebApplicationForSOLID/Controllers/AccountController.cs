@@ -119,7 +119,7 @@ public sealed class AccountController : Controller
             EmailTemplateCode.ConfirmationEmail,
             user.Email!,
             new() { ["NomComplet"] = user.NomComplet, ["Email"] = user.Email!, ["Lien"] = confirmUrl },
-            "Confirmation de votre compte - Gestion Scolarite",
+            "Confirmation de votre compte — Gestion Scolarité",
             $"""<h2>Bienvenue {user.NomComplet} !</h2><p>Confirmez votre email : <a href="{confirmUrl}">ici</a></p>""");
 
         var adminEmail = _configuration["AdminDefault:Email"] ?? "admin@scolarite.local";
@@ -171,7 +171,7 @@ public sealed class AccountController : Controller
                 EmailTemplateCode.ResetMotDePasse,
                 user.Email!,
                 new() { ["NomComplet"] = user.NomComplet, ["Email"] = user.Email!, ["Lien"] = resetUrl },
-                "Reinitialisation de mot de passe - Gestion Scolarite",
+                "Réinitialisation de mot de passe — Gestion Scolarité",
                 $"""<h2>Bonjour {user.NomComplet},</h2><p>Réinitialisez votre mot de passe : <a href="{resetUrl}">ici</a></p>""");
         }
 
@@ -236,7 +236,7 @@ public sealed class AccountController : Controller
         if (!result.Succeeded) { foreach (var e in result.Errors) ModelState.AddModelError(string.Empty, e.Description); return View(model); }
         user.EstActif = true; user.EmailConfirmed = true;
         await _userManager.UpdateAsync(user);
-        TempData["Success"] = "Votre compte a ete active avec succes ! Vous pouvez maintenant vous connecter.";
+        TempData["Success"] = "Votre compte a été activé avec succès ! Vous pouvez maintenant vous connecter.";
         return RedirectToAction("Login");
     }
 

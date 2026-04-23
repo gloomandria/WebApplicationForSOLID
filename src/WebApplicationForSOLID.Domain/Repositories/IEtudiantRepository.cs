@@ -7,7 +7,7 @@ namespace ProjetScolariteSOLID.Domain.Repositories;
 /// </summary>
 public interface IEtudiantRepository : IReadRepository<Etudiant>, IWriteRepository<Etudiant>
 {
-    Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default);
     Task<bool> ExistsAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<Etudiant>> GetByClasseAsync(int classeId, CancellationToken ct = default);
 }

@@ -12,6 +12,14 @@ public sealed class GetAllMatieresQueryHandler : IRequestHandler<GetAllMatieresQ
         => _service.GetAllAsync(ct);
 }
 
+public sealed class GetMatieresPagedQueryHandler : IRequestHandler<GetMatieresPagedQuery, PagedResult<Matiere>>
+{
+    private readonly IMatiereService _service;
+    public GetMatieresPagedQueryHandler(IMatiereService service) => _service = service;
+    public Task<PagedResult<Matiere>> Handle(GetMatieresPagedQuery request, CancellationToken ct)
+        => _service.GetPagedAsync(request.Page, request.PageSize, request.Search, request.SortCol, request.SortDir, ct);
+}
+
 public sealed class GetMatiereByIdQueryHandler : IRequestHandler<GetMatiereByIdQuery, Matiere?>
 {
     private readonly IMatiereService _service;

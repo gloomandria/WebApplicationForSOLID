@@ -30,6 +30,23 @@ public sealed class EmailTemplatesController : Controller
         return PartialView("_EmailTemplatesTable", new EmailTemplateListViewModel { Templates = templates });
     }
 
+    // ── JSON pour DataTables ──────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> DataJson(CancellationToken ct)
+    {
+        var templates = await _templateService.GetAllAsync(ct);
+        var data = templates.Select(t => new
+        {
+            id          = t.Id,
+            code        = t.Code,
+            nom         = t.Nom,
+            sujet       = t.Sujet,
+            estActif    = t.EstActif,
+            description = t.Description ?? string.Empty
+        });
+        return Json(new { data });
+    }
+
     // ── Formulaire création (AJAX) ────────────────────────────────────
     [HttpGet]
     public IActionResult FormCreate()

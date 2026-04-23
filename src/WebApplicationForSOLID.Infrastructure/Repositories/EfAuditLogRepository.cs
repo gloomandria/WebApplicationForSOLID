@@ -10,6 +10,9 @@ public sealed class EfAuditLogRepository : IAuditLogRepository
 
     public EfAuditLogRepository(ScolariteDbContext db) => _db = db;
 
+    public async Task<AuditLog?> GetByIdAsync(long id, CancellationToken ct = default)
+        => await _db.AuditLogs.FirstOrDefaultAsync(a => a.Id == id, ct);
+
     public async Task<IReadOnlyList<AuditLog>> GetByTableAsync(string tableName, CancellationToken ct = default)
         => await _db.AuditLogs
                     .Where(a => a.TableName == tableName)

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjetScolariteSOLID.Application.Contracts;
 using ProjetScolariteSOLID.Domain.Models;
 using ProjetScolariteSOLID.Domain.Models.Auth;
@@ -41,7 +42,7 @@ public sealed class AdminController : Controller
     // ── Liste des utilisateurs ────────────────────────────────────────────────
     public async Task<IActionResult> Users()
     {
-        var users = _userManager.Users.ToList();
+        var users = await _userManager.Users.ToListAsync();
         var rows  = new List<UserRowViewModel>();
 
         foreach (var u in users)
@@ -80,8 +81,8 @@ public sealed class AdminController : Controller
                 ["Email"]      = user.Email
             };
             var fallbackSujet = user.EstActif
-                ? "Votre compte a ete active - Gestion Scolarite"
-                : "Votre compte a ete desactive - Gestion Scolarite";
+                ? "Votre compte a été activé — Gestion Scolarité"
+                : "Votre compte a été désactivé — Gestion Scolarité";
             var fallbackCorps = user.EstActif
                 ? $"""<h2>Bonjour {user.NomComplet},</h2><p>Votre compte a été <strong>activé</strong>.</p>"""
                 : $"""<h2>Bonjour {user.NomComplet},</h2><p>Votre compte a été <strong>désactivé</strong>.</p>""";
@@ -115,7 +116,7 @@ public sealed class AdminController : Controller
             EmailTemplateCode.ValidationCompte,
             user.Email,
             variables,
-            "Activation de votre compte - Gestion Scolarite",
+            "Activation de votre compte — Gestion Scolarité",
             $"""<h2>Bonjour {user.NomComplet},</h2><p>Activez votre compte : <a href="{activateUrl}">cliquez ici</a></p>""");
 
         TempData["Success"] = $"Email de validation envoyé à {user.Email}.";

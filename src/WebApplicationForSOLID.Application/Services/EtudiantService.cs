@@ -20,8 +20,8 @@ public sealed class EtudiantService : IEtudiantService
         _logger = logger;
     }
 
-    public Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, CancellationToken ct = default)
-        => _repository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<IReadOnlyList<Etudiant>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllAsync(ct);

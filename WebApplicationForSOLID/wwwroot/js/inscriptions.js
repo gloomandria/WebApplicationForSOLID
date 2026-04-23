@@ -1,65 +1,102 @@
 /**
- * Gestion AJAX de la section Inscriptions.
- * Dépend de : jquery, bootstrap 5, ajax-helpers.js
+ * Gestion AJAX de la section Inscriptions — DataTables server-side.
+ * Dépend de : jquery, bootstrap 5, datatables, ajax-helpers.js
  */
 (function ($) {
     'use strict';
 
-    var appData     = document.getElementById('app-data');
-    var ctrl        = appData.dataset.controller;
-    var currentPage = parseInt(appData.dataset.currentPage, 10) || 1;
-    var H           = window.AjaxHelpers;
+    var ctrl = document.getElementById('app-data').dataset.controller;
+    var H    = window.AjaxHelpers;
+    var dt;
 
-    function refreshTable(page) {
-        return $.get('/' + ctrl + '/Table', { page: page })
-            .done(function (html) {
-                $('#table-body').html(html);
-                bindRowButtons();
-            });
+    var statutClasses = {
+        'Active':    'bg-success',
+        'Suspendue': 'bg-warning text-dark'
+    };
+
+    function statutHtml(v) {
+        var cls = statutClasses[v] || 'bg-danger';
+        return v ? '<span class="badge ' + cls + '">' + v + '</span>' : '';
     }
 
-    function loadAndWire(modalId, bodyId, getUrl, formId, alertId, postUrl) {
-        H.loadModal(modalId, bodyId, getUrl)
-            .done(function () {
-                H.wireForm(formId, alertId, postUrl, modalId, function (msg) {
-                    H.showAlert(msg, true);
-                    refreshTable(currentPage);
+    function actionsHtml(id) {
+        return '<button type="button" class="btn btn-sm btn-outline-warning btn-edit-statut me-1" data-id="' + id + '">Statut</button>'
+             + '<button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="' + id + '">Supprimer</button>';
+    }
+
+    function initDt() {
+        dt = $('#dt-inscriptions').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/' + ctrl + '/DataJson',
+                type: 'GET',
+                data: function (d) {
+                    var order = d.order && d.order.length ? d.order[0] : {};
+                    return {
+                        draw:        d.draw,
+                        start:       d.start,
+                        length:      d.length,
+                        searchValue: d.search ? d.search.value : '',
+                        sortCol:     order.column !== undefined ? order.column : 0,
+                        sortDir:     order.dir || 'asc'
+                    };
+                }
+            },
+            columns: [
+                { data: 'etudiant' },
+                { data: 'classe' },
+                { data: 'dateInscription' },
+                { data: 'statut', render: function (v) { return statutHtml(v); } },
+                { data: 'id', orderable: false, className: 'text-end', render: function (id) { return actionsHtml(id); } }
+            ],
+            pageLength: 10,
+            lengthMenu: [[10, 20, 30, 50], [10, 20, 30, 50]],
+            pagingType: 'full_numbers',
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/fr-FR.json'
+            },
+            drawCallback: function () { bindRowButtons(); }
+        });
+    }
+
+    function bindRowButtons() {
+        var $tbody = $('#dt-inscriptions tbody');
+
+        $tbody.off('click', '.btn-edit-statut').on('click', '.btn-edit-statut', function () {
+            $('#modal-edit-alert').text('');
+            H.loadModal('modal-edit-statut', 'modal-edit-body', '/' + ctrl + '/FormEditStatut?id=' + $(this).data('id'))
+                .done(function () {
+                    H.wireForm('form-edit-statut', 'modal-edit-alert', '/' + ctrl + '/EditStatutAjax', 'modal-edit-statut', function (msg) {
+                        H.showAlert(msg, true);
+                        dt.ajax.reload(null, false);
+                    });
                 });
-            });
+        });
+
+        $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
+            $('#modal-delete-alert').text('');
+            H.loadModal('modal-delete', 'modal-delete-body', '/' + ctrl + '/FormDelete?id=' + $(this).data('id'))
+                .done(function () {
+                    H.wireForm('form-delete', 'modal-delete-alert', '/' + ctrl + '/DeleteAjax', 'modal-delete', function (msg) {
+                        H.showAlert(msg, true);
+                        dt.ajax.reload(null, false);
+                    });
+                });
+        });
     }
 
     $('#btn-open-create').on('click', function () {
         $('#modal-create-alert').text('');
-        loadAndWire(
-            'modal-create', 'modal-create-body', '/' + ctrl + '/FormCreate',
-            'form-create',  'modal-create-alert', '/' + ctrl + '/CreateAjax'
-        );
+        H.loadModal('modal-create', 'modal-create-body', '/' + ctrl + '/FormCreate')
+            .done(function () {
+                H.wireForm('form-create', 'modal-create-alert', '/' + ctrl + '/CreateAjax', 'modal-create', function (msg) {
+                    H.showAlert(msg, true);
+                    dt.ajax.reload(null, false);
+                });
+            });
     });
 
-    $('#pagination-links').on('click', '.ajax-page', function (e) {
-        e.preventDefault();
-        currentPage = parseInt($(this).data('page'), 10);
-        refreshTable(currentPage);
-    });
-
-    function bindRowButtons() {
-        $('.btn-edit-statut').off('click').on('click', function () {
-            $('#modal-edit-alert').text('');
-            loadAndWire(
-                'modal-edit-statut', 'modal-edit-body', '/' + ctrl + '/FormEditStatut?id=' + $(this).data('id'),
-                'form-edit-statut',  'modal-edit-alert', '/' + ctrl + '/EditStatutAjax'
-            );
-        });
-
-        $('.btn-delete').off('click').on('click', function () {
-            $('#modal-delete-alert').text('');
-            loadAndWire(
-                'modal-delete', 'modal-delete-body', '/' + ctrl + '/FormDelete?id=' + $(this).data('id'),
-                'form-delete',  'modal-delete-alert', '/' + ctrl + '/DeleteAjax'
-            );
-        });
-    }
-
-    bindRowButtons();
+    initDt();
 
 }(jQuery));

@@ -15,44 +15,18 @@
 <div id="alert-zone"></div>
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle" id="inscriptions-table">
+    <table class="table table-hover align-middle" id="dt-inscriptions">
         <thead class="table-primary">
             <tr>
                 <th>Étudiant</th>
                 <th>Classe</th>
                 <th>Date d'inscription</th>
                 <th>Statut</th>
-                <th class="text-end">Actions</th>
+                <th class="text-end nosort">Actions</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-            @await Html.PartialAsync("_InscriptionsTable", Model)
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
-</div>
-
-<div class="d-flex justify-content-between align-items-center" id="pagination-zone">
-    <small class="text-muted" id="pagination-info">
-        @Model.Inscriptions.TotalCount inscription(s) — Page @Model.Inscriptions.Page / @Model.Inscriptions.TotalPages
-    </small>
-    <nav>
-        <ul class="pagination mb-0" id="pagination-links">
-            @if (Model.Inscriptions.HasPreviousPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage - 1)">‹</a></li>
-            }
-            @for (int p = 1; p <= Model.Inscriptions.TotalPages; p++)
-            {
-                <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
-                    <a class="page-link ajax-page" href="#" data-page="@p">@p</a>
-                </li>
-            }
-            @if (Model.Inscriptions.HasNextPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage + 1)">›</a></li>
-            }
-        </ul>
-    </nav>
 </div>
 
 <!-- Modal : Nouvelle inscription -->

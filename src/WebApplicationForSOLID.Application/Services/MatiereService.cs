@@ -19,6 +19,9 @@ public sealed class MatiereService : IMatiereService
     public Task<IReadOnlyList<Matiere>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllWithEnseignantAsync(ct);
 
+    public Task<PagedResult<Matiere>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
+
     public Task<Matiere?> GetByIdAsync(int id, CancellationToken ct = default)
         => _repository.GetByIdAsync(id, ct);
 

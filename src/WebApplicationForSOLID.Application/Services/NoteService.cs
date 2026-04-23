@@ -25,8 +25,8 @@ public sealed class NoteService : INoteService
         _logger = logger;
     }
 
-    public Task<PagedResult<Note>> GetNotesAsync(int page, int pageSize, CancellationToken ct = default)
-        => _noteRepository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Note>> GetNotesAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _noteRepository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<Note?> GetByIdAsync(int id, CancellationToken ct = default)
         => _noteRepository.GetByIdAsync(id, ct);

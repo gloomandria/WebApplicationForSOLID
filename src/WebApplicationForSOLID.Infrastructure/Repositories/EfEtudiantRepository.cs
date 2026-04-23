@@ -25,15 +25,35 @@ public sealed class EfEtudiantRepository : IEtudiantRepository
                          .OrderBy(e => e.User!.Nom).ThenBy(e => e.User!.Prenom)
                          .ToListAsync(ct);
 
-    public async Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<PagedResult<Etudiant>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
     {
-        var query = _context.Etudiants
-                            .Include(e => e.User)
-                            .AsNoTracking()
-                            .OrderBy(e => e.User!.Nom).ThenBy(e => e.User!.Prenom);
+        IQueryable<Etudiant> q = _context.Etudiants
+                        .Include(e => e.User)
+                        .AsNoTracking();
 
-        var totalCount = await query.CountAsync(ct);
-        var items = await query
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            q = q.Where(e => (e.NumeroEtudiant != null && e.NumeroEtudiant.ToLower().Contains(s))
+                          || (e.User!.Nom.ToLower().Contains(s))
+                          || (e.User!.Prenom.ToLower().Contains(s))
+                          || (e.User!.Email != null && e.User.Email.ToLower().Contains(s))
+                          || (e.User!.PhoneNumber != null && e.User.PhoneNumber.ToLower().Contains(s)));
+        }
+
+        bool asc = sortDir != "desc";
+        IOrderedQueryable<Etudiant> ordered = sortCol switch
+        {
+            0 => asc ? q.OrderBy(e => e.NumeroEtudiant)    : q.OrderByDescending(e => e.NumeroEtudiant),
+            2 => asc ? q.OrderBy(e => e.User!.Email)       : q.OrderByDescending(e => e.User!.Email),
+            3 => asc ? q.OrderBy(e => e.User!.PhoneNumber) : q.OrderByDescending(e => e.User!.PhoneNumber),
+            4 => asc ? q.OrderBy(e => e.DateNaissance)     : q.OrderByDescending(e => e.DateNaissance),
+            _ => asc ? q.OrderBy(e => e.User!.Nom).ThenBy(e => e.User!.Prenom)
+                     : q.OrderByDescending(e => e.User!.Nom).ThenByDescending(e => e.User!.Prenom)
+        };
+
+        var totalCount = await ordered.CountAsync(ct);
+        var items = await ordered
                           .Skip((page - 1) * pageSize)
                           .Take(pageSize)
                           .ToListAsync(ct);

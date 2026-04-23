@@ -1,12 +1,12 @@
 @model ProjetScolariteSOLID.ViewModels.MatieresViewModel
 
-@if (!Model.Matieres.Any())
+@if (!Model.Matieres.Items.Any())
 {
     <tr><td colspan="6"><div class="alert alert-info mb-0">Aucune matière enregistrée.</div></td></tr>
 }
 else
 {
-    @foreach (var m in Model.Matieres)
+    @foreach (var m in Model.Matieres.Items)
     {
         <tr>
             <td><code>@m.Code</code></td>

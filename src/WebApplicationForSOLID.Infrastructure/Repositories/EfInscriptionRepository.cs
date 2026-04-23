@@ -42,16 +42,36 @@ public sealed class EfInscriptionRepository : IInscriptionRepository
                          .Where(i => i.ClasseId == classeId)
                          .ToListAsync(ct);
 
-    public async Task<PagedResult<Inscription>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<PagedResult<Inscription>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
     {
-        var query = _context.Inscriptions
-                            .AsNoTracking()
-                            .Include(i => i.Etudiant)
-                            .Include(i => i.Classe)
-                            .OrderByDescending(i => i.DateInscription);
+        IQueryable<Inscription> q = _context.Inscriptions
+                        .AsNoTracking()
+                        .Include(i => i.Etudiant).ThenInclude(e => e!.User)
+                        .Include(i => i.Classe)
+                        .Include(i => i.Statut);
 
-        var totalCount = await query.CountAsync(ct);
-        var items = await query
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            q = q.Where(i => (i.Etudiant != null && i.Etudiant.User != null
+                              && (i.Etudiant.User.Nom.ToLower().Contains(s)
+                               || i.Etudiant.User.Prenom.ToLower().Contains(s)))
+                          || (i.Classe != null && i.Classe.Nom.ToLower().Contains(s))
+                          || (i.Statut != null && i.Statut.Libelle.ToLower().Contains(s)));
+        }
+
+        bool asc = sortDir != "desc";
+        IOrderedQueryable<Inscription> ordered = sortCol switch
+        {
+            1 => asc ? q.OrderBy(i => i.Classe!.Nom)            : q.OrderByDescending(i => i.Classe!.Nom),
+            2 => asc ? q.OrderBy(i => i.DateInscription)        : q.OrderByDescending(i => i.DateInscription),
+            3 => asc ? q.OrderBy(i => i.Statut!.Libelle)        : q.OrderByDescending(i => i.Statut!.Libelle),
+            _ => asc ? q.OrderBy(i => i.Etudiant!.User!.Nom).ThenBy(i => i.Etudiant!.User!.Prenom)
+                     : q.OrderByDescending(i => i.Etudiant!.User!.Nom).ThenByDescending(i => i.Etudiant!.User!.Prenom)
+        };
+
+        var totalCount = await ordered.CountAsync(ct);
+        var items = await ordered
                           .Skip((page - 1) * pageSize)
                           .Take(pageSize)
                           .ToListAsync(ct);

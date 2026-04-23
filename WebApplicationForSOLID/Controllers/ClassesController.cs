@@ -31,17 +31,38 @@ public sealed class ClassesController : Controller
         _niveauRepo  = niveauRepo;
     }
 
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10, CancellationToken ct = default)
     {
-        var classes = await _mediator.Send(new GetAllClassesQuery(), ct);
-        return View(new ClassesViewModel { Classes = classes });
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : 10;
+        var classes = await _mediator.Send(new GetClassesPagedQuery(page, pageSize), ct);
+        return View(new ClassesViewModel { Classes = classes, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = 10, CancellationToken ct = default)
     {
-        var classes = await _mediator.Send(new GetAllClassesQuery(), ct);
-        return PartialView("_ClassesTable", new ClassesViewModel { Classes = classes });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : 10;
+        var classes = await _mediator.Send(new GetClassesPagedQuery(page, pageSize), ct);
+        return PartialView("_ClassesTable", new ClassesViewModel { Classes = classes, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : 10;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetClassesPagedQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(c => new
+        {
+            id              = c.Id,
+            nom             = c.Nom,
+            niveau          = c.Niveau?.Libelle ?? "",
+            filiere         = c.Filiere?.Libelle ?? "",
+            anneeAcademique = c.AnneeAcademique?.Libelle ?? "",
+            capaciteMax     = c.CapaciteMax
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]

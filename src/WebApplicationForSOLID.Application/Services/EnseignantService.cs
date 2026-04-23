@@ -16,8 +16,8 @@ public sealed class EnseignantService : IEnseignantService
         _logger = logger;
     }
 
-    public Task<PagedResult<Enseignant>> GetEnseignantsAsync(int page, int pageSize, CancellationToken ct = default)
-        => _repository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Enseignant>> GetEnseignantsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<IReadOnlyList<Enseignant>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllAsync(ct);

@@ -25,8 +25,8 @@ public sealed class InscriptionService : IInscriptionService
         _logger = logger;
     }
 
-    public Task<PagedResult<Inscription>> GetInscriptionsAsync(int page, int pageSize, CancellationToken ct = default)
-        => _inscriptionRepository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Inscription>> GetInscriptionsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _inscriptionRepository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<Inscription?> GetByIdAsync(int id, CancellationToken ct = default)
         => _inscriptionRepository.GetByIdAsync(id, ct);

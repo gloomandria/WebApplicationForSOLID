@@ -23,7 +23,7 @@
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="dt-emailtemplates">
                 <thead class="table-dark">
                     <tr>
                         <th class="ps-3">Code</th>
@@ -31,12 +31,10 @@
                         <th>Sujet</th>
                         <th class="text-center">Statut</th>
                         <th>Description</th>
-                        <th class="text-end pe-3">Actions</th>
+                        <th class="text-end pe-3 nosort">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="table-body">
-                    @await Html.PartialAsync("_EmailTemplatesTable", Model)
-                </tbody>
+                <tbody id="table-body"></tbody>
             </table>
         </div>
     </div>

@@ -7,6 +7,7 @@ public sealed class EnseignantsViewModel
 {
     public PagedResult<Enseignant>  Enseignants        { get; init; } = new();
     public int                      CurrentPage        { get; init; } = 1;
+    public int                      PageSize           { get; init; } = 10;
     public EnseignantFormModel      Enseignant         { get; init; } = new();
     public int                      EnseignantId       { get; init; }
     public Enseignant?              SelectedEnseignant { get; init; }

@@ -15,7 +15,7 @@
 <div id="alert-zone"></div>
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle" id="dt-notes">
         <thead class="table-info">
             <tr>
                 <th>Étudiant</th>
@@ -24,35 +24,11 @@
                 <th>Type</th>
                 <th>Date</th>
                 <th>Commentaire</th>
-                <th class="text-end">Actions</th>
+                <th class="text-end nosort">Actions</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-            @await Html.PartialAsync("_NotesTable", Model)
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
-</div>
-
-<div class="d-flex justify-content-between align-items-center">
-    <small class="text-muted">@Model.Notes.TotalCount note(s) — Page @Model.Notes.Page / @Model.Notes.TotalPages</small>
-    <nav>
-        <ul class="pagination mb-0" id="pagination-links">
-            @if (Model.Notes.HasPreviousPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage - 1)">‹</a></li>
-            }
-            @for (int p = 1; p <= Model.Notes.TotalPages; p++)
-            {
-                <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
-                    <a class="page-link ajax-page" href="#" data-page="@p">@p</a>
-                </li>
-            }
-            @if (Model.Notes.HasNextPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage + 1)">›</a></li>
-            }
-        </ul>
-    </nav>
 </div>
 
 <!-- Modal : Ajouter -->

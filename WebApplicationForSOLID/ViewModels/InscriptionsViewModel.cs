@@ -7,6 +7,7 @@ public sealed class InscriptionsViewModel
 {
     public PagedResult<Inscription> Inscriptions        { get; init; } = new();
     public int                      CurrentPage         { get; init; } = 1;
+    public int                      PageSize            { get; init; } = 10;
     public int                      EtudiantId          { get; init; }
     public int                      ClasseId            { get; init; }
     public int                      InscriptionId       { get; init; }

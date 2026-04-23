@@ -51,8 +51,7 @@ public sealed class AuditController : Controller
     // ── Détail d'un log ───────────────────────────────────────────────────────
     public async Task<IActionResult> Details(long id, CancellationToken ct)
     {
-        var recent = await _auditRepo.GetRecentAsync(1000, ct);
-        var log    = recent.FirstOrDefault(l => l.Id == id);
+        var log = await _auditRepo.GetByIdAsync(id, ct);
         if (log is null) return NotFound();
         return View(new AuditDetailViewModel { Log = log });
     }

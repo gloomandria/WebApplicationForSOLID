@@ -18,7 +18,7 @@ public sealed class InscriptionsController : Controller
 {
     private readonly IMediator _mediator;
     private readonly IReferentielRepository<StatutInscriptionRef> _statutRepo;
-    private const int PageSize = 10;
+    private const int DefaultPageSize = 10;
 
     public InscriptionsController(IMediator mediator, IReferentielRepository<StatutInscriptionRef> statutRepo)
     {
@@ -26,18 +26,37 @@ public sealed class InscriptionsController : Controller
         _statutRepo = statutRepo;
     }
 
-    public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        var inscriptions = await _mediator.Send(new GetInscriptionsQuery(page, PageSize), ct);
-        return View(new InscriptionsViewModel { Inscriptions = inscriptions, CurrentPage = page });
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var inscriptions = await _mediator.Send(new GetInscriptionsQuery(page, pageSize), ct);
+        return View(new InscriptionsViewModel { Inscriptions = inscriptions, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(int page, CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        page = page < 1 ? 1 : page;
-        var inscriptions = await _mediator.Send(new GetInscriptionsQuery(page, PageSize), ct);
-        return PartialView("_InscriptionsTable", new InscriptionsViewModel { Inscriptions = inscriptions, CurrentPage = page });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var inscriptions = await _mediator.Send(new GetInscriptionsQuery(page, pageSize), ct);
+        return PartialView("_InscriptionsTable", new InscriptionsViewModel { Inscriptions = inscriptions, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : DefaultPageSize;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetInscriptionsQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(i => new
+        {
+            id              = i.Id,
+            etudiant        = i.Etudiant?.NomComplet ?? $"Id={i.EtudiantId}",
+            classe          = i.Classe?.Nom ?? $"Id={i.ClasseId}",
+            dateInscription = i.DateInscription.ToString("dd/MM/yyyy"),
+            statut          = i.Statut?.Libelle ?? ""
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]

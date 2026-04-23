@@ -16,7 +16,7 @@ public sealed class EtudiantsController : Controller
     private readonly IMediator _mediator;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _configuration;
-    private const int PageSize = 8;
+    private const int DefaultPageSize = 10;
 
     public EtudiantsController(IMediator mediator, UserManager<ApplicationUser> userManager, IConfiguration configuration)
     {
@@ -25,18 +25,38 @@ public sealed class EtudiantsController : Controller
         _configuration = configuration;
     }
 
-    public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, PageSize), ct);
-        return View(new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page });
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, pageSize), ct);
+        return View(new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(int page, CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        page = page < 1 ? 1 : page;
-        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, PageSize), ct);
-        return PartialView("_EtudiantsTable", new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, pageSize), ct);
+        return PartialView("_EtudiantsTable", new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : DefaultPageSize;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetEtudiantsQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(e => new
+        {
+            id            = e.Id,
+            numeroEtudiant = e.NumeroEtudiant,
+            nomComplet    = e.NomComplet,
+            email         = e.Email,
+            telephone     = e.Telephone,
+            dateNaissance = e.DateNaissance.ToString("dd/MM/yyyy")
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]
@@ -153,14 +173,12 @@ public sealed class EtudiantsController : Controller
             user.Prenom      = form.Prenom;
             user.Nom         = form.Nom;
             user.PhoneNumber = form.Telephone;
-            if (user.Email != form.Email)
-            {
-                user.Email          = form.Email;
-                user.UserName       = form.Email;
-                user.NormalizedEmail     = form.Email.ToUpperInvariant();
-                user.NormalizedUserName  = form.Email.ToUpperInvariant();
-            }
             await _userManager.UpdateAsync(user);
+            if (!string.Equals(user.Email, form.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                await _userManager.SetEmailAsync(user, form.Email);
+                await _userManager.SetUserNameAsync(user, form.Email);
+            }
         }
 
         // Mettre à jour la fiche étudiant

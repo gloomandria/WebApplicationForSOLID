@@ -29,8 +29,8 @@
     </div>
     <div class="col-md-3 d-flex align-items-end pb-1">
         <div class="form-check form-switch ms-2">
-            <input type="hidden" name="EstActif" value="false" />
             <input name="EstActif" type="checkbox" class="form-check-input" role="switch" value="true" @(Model.EstActif ? "checked" : "") id="chk-actif" />
+            <input type="hidden" name="EstActif" value="false" />
             <label class="form-check-label fw-semibold" for="chk-actif">Actif</label>
         </div>
     </div>
