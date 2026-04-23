@@ -411,7 +411,8 @@ public sealed class DataSeeder : IDataSeeder
 
         await _context.Notes.AddRangeAsync(notes, ct);
         await _context.SaveChangesAsync(ct);
-    }
+    }
+
     private async Task SeedEmailTemplatesAsync(CancellationToken ct)
     {
         var definitions = new List<EmailTemplate>
