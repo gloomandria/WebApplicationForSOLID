@@ -278,6 +278,46 @@ Toutes les clés se trouvent dans `WebApplicationForSOLID/appsettings.json` :
 ## Rôles et permissions
 
 L'application définit quatre rôles fixes :
+### Authentification JWT
+
+Configurer les paramètres JWT dans `appsettings.json` :
+
+```json
+"Jwt": {
+  "Key": "<clé secrète de 32+ caractères>",
+  "Issuer": "ScolariteApp",
+  "Audience": "ScolariteApp",
+  "ExpiresInMinutes": 480
+}
+```
+
+### Administrateur par défaut
+
+Un compte administrateur est créé automatiquement au premier démarrage :
+
+```json
+"AdminDefault": {
+  "Email": "admin@scolarite.local",
+  "Password": "<mot de passe>"
+}
+```
+
+### SMTP (envoi d'e-mails)
+
+Configurer les paramètres SMTP dans `appsettings.json` :
+
+```json
+"Smtp": {
+  "Host": "smtp.example.com",
+  "Port": "587",
+  "User": "<utilisateur>",
+  "Password": "<mot de passe>",
+  "From": "noreply@scolarite.local",
+  "FromName": "Gestion Scolarité"
+}
+```
+
+### Logging (Serilog)
 
 | Rôle | Accès |
 |---|---|
