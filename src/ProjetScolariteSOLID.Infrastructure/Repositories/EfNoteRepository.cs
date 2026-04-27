@@ -64,7 +64,7 @@ public sealed class EfNoteRepository : INoteRepository
                                || n.Etudiant.User.Prenom.ToLower().Contains(s)))
                           || (n.Matiere != null && n.Matiere.Intitule.ToLower().Contains(s))
                           || (n.TypeEvaluation != null && n.TypeEvaluation.Libelle.ToLower().Contains(s))
-                          || n.Commentaire.ToLower().Contains(s));
+                          || (n.Commentaire != null && n.Commentaire.ToLower().Contains(s)));
         }
 
         bool asc = sortDir != "desc";

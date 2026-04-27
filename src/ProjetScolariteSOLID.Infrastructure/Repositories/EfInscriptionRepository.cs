@@ -12,6 +12,7 @@ public sealed class EfInscriptionRepository : IInscriptionRepository
                          .AsNoTracking()
                          .Include(i => i.Etudiant)
                          .Include(i => i.Classe)
+                         .Include(i => i.Statut)
                          .FirstOrDefaultAsync(i => i.Id == id, ct);
 
     public async Task<IReadOnlyList<Inscription>> GetAllAsync(CancellationToken ct = default)

@@ -1,11 +1,11 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/src/">
-    <Project Path="src/WebApplicationForSOLID.Application/ProjetScolariteSOLID.Application.csproj" />
-    <Project Path="src/WebApplicationForSOLID.Domain/ProjetScolariteSOLID.Domain.csproj" />
-    <Project Path="src/WebApplicationForSOLID.Infrastructure/ProjetScolariteSOLID.Infrastructure.csproj" />
+    <Project Path="src/ProjetScolariteSOLID.Application/ProjetScolariteSOLID.Application.csproj" />
+    <Project Path="src/ProjetScolariteSOLID.Domain/ProjetScolariteSOLID.Domain.csproj" />
+    <Project Path="src/ProjetScolariteSOLID.Infrastructure/ProjetScolariteSOLID.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ProjetScolariteSOLID.Tests/ProjetScolariteSOLID.Tests.csproj" />
   </Folder>
-  <Project Path="WebApplicationForSOLID/ProjetScolariteSOLID.csproj" />
+  <Project Path="ProjetScolariteSOLID/ProjetScolariteSOLID.csproj" />
 </Solution>

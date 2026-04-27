@@ -12,7 +12,7 @@
 
   <!-- Application dépend uniquement de Domain (DIP) -->
   <ItemGroup>
-    <ProjectReference Include="..\WebApplicationForSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
+    <ProjectReference Include="..\ProjetScolariteSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
   </ItemGroup>
 
 </Project>

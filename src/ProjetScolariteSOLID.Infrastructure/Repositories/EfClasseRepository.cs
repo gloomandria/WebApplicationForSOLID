@@ -10,6 +10,9 @@ public sealed class EfClasseRepository : IClasseRepository
     public async Task<Classe?> GetByIdAsync(int id, CancellationToken ct = default)
         => await _context.Classes
                          .AsNoTracking()
+                         .Include(c => c.Niveau)
+                         .Include(c => c.Filiere)
+                         .Include(c => c.AnneeAcademique)
                          .FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<IReadOnlyList<Classe>> GetAllAsync(CancellationToken ct = default)

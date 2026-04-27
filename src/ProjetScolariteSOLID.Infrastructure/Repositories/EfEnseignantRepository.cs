@@ -86,6 +86,9 @@ public sealed class EfEnseignantRepository : IEnseignantRepository
 
     public async Task UpdateAsync(Enseignant entity, CancellationToken ct = default)
     {
+        // Détache la navigation User pour éviter les conflits de tracking avec Identity
+        entity.User = null;
+
         _context.Enseignants.Update(entity);
         await _context.SaveChangesAsync(ct);
     }

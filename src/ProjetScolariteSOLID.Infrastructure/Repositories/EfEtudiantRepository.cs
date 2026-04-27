@@ -94,8 +94,13 @@ public sealed class EfEtudiantRepository : IEtudiantRepository
 
     public async Task UpdateAsync(Etudiant entity, CancellationToken ct = default)
     {
-        _context.Etudiants.Update(entity);
-        await _context.SaveChangesAsync(ct);
+        await _context.Etudiants
+            .Where(e => e.Id == entity.Id)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(e => e.DateNaissance, entity.DateNaissance)
+                .SetProperty(e => e.Adresse, entity.Adresse)
+                .SetProperty(e => e.NumeroEtudiant, entity.NumeroEtudiant),
+            ct);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)

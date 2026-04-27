@@ -35,7 +35,8 @@
         var toggleLabel = row.estActif ? '🔒 Désactiver' : '🔓 Activer';
         var actionLabel = row.estActif ? 'désactiver' : 'activer';
         return '<div class="d-flex justify-content-end gap-1 flex-wrap">'
-             + '<a href="/Admin/AssignRole?userId=' + row.id + '" class="btn btn-sm btn-outline-primary">🎭 Rôle</a>'
+             + '<button type="button" class="btn btn-sm btn-outline-primary btn-edit-role"'
+             +   ' data-user-id="' + row.id + '">🎭 Rôle</button>'
              + '<button type="button" class="btn btn-sm ' + toggleClass + ' btn-toggle-active"'
              +   ' data-user-id="' + row.id + '" data-user-name="' + row.nomComplet + '" data-action-label="' + actionLabel + '">'
              + toggleLabel + '</button>'
@@ -86,6 +87,17 @@
 
     function bindRowButtons() {
         var $tbody = $('#dt-users tbody');
+
+        $tbody.off('click', '.btn-edit-role').on('click', '.btn-edit-role', function () {
+            $('#modal-edit-role-alert').text('');
+            H.loadModal('modal-edit-role', 'modal-edit-role-body', '/Admin/FormEditRole?userId=' + $(this).data('user-id'))
+                .done(function () {
+                    H.wireForm('form-edit-role', 'modal-edit-role-alert', '/Admin/EditRoleAjax', 'modal-edit-role', function (msg) {
+                        H.showAlert(msg, true);
+                        dt.ajax.reload(null, false);
+                    });
+                });
+        });
 
         $tbody.off('click', '.btn-toggle-active').on('click', '.btn-toggle-active', function () {
             var isDeactivate = $(this).data('action-label') === 'désactiver';

@@ -57,20 +57,20 @@ public sealed class AdminController : Controller
         var users = _userManager.Users.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchValue))
-            users = users.Where(u => u.NomComplet.Contains(searchValue)
+            users = users.Where(u => (u.Nom.Contains(searchValue) || u.Prenom.Contains(searchValue))
                                   || (u.Email != null && u.Email.Contains(searchValue)));
 
         var total = await users.CountAsync();
 
         users = (sortCol, sortDir.ToLower()) switch
         {
-            (0, "asc")  => users.OrderBy(u => u.NomComplet),
-            (0, _)      => users.OrderByDescending(u => u.NomComplet),
+            (0, "asc")  => users.OrderBy(u => u.Nom).ThenBy(u => u.Prenom),
+            (0, _)      => users.OrderByDescending(u => u.Nom).ThenByDescending(u => u.Prenom),
             (1, "asc")  => users.OrderBy(u => u.Email),
             (1, _)      => users.OrderByDescending(u => u.Email),
             (4, "asc")  => users.OrderBy(u => u.DateCreation),
             (4, _)      => users.OrderByDescending(u => u.DateCreation),
-            _           => users.OrderBy(u => u.NomComplet)
+            _           => users.OrderBy(u => u.Nom).ThenBy(u => u.Prenom)
         };
 
         var paged = await users.Skip(start).Take(length).ToListAsync();
@@ -153,7 +153,7 @@ public sealed class AdminController : Controller
         return Json(new { success = true, message = $"Email de validation envoyé à {user.Email}." });
     }
 
-    // ── Assigner un rôle ──────────────────────────────────────────────────────
+    // ── Assigner un rôle (page complète — conservé pour compatibilité) ────────
     [HttpGet]
     public async Task<IActionResult> AssignRole(string userId)
     {
@@ -162,9 +162,9 @@ public sealed class AdminController : Controller
         var roles = await _userManager.GetRolesAsync(user);
         return View(new AssignRoleViewModel
         {
-            UserId    = user.Id,
+            UserId     = user.Id,
             NomComplet = user.NomComplet,
-            Email     = user.Email ?? string.Empty,
+            Email      = user.Email ?? string.Empty,
             RoleActuel = roles.FirstOrDefault() ?? string.Empty
         });
     }
@@ -182,6 +182,39 @@ public sealed class AdminController : Controller
 
         TempData["Success"] = $"Rôle '{model.NouveauRole}' assigné à {user.NomComplet}.";
         return RedirectToAction("Users");
+    }
+
+    // ── Formulaire d'édition de rôle (partial pour modale AJAX) ──────────────
+    [HttpGet]
+    public async Task<IActionResult> FormEditRole(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return NotFound();
+        var roles = await _userManager.GetRolesAsync(user);
+        return PartialView("_FormEditRole", new AssignRoleViewModel
+        {
+            UserId     = user.Id,
+            NomComplet = user.NomComplet,
+            Email      = user.Email ?? string.Empty,
+            RoleActuel = roles.FirstOrDefault() ?? string.Empty
+        });
+    }
+
+    // ── Sauvegarde AJAX du rôle ───────────────────────────────────────────────
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditRoleAjax([FromForm] string userId, [FromForm] string nouveauRole)
+    {
+        if (string.IsNullOrWhiteSpace(nouveauRole))
+            return Json(new { success = false, message = "Veuillez choisir un rôle." });
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return Json(new { success = false, message = "Utilisateur introuvable." });
+
+        var rolesActuels = await _userManager.GetRolesAsync(user);
+        await _userManager.RemoveFromRolesAsync(user, rolesActuels);
+        await _userManager.AddToRoleAsync(user, nouveauRole);
+
+        return Json(new { success = true, message = $"Rôle '{nouveauRole}' assigné à {user.NomComplet}." });
     }
 
     // ── Matrice de permissions ────────────────────────────────────────────────

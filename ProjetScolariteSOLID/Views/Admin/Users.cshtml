@@ -34,6 +34,29 @@
     </div>
 </div>
 
+<!-- ── Modal : Éditer le rôle ─────────────────────────────────────────────── -->
+<div class="modal fade" id="modal-edit-role" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">🎭 Assigner un rôle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-edit-role">
+                @Html.AntiForgeryToken()
+                <div class="modal-body" id="modal-edit-role-body">
+                    <div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <div id="modal-edit-role-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- ── Modal : Activer / Désactiver ──────────────────────────────────────── -->
 <div class="modal fade" id="modal-toggle" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

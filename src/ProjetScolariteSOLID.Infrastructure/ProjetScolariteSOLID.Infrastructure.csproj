@@ -23,8 +23,8 @@
 
   <!-- Infrastructure dépend de Domain + Application -->
   <ItemGroup>
-    <ProjectReference Include="..\WebApplicationForSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
-    <ProjectReference Include="..\WebApplicationForSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
+    <ProjectReference Include="..\ProjetScolariteSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
+    <ProjectReference Include="..\ProjetScolariteSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -66,6 +66,7 @@ public sealed class NoteService : INoteService
         if (!await _noteRepository.ExistsAsync(note.Id, ct))
             return OperationResult.Failure($"Note introuvable (Id={note.Id}).");
 
+        note.Commentaire ??= string.Empty;
         await _noteRepository.UpdateAsync(note, ct);
         _logger.LogInformation("Note modifiée : {Id}", note.Id);
         return OperationResult.Success();
