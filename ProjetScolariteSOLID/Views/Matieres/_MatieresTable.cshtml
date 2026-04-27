@@ -1,0 +1,23 @@
+@model ProjetScolariteSOLID.ViewModels.MatieresViewModel
+
+@if (!Model.Matieres.Items.Any())
+{
+    <tr><td colspan="6"><div class="alert alert-info mb-0">Aucune matière enregistrée.</div></td></tr>
+}
+else
+{
+    @foreach (var m in Model.Matieres.Items)
+    {
+        <tr>
+            <td><code>@m.Code</code></td>
+            <td>@m.Intitule</td>
+            <td class="text-center"><span class="badge bg-warning text-dark">@m.Coefficient</span></td>
+            <td class="text-center">@m.VolumeHoraire h</td>
+            <td>@(m.Enseignant?.NomComplet ?? "—")</td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@m.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@m.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

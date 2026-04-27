@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ProjetScolariteSOLID.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <!-- EF Core SQL Server uniquement dans Infrastructure -->
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.16.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+  </ItemGroup>
+
+  <!-- ASP.NET Core framework reference for Identity and Hosting -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Infrastructure dépend de Domain + Application -->
+  <ItemGroup>
+    <ProjectReference Include="..\ProjetScolariteSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
+    <ProjectReference Include="..\ProjetScolariteSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "Gestion des utilisateurs";
+}
+
+<div id="app-data" data-controller="Admin"></div>
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">👥 Utilisateurs</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Back-office</a>
+</div>
+
+<div id="alert-zone"></div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="dt-users">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th class="text-center">Email confirmé</th>
+                        <th class="text-center">Statut</th>
+                        <th>Créé le</th>
+                        <th class="text-end nosort">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Éditer le rôle ─────────────────────────────────────────────── -->
+<div class="modal fade" id="modal-edit-role" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">🎭 Assigner un rôle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-edit-role">
+                @Html.AntiForgeryToken()
+                <div class="modal-body" id="modal-edit-role-body">
+                    <div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <div id="modal-edit-role-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Activer / Désactiver ──────────────────────────────────────── -->
+<div class="modal fade" id="modal-toggle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom" id="modal-toggle-header">
+                <h5 class="modal-title" id="modal-toggle-title">Confirmer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="fs-1 mb-2" id="modal-toggle-icon">❓</div>
+                <p class="mb-1">
+                    Êtes-vous sûr de vouloir <strong id="modal-toggle-action"></strong>
+                    le compte de <strong id="modal-toggle-user"></strong> ?
+                </p>
+                <small class="text-muted">Un email sera envoyé à l'utilisateur pour l'informer.</small>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn px-4" id="modal-toggle-btn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Envoi de validation ───────────────────────────────────────── -->
+<div class="modal fade" id="modal-validation" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom bg-info bg-opacity-10">
+                <h5 class="modal-title">✉️ Envoyer un email de validation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="fs-1 mb-2">📨</div>
+                <p class="mb-1">
+                    Un email contenant un <strong>lien d'activation</strong> et de définition de mot de passe
+                    sera envoyé à :
+                </p>
+                <p class="fw-semibold mb-0" id="modal-validation-user"></p>
+                <small class="text-muted" id="modal-validation-email"></small>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-info px-4" id="btn-confirm-validation">✉️ Envoyer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-users.js" asp-append-version="true"></script>
+}

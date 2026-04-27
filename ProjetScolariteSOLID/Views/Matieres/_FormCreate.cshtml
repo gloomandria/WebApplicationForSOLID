@@ -1,0 +1,32 @@
+@model ProjetScolariteSOLID.ViewModels.MatieresViewModel
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Code</label>
+        <input name="Matiere.Code" class="form-control" required />
+    </div>
+    <div class="col-md-8">
+        <label class="form-label">Intitulé</label>
+        <input name="Matiere.Intitule" class="form-control" required />
+    </div>
+    <div class="col-12">
+        <label class="form-label">Description</label>
+        <div id="quill-description" style="height:120px; background:#fff;"></div>
+        <input type="hidden" name="Matiere.Description" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Coefficient</label>
+        <input name="Matiere.Coefficient" class="form-control" type="number" min="1" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Volume horaire</label>
+        <input name="Matiere.VolumeHoraire" class="form-control" type="number" min="0" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Enseignant</label>
+        <select name="Matiere.EnseignantId" class="form-select">
+            <option value="">— Aucun —</option>
+            @foreach (var item in Model.EnseignantsList) { <option value="@item.Value">@item.Text</option> }
+        </select>
+    </div>
+</div>

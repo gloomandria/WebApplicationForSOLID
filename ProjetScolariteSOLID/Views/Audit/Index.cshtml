@@ -1,0 +1,56 @@
+﻿@model ProjetScolariteSOLID.ViewModels.Admin.AuditListViewModel
+@{
+    ViewData["Title"] = "Journal d'audit";
+}
+
+<div id="app-data" data-controller="Audit"></div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>🕵️ Journal d'audit</h2>
+    <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary btn-sm">← Back-office</a>
+</div>
+
+<div id="alert-zone"></div>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-4">
+        <select id="filter-table" class="form-select form-select-sm">
+            <option value="">— Toutes les tables —</option>
+            @foreach (var t in Model.Tables)
+            {
+                <option value="@t">@t</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <input type="text" id="filter-user" class="form-control form-control-sm"
+               placeholder="Filtrer par UserId…" />
+    </div>
+    <div class="col-md-2">
+        <button type="button" id="btn-filter" class="btn btn-sm btn-primary w-100">Filtrer</button>
+    </div>
+    <div class="col-md-2">
+        <button type="button" id="btn-reset" class="btn btn-sm btn-outline-secondary w-100">Réinitialiser</button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle" id="dt-audit">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Horodatage (UTC)</th>
+                <th>Table</th>
+                <th>Action</th>
+                <th>Clé(s)</th>
+                <th>Utilisateur</th>
+                <th class="nosort"></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/js/audit.js" asp-append-version="true"></script>
+}
