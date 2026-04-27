@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
@@ -6,16 +7,18 @@ using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Notes.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Notes.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.Domain.Repositories;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant}")]
 public sealed class NotesController : Controller
 {
     private readonly IMediator _mediator;
     private readonly IReferentielRepository<TypeEvaluationRef> _typeEvalRepo;
-    private const int PageSize = 10;
+    private const int DefaultPageSize = 10;
 
     public NotesController(IMediator mediator, IReferentielRepository<TypeEvaluationRef> typeEvalRepo)
     {
@@ -23,18 +26,39 @@ public sealed class NotesController : Controller
         _typeEvalRepo = typeEvalRepo;
     }
 
-    public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        var notes = await _mediator.Send(new GetNotesQuery(page, PageSize), ct);
-        return View(new NotesViewModel { Notes = notes, CurrentPage = page });
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var notes = await _mediator.Send(new GetNotesQuery(page, pageSize), ct);
+        return View(new NotesViewModel { Notes = notes, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(int page, CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        page = page < 1 ? 1 : page;
-        var notes = await _mediator.Send(new GetNotesQuery(page, PageSize), ct);
-        return PartialView("_NotesTable", new NotesViewModel { Notes = notes, CurrentPage = page });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var notes = await _mediator.Send(new GetNotesQuery(page, pageSize), ct);
+        return PartialView("_NotesTable", new NotesViewModel { Notes = notes, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : DefaultPageSize;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetNotesQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(n => new
+        {
+            id            = n.Id,
+            etudiant      = n.Etudiant?.NomComplet ?? $"Id={n.EtudiantId}",
+            matiere       = n.Matiere?.Intitule ?? $"Id={n.MatiereId}",
+            valeur        = n.Valeur.ToString("0.##"),
+            typeEvaluation = n.TypeEvaluation?.Libelle ?? "",
+            date          = n.Date.ToString("dd/MM/yyyy"),
+            commentaire   = n.Commentaire
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]

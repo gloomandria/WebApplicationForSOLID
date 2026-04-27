@@ -280,24 +280,30 @@ namespace ProjetScolariteSOLID.Infrastructure.Data.Migrations
             migrationBuilder.InsertData("Niveaux", new[] { "Libelle" }, new object[] { "Master 1" });
             migrationBuilder.InsertData("Niveaux", new[] { "Libelle" }, new object[] { "Master 2" });
 
-            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Génie Logiciel" });
-            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Réseaux et Télécommunications" });
-            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Intelligence Artificielle" });
-            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Base de Données" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Mathématiques" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Informatique" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Physique" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Chimie" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Biologie" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Français" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Anglais" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Histoire-Géographie" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Éducation Physique" });
+            migrationBuilder.InsertData("Specialites", new[] { "Libelle" }, new object[] { "Arts plastiques" });
 
             migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Assistant" });
-            migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Maître Assistant" });
-            migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Maître de Conférences" });
+            migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Maître-assistant" });
+            migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Maître de conférences" });
             migrationBuilder.InsertData("Grades", new[] { "Libelle" }, new object[] { "Professeur" });
 
             migrationBuilder.InsertData("StatutsInscription", new[] { "Libelle" }, new object[] { "Active" });
+            migrationBuilder.InsertData("StatutsInscription", new[] { "Libelle" }, new object[] { "Suspendue" });
             migrationBuilder.InsertData("StatutsInscription", new[] { "Libelle" }, new object[] { "Annulée" });
-            migrationBuilder.InsertData("StatutsInscription", new[] { "Libelle" }, new object[] { "En attente" });
 
-            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Examen" });
-            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Contrôle Continu" });
-            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "TP" });
-            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Projet" });
+            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Contrôle continu" });
+            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Examen partiel" });
+            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Examen final" });
+            migrationBuilder.InsertData("TypesEvaluation", new[] { "Libelle" }, new object[] { "Rattrapage" });
 
             // Update existing rows to point to the first valid FK value (Id=1)
             migrationBuilder.Sql("UPDATE Classes SET AnneeAcademiqueId = 1, FiliereId = 1, NiveauId = 1 WHERE AnneeAcademiqueId = 0 OR FiliereId = 0 OR NiveauId = 0");

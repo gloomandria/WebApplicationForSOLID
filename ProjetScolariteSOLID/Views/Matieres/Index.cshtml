@@ -14,7 +14,7 @@
 <div id="alert-zone"></div>
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle" id="dt-matieres">
         <thead class="table-warning">
             <tr>
                 <th>Code</th>
@@ -22,12 +22,10 @@
                 <th class="text-center">Coefficient</th>
                 <th class="text-center">Volume horaire</th>
                 <th>Enseignant</th>
-                <th class="text-end">Actions</th>
+                <th class="text-end nosort">Actions</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-            @await Html.PartialAsync("_MatieresTable", Model)
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
 </div>
 
@@ -86,6 +84,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/ajax-helpers.js" asp-append-version="true"></script>
-    <script src="~/js/matieres.js" asp-append-version="true"></script>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>    <script src="~/js/matieres.js" asp-append-version="true"></script>
 }

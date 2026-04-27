@@ -1,18 +1,18 @@
 @model ProjetScolariteSOLID.ViewModels.ClassesViewModel
 
-@if (!Model.Classes.Any())
+@if (!Model.Classes.Items.Any())
 {
     <tr><td colspan="6"><div class="alert alert-info mb-0">Aucune classe enregistrée.</div></td></tr>
 }
 else
 {
-    @foreach (var c in Model.Classes)
+    @foreach (var c in Model.Classes.Items)
     {
         <tr>
             <td>@c.Nom</td>
-            <td><span class="badge bg-success">@c.Niveau</span></td>
-            <td>@c.Filiere</td>
-            <td>@c.AnneeAcademique</td>
+            <td><span class="badge bg-success">@c.Niveau?.Libelle</span></td>
+            <td>@c.Filiere?.Libelle</td>
+            <td>@c.AnneeAcademique?.Libelle</td>
             <td class="text-center">@c.CapaciteMax</td>
             <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@c.Id">Éditer</button>

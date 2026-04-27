@@ -1,31 +1,55 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjetScolariteSOLID.Application.CQRS.Enseignants.Queries;
 using ProjetScolariteSOLID.Application.CQRS.Matieres.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Matieres.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant}")]
 public sealed class MatieresController : Controller
 {
     private readonly IMediator _mediator;
 
     public MatieresController(IMediator mediator) => _mediator = mediator;
 
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10, CancellationToken ct = default)
     {
-        var matieres = await _mediator.Send(new GetAllMatieresQuery(), ct);
-        return View(new MatieresViewModel { Matieres = matieres });
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : 10;
+        var matieres = await _mediator.Send(new GetMatieresPagedQuery(page, pageSize), ct);
+        return View(new MatieresViewModel { Matieres = matieres, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = 10, CancellationToken ct = default)
     {
-        var matieres = await _mediator.Send(new GetAllMatieresQuery(), ct);
-        return PartialView("_MatieresTable", new MatieresViewModel { Matieres = matieres });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : 10;
+        var matieres = await _mediator.Send(new GetMatieresPagedQuery(page, pageSize), ct);
+        return PartialView("_MatieresTable", new MatieresViewModel { Matieres = matieres, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : 10;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetMatieresPagedQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(m => new
+        {
+            id            = m.Id,
+            code          = m.Code,
+            intitule      = m.Intitule,
+            coefficient   = m.Coefficient,
+            volumeHoraire = m.VolumeHoraire,
+            enseignant    = m.Enseignant?.NomComplet ?? "—"
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]

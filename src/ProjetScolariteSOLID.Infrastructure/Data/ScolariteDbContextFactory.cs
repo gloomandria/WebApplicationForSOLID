@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace ProjetScolariteSOLID.Infrastructure.Data;
 
 /// <summary>
 /// Factory pour dotnet ef CLI.
-/// Charge les paramètres depuis appsettings.json directement (sans DI).
+/// Charge les paramètres depuis appsettings.json via IConfigurationBuilder.
 /// </summary>
 public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<ScolariteDbContext>
 {
@@ -13,13 +14,13 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
     {
         var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-        // Chercher appsettings.json en remontant depuis le répertoire courant
+        // Chercher le dossier WebApplicationForSOLID contenant appsettings.json
         string? webAppDir = null;
         var candidates = new[]
         {
-            Path.Combine(Directory.GetCurrentDirectory(), "ProjetScolariteSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "ProjetScolariteSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "ProjetScolariteSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "WebApplicationForSOLID"),
         };
         foreach (var c in candidates)
         {
@@ -28,40 +29,15 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
         if (webAppDir is null)
             throw new InvalidOperationException("Impossible de localiser appsettings.json.");
 
-        var appsettingsPath    = Path.Combine(webAppDir, "appsettings.json");
-        var appsettingsEnvPath = Path.Combine(webAppDir, $"appsettings.{environmentName}.json");
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(webAppDir)
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
 
-        var config = new System.Collections.Generic.Dictionary<string, string>();
-
-        // Lire le fichier appsettings.json de base
-        if (File.Exists(appsettingsPath))
-        {
-            var json = System.Text.Json.JsonDocument.Parse(File.ReadAllText(appsettingsPath));
-            if (json.RootElement.TryGetProperty("ConnectionStrings", out var connStrings))
-            {
-                if (connStrings.TryGetProperty("ScolariteDb", out var dbConn))
-                {
-                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString() ?? string.Empty;
-                }
-            }
-        }
-
-        // Lire le fichier appsettings.{environment}.json (overwrite)
-        if (File.Exists(appsettingsEnvPath))
-        {
-            var json = System.Text.Json.JsonDocument.Parse(File.ReadAllText(appsettingsEnvPath));
-            if (json.RootElement.TryGetProperty("ConnectionStrings", out var connStrings))
-            {
-                if (connStrings.TryGetProperty("ScolariteDb", out var dbConn))
-                {
-                    config["ConnectionStrings:ScolariteDb"] = dbConn.GetString() ?? string.Empty;
-                }
-            }
-        }
-
-        var connectionString = config.TryGetValue("ConnectionStrings:ScolariteDb", out var cs) 
-            ? cs 
-            : throw new InvalidOperationException("ConnectionString 'ScolariteDb' not found in appsettings.json");
+        var connectionString = configuration.GetConnectionString("ScolariteDb")
+            ?? throw new InvalidOperationException("ConnectionString 'ScolariteDb' not found.");
 
         var optionsBuilder = new DbContextOptionsBuilder<ScolariteDbContext>();
         optionsBuilder.UseSqlServer(connectionString);

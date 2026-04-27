@@ -9,7 +9,7 @@ public sealed class GetEnseignantsQueryHandler : IRequestHandler<GetEnseignantsQ
     private readonly IEnseignantService _service;
     public GetEnseignantsQueryHandler(IEnseignantService service) => _service = service;
     public Task<PagedResult<Enseignant>> Handle(GetEnseignantsQuery request, CancellationToken ct)
-        => _service.GetEnseignantsAsync(request.Page, request.PageSize, ct);
+        => _service.GetEnseignantsAsync(request.Page, request.PageSize, request.Search, request.SortCol, request.SortDir, ct);
 }
 
 public sealed class GetAllEnseignantsQueryHandler : IRequestHandler<GetAllEnseignantsQuery, IReadOnlyList<Enseignant>>

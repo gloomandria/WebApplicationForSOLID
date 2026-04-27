@@ -1,4 +1,4 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/src/">
     <Project Path="src/ProjetScolariteSOLID.Application/ProjetScolariteSOLID.Application.csproj" />
     <Project Path="src/ProjetScolariteSOLID.Domain/ProjetScolariteSOLID.Domain.csproj" />

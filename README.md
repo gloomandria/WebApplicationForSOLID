@@ -1,202 +1,72 @@
-# ProjetScolariteSOLID
+# 🎓 Gestion Scolarité — ProjetScolariteSOLID
 
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
-[![Entity Framework Core](https://img.shields.io/badge/EF%20Core-10.0.7-512BD4)](https://docs.microsoft.com/ef/)
-[![MediatR](https://img.shields.io/badge/MediatR-12.x-green)](https://github.com/jbogard/MediatR)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-orange)](https://docs.microsoft.com/dotnet/architecture/)
-[![Tests](https://img.shields.io/badge/Tests-75%20xUnit-success)](tests/)
-
-Application web de gestion scolaire développée avec **ASP.NET Core MVC (.NET 10)**, conçue comme projet d'apprentissage et de démonstration des **principes SOLID**, du pattern **CQRS** via MediatR, et des bonnes pratiques d'architecture logicielle en couches.
+Application web ASP.NET Core MVC de gestion de scolarité, conçue selon les **principes SOLID** et l'**Architecture en couches (Clean Architecture)**. Elle couvre la gestion complète des étudiants, enseignants, classes, matières, inscriptions et notes, avec un back-office d'administration, un journal d'audit, un système d'e-mails et une API JWT.
 
 ---
 
-## Table des matières
+## 📑 Table des matières
 
-- [Aperçu](#aperçu)
+- [Fonctionnalités](#fonctionnalités)
 - [Architecture](#architecture)
-- [Modèle de données](#modèle-de-données)
 - [Principes SOLID appliqués](#principes-solid-appliqués)
-- [Pattern CQRS et MediatR](#pattern-cqrs-et-mediatr)
 - [Technologies](#technologies)
+- [Structure du projet](#structure-du-projet)
 - [Prérequis](#prérequis)
 - [Installation et démarrage](#installation-et-démarrage)
 - [Configuration](#configuration)
+- [Rôles et permissions](#rôles-et-permissions)
+- [Journal d'audit](#journal-daudit)
+- [Système d'e-mails](#système-de-mails)
+- [API REST (JWT)](#api-rest-jwt)
 - [Déploiement IIS](#déploiement-iis)
-- [Structure du projet](#structure-du-projet)
 - [Tests unitaires](#tests-unitaires)
-- [Fonctionnalités](#fonctionnalités)
-- [Référentiels de données](#référentiels-de-données)
 
 ---
 
-## Aperçu
+## Fonctionnalités
 
-**ProjetScolariteSOLID** est une application web complète de gestion de scolarité universitaire permettant d'administrer :
+| Module | Description |
+|---|---|
+| **Étudiants** | CRUD complet, création de compte Identity lié, bulletin de notes |
+| **Enseignants** | CRUD complet, spécialité, grade, compte Identity lié |
+| **Classes** | Gestion des promotions/classes avec niveau, filière et année académique |
+| **Matières** | Catalogue avec coefficient, volume horaire et enseignant assigné |
+| **Inscriptions** | Inscription étudiant → classe → année scolaire, contrôle de capacité |
+| **Notes** | Saisie et consultation, type d'évaluation, génération de bulletins par étudiant |
+| **Référentiels** | Spécialités, grades, filières, niveaux, années académiques, types d'évaluation, statuts d'inscription |
+| **Administration** | Gestion des utilisateurs, rôles, matrice de permissions, file d'e-mails |
+| **Journal d'audit** | Traçabilité de toutes les opérations INSERT/UPDATE/DELETE en base |
+| **E-mails** | Templates WYSIWYG (Quill), file d'envoi asynchrone (SMTP) |
+| **Compte** | Inscription, connexion, confirmation e-mail, mot de passe oublié / réinitialisation |
+| **API JWT** | Authentification programmatique via `/api/auth` |
 
-- Les **étudiants** avec génération automatique du numéro (`ETU0001`, `ETU0002`...)
-- Les **enseignants** avec grades et spécialités
-- Les **matières** avec coefficients et volumes horaires
-- Les **classes** par filière, niveau et année académique
-- Les **inscriptions** avec contrôle de capacité et gestion des statuts
-- Les **notes** et génération automatique de **bulletins** avec calcul des moyennes pondérées
-
-L'application met en œuvre une architecture en couches (Clean Architecture), le pattern **CQRS** via MediatR, des interactions **AJAX dynamiques** (modales jQuery sans rechargement de page), et des patterns centrés sur les principes SOLID.
-
-Toutes les opérations de modification retournent un `OperationResult` — aucune exception métier n'est levée dans la couche Application
+Toutes les listes (Étudiants, Enseignants, Classes, Matières, Inscriptions, Notes) utilisent **DataTables 2.1.8** avec pagination, tri et recherche côté serveur.
 
 ---
 
 ## Architecture
 
-Le projet est organisé en **4 couches** distinctes suivant les principes de la **Clean Architecture** :
+Le projet est organisé en **5 couches** distinctes :
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         ProjetScolariteSOLID                            │
-│                    (Couche Présentation - Web)                          │
-│         Controllers MVC • ViewModels • Views Razor • Middleware         │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │ Dépend de ↓
-┌────────────────────────────────▼────────────────────────────────────────┐
-│                 ProjetScolariteSOLID.Application                        │
-│                    (Couche Application/Use Cases)                       │
-│    CQRS (Commands/Queries/Handlers) • Services • Validators • Behaviors │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │ Dépend de ↓
-┌────────────────────────────────▼────────────────────────────────────────┐
-│                ProjetScolariteSOLID.Infrastructure                      │
-│                      (Couche Infrastructure)                            │
-│    EF Core DbContext • Repositories EF • Configurations • Migrations    │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │ Dépend de ↓
-┌────────────────────────────────▼────────────────────────────────────────┐
-│                    ProjetScolariteSOLID.Domain                          │
-│                    (Couche Domain - Cœur Métier)                        │
-│        Entités • Interfaces Repositories • Value Objects                │
-│                   ★ AUCUNE DÉPENDANCE EXTERNE ★                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-```
+WebApplicationForSOLID/                     → Couche Présentation (ASP.NET Core MVC)
+src/
+  ProjetScolariteSOLID.Domain/              → Modèles métier & interfaces de repositories
+  ProjetScolariteSOLID.Application/         → CQRS (Commands/Queries/Handlers), Services, Validators
+  ProjetScolariteSOLID.Infrastructure/      → EF Core, Repositories, SMTP, Migrations
 tests/
-└── ProjetScolariteSOLID.Tests/             ← Tests unitaires xUnit + Moq
+  ProjetScolariteSOLID.Tests/               → Tests unitaires (xUnit + Moq)
 ```
 
-### Flux d'une requête (CQRS)
+### Flux d'une requête
 
 ```
-HTTP Request
-     ↓
-┌─────────────────┐
-│   Controller    │ ← Reçoit la requête, prépare la Command/Query
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│    MediatR      │ ← Dispatche vers le pipeline
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│ LoggingBehavior │ ← Log la requête, mesure la durée (alerte si > 500ms)
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│ValidationBehavior│ ← Valide les Commands via IValidator<T>
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│    Handler      │ ← Exécute la logique métier
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│   Repository    │ ← Accède aux données via EF Core
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│   SQL Server    │ ← Persistance
-└─────────────────┘
+Razor View → Controller → IMediator (LoggingBehavior → ValidationBehavior) → Handler → Service → Repository → SQL Server
 ```
 
----
-
-## Modèle de données
-
-### Schéma relationnel
-
-```
-┌────────────────────┐         ┌────────────────────┐         ┌────────────────────┐
-│     ETUDIANT       │         │       CLASSE       │         │    ENSEIGNANT      │
-├────────────────────┤         ├────────────────────┤         ├────────────────────┤
-│ Id (PK)            │         │ Id (PK)            │         │ Id (PK)            │
-│ NumeroEtudiant     │         │ Nom                │         │ Matricule          │
-│ Nom                │         │ CapaciteMax        │         │ Nom                │
-│ Prenom             │         │ NiveauId (FK)      │──┐      │ Prenom             │
-│ Email (unique)     │         │ FiliereId (FK)     │──┼──┐   │ Email              │
-│ Telephone          │         │ AnneeAcademiqueId  │──┼──┼─┐ │ Telephone          │
-│ Adresse            │         └─────────┬──────────┘  │  │ │ │ SpecialiteId (FK)  │──┐
-│ DateNaissance      │                   │             │  │ │ │ GradeId (FK)       │──┼─┐
-│ DateInscription    │                   │             │  │ │ │ DateEmbauche       │  │ │
-└─────────┬──────────┘                   │             │  │ │ └─────────┬──────────┘  │ │
-          │                              │             │  │ │           │             │ │
-          │    ┌─────────────────────────┘             │  │ │           │             │ │
-          │    │                                       │  │ │           │             │ │
-          ▼    ▼                                       │  │ │           ▼             │ │
-┌────────────────────┐                                 │  │ │ ┌────────────────────┐  │ │
-│    INSCRIPTION     │                                 │  │ │ │      MATIERE       │  │ │
-├────────────────────┤                                 │  │ │ ├────────────────────┤  │ │
-│ Id (PK)            │                                 │  │ │ │ Id (PK)            │  │ │
-│ EtudiantId (FK)    │                                 │  │ │ │ Code               │  │ │
-│ ClasseId (FK)      │                                 │  │ │ │ Intitule           │  │ │
-│ StatutId (FK)      │──────────────────────────────┐  │  │ │ │ Description        │  │ │
-│ DateInscription    │                              │  │  │ │ │ Coefficient        │  │ │
-└────────────────────┘                              │  │  │ │ │ VolumeHoraire      │  │ │
-                                                    │  │  │ │ │ EnseignantId (FK)  │──┘ │
-          ┌─────────────────────────────────────────┘  │  │ │ └─────────┬──────────┘    │
-          │                                            │  │ │           │               │
-          ▼                                            ▼  ▼ ▼           │               │
-┌────────────────────┐                    ┌────────────────────┐        │               │
-│ STATUT_INSCRIPTION │                    │   REFERENTIELS     │        │               │
-├────────────────────┤                    ├────────────────────┤        │               │
-│ Id (PK)            │                    │ • Niveau           │        │               │
-│ Libelle            │                    │ • Filiere          │        │               │
-│ (Active, Suspendue,│                    │ • AnneeAcademique  │        │               │
-│  Annulée)          │                    │ • Specialite       │←───────┼───────────────┘
-└────────────────────┘                    │ • Grade            │←───────┘
-                                          │ • TypeEvaluation   │
-                                          └─────────┬──────────┘
-                                                    │
-┌────────────────────┐                              │
-│        NOTE        │                              │
-├────────────────────┤                              │
-│ Id (PK)            │                              │
-│ EtudiantId (FK)    │ ←── Lien vers Etudiant       │
-│ MatiereId (FK)     │ ←── Lien vers Matiere        │
-│ Valeur (0-20)      │                              │
-│ TypeEvaluationId   │ ←────────────────────────────┘
-│ Date               │
-│ Commentaire        │
-└────────────────────┘
-```
-
-### Entités principales
-
-| Entité | Description | Propriétés clés |
-|--------|-------------|-----------------|
-| **Etudiant** | Représente un étudiant inscrit | `NumeroEtudiant` (auto-généré ETU0001), `Nom`, `Prenom`, `Email`, `DateNaissance` |
-| **Enseignant** | Représente un enseignant | `Matricule`, `Nom`, `Prenom`, `Specialite`, `Grade` |
-| **Classe** | Une classe d'étudiants | `Nom`, `Niveau`, `Filiere`, `AnneeAcademique`, `CapaciteMax` |
-| **Matiere** | Une matière enseignée | `Code`, `Intitule`, `Coefficient`, `VolumeHoraire`, `Enseignant` |
-| **Inscription** | Lien étudiant-classe | `Etudiant`, `Classe`, `Statut`, `DateInscription` |
-| **Note** | Note d'un étudiant | `Etudiant`, `Matiere`, `Valeur` (0-20), `TypeEvaluation`, `Date` |
-
-### Value Objects
-
-| Classe | Description |
-|--------|-------------|
-| **BulletinEtudiant** | Bulletin académique avec moyennes pondérées et mention |
-| **LigneNote** | Ligne du bulletin : matière, coefficient, moyenne pondérée |
-| **PagedResult\<T\>** | Résultat paginé avec `Items`, `TotalCount`, `Page`, `PageSize` |
-| **OperationResult\<T\>** | Pattern Result : `IsSuccess`, `Value`, `ErrorMessage` |
-| **ValidationResult** | Résultat de validation avec liste d'erreurs |
+- Les **lectures** passent par des `Query` MediatR renvoyant des modèles de domaine.
+- Les **écritures** passent par des `Command` MediatR renvoyant un `OperationResult<T>`.
+- Les **contrôleurs** ne touchent jamais EF Core directement.
 
 ---
 
@@ -204,145 +74,119 @@ HTTP Request
 
 | Principe | Exemple concret dans le projet |
 |---|---|
-| **S** — Single Responsibility | Chaque service (`EtudiantService`, `NoteService`…) gère un seul agrégat. `EtudiantValidator` ne fait que valider, `LoggingBehavior` ne fait que logger. |
-| **O** — Open/Closed | `ScolariteDbContext` utilise `ApplyConfigurationsFromAssembly` : ajouter une entité ne modifie pas le DbContext. Les Behaviors MediatR sont extensibles sans modification. |
-| **L** — Liskov Substitution | Les repositories EF (`EfEtudiantRepository`) sont substituables via leurs interfaces (`IEtudiantRepository`) sans rompre de contrat. |
-| **I** — Interface Segregation | `IReadRepository<T>` (lecture) et `IWriteRepository<T>` (écriture) séparent les responsabilités. Les clients n'implémentent que ce dont ils ont besoin. |
-| **D** — Dependency Inversion | Les couches supérieures dépendent uniquement des abstractions (interfaces), jamais des implémentations concrètes. Injection via DI. |
-
-### Exemples de code SOLID
-
-**SRP - Single Responsibility :**
-```csharp
-// Chaque validateur a UNE seule responsabilité
-public sealed class EtudiantValidator : IValidator<Etudiant>
-{
-    public ValidationResult Validate(Etudiant etudiant)
-    {
-        var result = new ValidationResult();
-        if (string.IsNullOrWhiteSpace(etudiant.Nom))
-            result.AddError("Le nom est obligatoire.");
-        // ...
-        return result;
-    }
-}
-```
-
-**OCP - Open/Closed :**
-```csharp
-// Ajouter une entité = créer une IEntityTypeConfiguration, sans modifier DbContext
-protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    modelBuilder.ApplyConfigurationsFromAssembly(typeof(EtudiantConfiguration).Assembly);
-}
-```
-
-**ISP - Interface Segregation :**
-```csharp
-// Interfaces séparées pour lecture et écriture
-public interface IReadRepository<T> where T : class
-{
-    Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
-    Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default);
-}
-
-public interface IWriteRepository<T> where T : class
-{
-    Task<T> AddAsync(T entity, CancellationToken ct = default);
-    Task UpdateAsync(T entity, CancellationToken ct = default);
-    Task DeleteAsync(int id, CancellationToken ct = default);
-}
-```
-
-**DIP - Dependency Inversion :**
-```csharp
-// Les services dépendent d'abstractions, pas d'implémentations
-services.AddScoped<IEtudiantRepository, EfEtudiantRepository>();
-services.AddScoped<IEtudiantService, EtudiantService>();
-```
-
----
-
-## Pattern CQRS et MediatR
-
-### Commands (Écriture)
-
-```csharp
-// Création d'un étudiant
-public sealed record CreateEtudiantCommand(Etudiant Etudiant) : IRequest<OperationResult<Etudiant>>;
-
-// Mise à jour
-public sealed record UpdateEtudiantCommand(Etudiant Etudiant) : IRequest<OperationResult>;
-
-// Suppression
-public sealed record DeleteEtudiantCommand(int Id) : IRequest<OperationResult>;
-```
-
-### Queries (Lecture)
-
-```csharp
-// Liste paginée
-public sealed record GetEtudiantsQuery(int Page, int PageSize) : IRequest<PagedResult<Etudiant>>;
-
-// Par ID
-public sealed record GetEtudiantByIdQuery(int Id) : IRequest<Etudiant?>;
-
-// Bulletin académique
-public sealed record GetEtudiantBulletinQuery(int EtudiantId) : IRequest<BulletinEtudiant?>;
-```
-
-### Behaviors (Cross-Cutting Concerns)
-
-| Behavior | Responsabilité |
-|----------|---------------|
-| **LoggingBehavior** | Log chaque requête MediatR, mesure la durée, alerte si > 500ms |
-| **ValidationBehavior** | Valide automatiquement les Commands via `IValidator<T>` avant exécution |
-
-```csharp
-// Pipeline : Logging → Validation → Handler
-cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
-cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-```
+| **S** — Single Responsibility | Chaque handler CQRS a une seule responsabilité. Les contrôleurs délèguent à MediatR. Les validators sont séparés des services. |
+| **O** — Open/Closed | `ScolariteDbContext` utilise `ApplyConfigurationsFromAssembly` : ajouter une entité ne modifie pas le DbContext. Les référentiels utilisent `EfReferentielRepository<T>` générique. |
+| **L** — Liskov Substitution | Les repositories EF (`EfEtudiantRepository`) sont substituables via leurs interfaces (`IEtudiantRepository`). |
+| **I** — Interface Segregation | Les contrats applicatifs (`IEtudiantService`, `IEmailQueueService`…) sont séparés par domaine fonctionnel. `IReadRepository<T>` et `IWriteRepository<T>` sont distincts. |
+| **D** — Dependency Inversion | Les couches hautes (Application, Présentation) dépendent d'abstractions (interfaces), jamais des implémentations concrètes. L'injection est centralisée dans `AddApplicationServices()` et `AddInfrastructureServices()`. |
 
 ---
 
 ## Technologies
 
-| Technologie | Rôle |
-|---|---|
-| **ASP.NET Core MVC 10** | Framework web — Controllers, Views Razor, ViewModels |
-| **jQuery AJAX** | Interactions dynamiques (modales, chargement partiel sans rechargement de page) |
-| **Bootstrap** | UI responsive |
-| **Entity Framework Core 10** | ORM & migrations |
-| **SQL Server** | Base de données |
-| **MediatR** | Pattern CQRS (Commands, Queries, Behaviors) |
-| **Serilog** | Logging structuré (Console + SQL Server) |
-| **xUnit + Moq** | Tests unitaires de la couche Application |
-| **coverlet** | Couverture de code |
+| Catégorie | Technologie | Version |
+|---|---|---|
+| Framework | ASP.NET Core MVC | .NET 10 |
+| ORM | Entity Framework Core | 10.x |
+| Base de données | SQL Server | 2019+ |
+| Authentification | ASP.NET Core Identity | — |
+| CQRS | MediatR | 12.x |
+| Pagination / Tri | DataTables (server-side) | 2.1.8 |
+| UI | Bootstrap | 5.3 |
+| Éditeur HTML | Quill.js | 2.x |
+| E-mail | MailKit (SMTP) | — |
+| Logging | Serilog (Console + SQL Server) | — |
+| API | JWT Bearer | — |
+| Tests | xUnit + Moq | — |
 
-### Versions des packages
+---
 
-| Package | Version |
-|---------|---------|
-| `Microsoft.EntityFrameworkCore.SqlServer` | 10.0.7 |
-| `Microsoft.EntityFrameworkCore.Design` | 10.0.7 |
-| `MediatR` | 12.x |
-| `Serilog.AspNetCore` | 10.0.0 |
-| `Serilog.Sinks.MSSqlServer` | 9.0.3 |
-| `Serilog.Enrichers.Environment` | 3.0.1 |
-| `xUnit` | 2.9.3 |
-| `Moq` | 4.20.72 |
-| `Microsoft.NET.Test.Sdk` | 17.12.0 |
-| `coverlet.collector` | 6.0.4 |
+## Structure du projet
+
+```
+WebApplicationForSOLID/
+├── Controllers/
+│   ├── AccountController.cs        # Connexion, inscription, activation, reset
+│   ├── AdminController.cs          # Back-office : users, rôles, permissions, e-mails
+│   ├── AuditController.cs          # Journal d'audit paginé + détail
+│   ├── ClassesController.cs        # CRUD Classes (DataTables server-side)
+│   ├── EmailTemplatesController.cs # Gestion des templates e-mail (Quill)
+│   ├── EnseignantsController.cs    # CRUD Enseignants (DataTables server-side)
+│   ├── EtudiantsController.cs      # CRUD Étudiants + bulletin (DataTables server-side)
+│   ├── HomeController.cs           # Dashboard avec statistiques
+│   ├── InscriptionsController.cs   # CRUD Inscriptions (DataTables server-side)
+│   ├── MatieresController.cs       # CRUD Matières (DataTables server-side)
+│   ├── NotesController.cs          # CRUD Notes (DataTables server-side)
+│   ├── ReferentielsController.cs   # Spécialités, grades et autres référentiels
+│   └── Api/
+│       └── AuthApiController.cs    # POST /api/auth/login → JWT
+├── Middleware/
+│   └── GlobalExceptionMiddleware.cs# Gestion centralisée des exceptions
+├── ViewModels/                     # ViewModels spécifiques par feature
+├── Views/
+│   ├── Shared/
+│   │   ├── _Layout.cshtml          # Layout principal (DataTables CDN, Bootstrap 5)
+│   │   └── _AuthLayout.cshtml      # Layout pages authentification
+│   ├── Etudiants / Enseignants / …   # Vues CRUD avec modals AJAX
+│   ├── Admin/                      # Users, Rôles, Permissions, EmailQueue
+│   └── Audit/                      # Liste avec filtres + pagination ellipsis
+├── wwwroot/js/
+│   ├── ajax-helpers.js             # Helpers AJAX réutilisables
+│   ├── etudiants.js                # DataTables init + AJAX CRUD
+│   ├── enseignants.js
+│   ├── classes.js / matieres.js / inscriptions.js / notes.js
+│   └── emailtemplates.js           # DataTables client-side + Quill
+├── appsettings.json / Development / Release
+├── web.config                      # Configuration ASP.NET Core Module V2 (IIS)
+└── Program.cs                      # Point d'entrée, configuration DI
+
+src/ProjetScolariteSOLID.Domain/
+├── Models/                         # Etudiant, Enseignant, Classe, Matiere,
+│                                   # Inscription, Note, AuditLog, EmailTemplate…
+│   └── Auth/                       # ApplicationUser, ApplicationRole, RolePermission, EmailQueue
+└── Repositories/                   # IEtudiantRepository, IAuditLogRepository, IXxxRepository…
+
+src/ProjetScolariteSOLID.Application/
+├── CQRS/
+│   ├── Behaviors/                  # LoggingBehavior, ValidationBehavior
+│   └── Etudiants|Enseignants|…/
+│       └── Commands/ Queries/ Handlers/
+├── Contracts/                      # IValidator<T>, IEmailQueueService, IPermissionService…
+├── Services/                       # EtudiantService, NoteService, InscriptionService…
+├── Validators/                     # EtudiantValidator, NoteValidator, MatiereValidator…
+└── Extensions/                     # AddApplicationServices() (DI registration)
+
+src/ProjetScolariteSOLID.Infrastructure/
+├── Data/
+│   ├── ScolariteDbContext.cs       # DbContext EF Core + Audit interceptor
+│   ├── DataSeeder.cs               # Seed admin, rôles, templates, données de démo (idempotent)
+│   ├── Configurations/             # IEntityTypeConfiguration<T> par entité
+│   └── Migrations/                 # Migrations EF Core
+├── Repositories/                   # EfEtudiantRepository, EfAuditLogRepository…
+├── Email/
+│   ├── EfEmailQueueService.cs      # File d'attente d'e-mails en base
+│   ├── EfEmailTemplateService.cs   # Gestion des templates e-mail
+│   ├── SmtpEmailSender.cs          # Envoi SMTP via MailKit
+│   └── EmailQueueBackgroundService.cs # Service d'arrière-plan
+├── Notifications/
+│   └── DatabaseNotificationService.cs # Notifications via Serilog
+├── Auth/
+│   └── PermissionService.cs        # Permissions par rôle
+└── Extensions/                     # AddInfrastructureServices() (DI registration)
+
+tests/ProjetScolariteSOLID.Tests/
+├── Fixtures/Builders.cs            # EtudiantBuilder, NoteBuilder…
+├── Validators/                     # Tests des règles de validation
+└── Services/                       # Tests avec Moq (logique métier)
+```
 
 ---
 
 ## Prérequis
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [SQL Server](https://www.microsoft.com/fr-fr/sql-server/sql-server-downloads) (version locale ou Express)
-- Visual Studio 2022+ ou VS Code
-- IIS avec le module **ASP.NET Core Module V2** (Hosting Bundle .NET 10) pour la production
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- SQL Server 2019+ (ou LocalDB pour le développement)
+- (Optionnel) Serveur SMTP ou [Mailhog](https://github.com/mailhog/MailHog) pour les e-mails en local
 
 ---
 
@@ -351,59 +195,202 @@ cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/gloomandria/ProjetScolariteSOLID.git
-cd ProjetScolariteSOLID
+git clone https://github.com/gloomandria/WebApplicationForSOLID.git
+cd WebApplicationForSOLID
 ```
 
-### 2. Configurer la connexion à la base de données
+### 2. Configurer `appsettings.json`
 
-Modifier la chaîne de connexion dans `ProjetScolariteSOLID/appsettings.Development.json` :
+Renseigner la chaîne de connexion et les autres paramètres (voir [Configuration](#configuration)).
 
-```json
-{
-  "ConnectionStrings": {
-    "ScolariteDb": "Server=.;Database=Scolarite_Dev;Trusted_Connection=True;TrustServerCertificate=True"
-  }
-}
-```
-
-### 3. Lancer l'application
+### 3. Appliquer les migrations et le seed uniquement
 
 ```bash
-dotnet run --project ProjetScolariteSOLID/ProjetScolariteSOLID.csproj
+dotnet run --project WebApplicationForSOLID/ProjetScolariteSOLID.csproj -- --seed-only
 ```
 
-> Les migrations EF Core et le seed des données sont appliqués **automatiquement** au démarrage.
+Cette commande applique toutes les migrations EF Core et insère les données initiales (compte admin, rôles, templates e-mail, données de démonstration) puis s'arrête sans démarrer le serveur web.
+
+### 4. Démarrer l'application
+
+```bash
+dotnet run --project WebApplicationForSOLID/ProjetScolariteSOLID.csproj
+```
+
+> Les migrations et le seed sont aussi appliqués automatiquement au démarrage normal.
+
+L'application est accessible sur `https://localhost:5001` (ou le port configuré).
+
+### 5. Connexion initiale
+
+| Champ | Valeur |
+|---|---|
+| Email | `admin@scolarite.local` (configurable) |
+| Mot de passe | valeur de `AdminDefault:Password` dans `appsettings.json` |
+
+> ⚠️ Changez le mot de passe admin immédiatement après la première connexion.
 
 ---
 
 ## Configuration
 
-### Fichiers appsettings
+Toutes les clés se trouvent dans `WebApplicationForSOLID/appsettings.json` :
 
-| Fichier | Environnement | Usage |
-|---|---|---|
-| `appsettings.json` | Base (tous) | Valeurs par défaut |
-| `appsettings.Development.json` | Développement | SQL Server local, logs détaillés — **exclu du publish** |
-| `appsettings.Release.json` | Production IIS | SQL Server réel, logs minimalistes |
+```json
+{
+  "ConnectionStrings": {
+    "ScolariteDb": "Server=.;Database=ScolariteDB;Trusted_Connection=True;TrustServerCertificate=True"
+  },
+  "AdminDefault": {
+    "Email": "admin@scolarite.local",
+    "Password": "VotreMotDePasseAdmin!"
+  },
+  "Identity": {
+    "DefaultPassword": "Changeme@1234!"
+  },
+  "Jwt": {
+    "Key": "une_clé_secrète_d_au_moins_32_caractères!",
+    "Issuer": "ScolariteApp",
+    "Audience": "ScolariteApp",
+    "ExpiresInMinutes": 480
+  },
+  "Smtp": {
+    "Host": "localhost",
+    "Port": "1025",
+    "User": "",
+    "Password": "",
+    "From": "noreply@scolarite.local",
+    "FromName": "Gestion Scolarité"
+  }
+}
+```
 
-### Connexion SQL Server
+| Clé | Description |
+|---|---|
+| `ConnectionStrings:ScolariteDb` | Chaîne de connexion SQL Server |
+| `AdminDefault:Password` | Mot de passe du compte administrateur créé au seed |
+| `Identity:DefaultPassword` | Mot de passe provisoire attribué aux nouveaux comptes (étudiant/enseignant) |
+| `Jwt:Key` | Clé secrète HS256 (min. 32 caractères) pour la signature des tokens JWT |
+| `Smtp:*` | Paramètres SMTP pour l'envoi d'e-mails |
 
-| Paramètre | Développement | Production |
-|---|---|---|
-| `Server` | `.` ou `(localdb)\MSSQLLocalDB` | Nom du serveur SQL |
-| `Database` | `Scolarite_Dev` | `Scolarite_Prod` |
-| `Trusted_Connection` | `True` | `True` (compte du pool IIS) |
+---
 
-> En production, le compte du **pool d'application IIS** doit avoir les droits `db_owner` sur la base.
+## Rôles et permissions
+
+L'application définit quatre rôles fixes :
+### Authentification JWT
+
+Configurer les paramètres JWT dans `appsettings.json` :
+
+```json
+"Jwt": {
+  "Key": "<clé secrète de 32+ caractères>",
+  "Issuer": "ScolariteApp",
+  "Audience": "ScolariteApp",
+  "ExpiresInMinutes": 480
+}
+```
+
+### Administrateur par défaut
+
+Un compte administrateur est créé automatiquement au premier démarrage :
+
+```json
+"AdminDefault": {
+  "Email": "admin@scolarite.local",
+  "Password": "<mot de passe>"
+}
+```
+
+### SMTP (envoi d'e-mails)
+
+Configurer les paramètres SMTP dans `appsettings.json` :
+
+```json
+"Smtp": {
+  "Host": "smtp.example.com",
+  "Port": "587",
+  "User": "<utilisateur>",
+  "Password": "<mot de passe>",
+  "From": "noreply@scolarite.local",
+  "FromName": "Gestion Scolarité"
+}
+```
 
 ### Logging (Serilog)
 
-Les logs sont écrits vers :
-- La **console** (développement uniquement)
-- Une table **`dbo.Logs`** dans SQL Server (créée automatiquement)
+| Rôle | Accès |
+|---|---|
+| `Administrateur` | Back-office complet, gestion des utilisateurs, audit, permissions |
+| `Enseignant` | Consultation et édition des étudiants, matières, notes, inscriptions, classes |
+| `Etudiant` | Consultation de ses informations et de son bulletin de notes |
+| `Visiteur` | Accès en lecture seule au dashboard |
 
-Le niveau minimum est configurable dans `appsettings.json` sous la clé `Serilog`.
+En plus des rôles, une **matrice de permissions** par ressource (Étudiants, Enseignants, Matières, Classes, Inscriptions, Notes, Référentiels) est configurable par l'administrateur via le back-office (`/Admin/Permissions`). Chaque rôle peut se voir accorder les droits `Lire`, `Créer`, `Modifier`, `Supprimer` par ressource.
+
+---
+
+## Journal d'audit
+
+Toutes les opérations `INSERT`, `UPDATE` et `DELETE` en base de données sont automatiquement tracées dans la table `AuditLogs` via un **intercepteur EF Core** (`SaveChangesInterceptor`).
+
+Chaque entrée contient :
+- La table concernée, l'action et l'horodatage UTC
+- Les clés primaires de l'entité
+- Les anciennes et nouvelles valeurs (JSON)
+- L'identifiant de l'utilisateur connecté
+
+Le journal est consultable via `/Audit/Index` avec :
+- **Filtrage** par table ou par identifiant d'utilisateur
+- **Pagination** avec ellipsis (premières pages, pages proches de la courante, dernières pages)
+- **Détail** complet d'une entrée via `/Audit/Details/{id}`
+
+---
+
+## Système d'e-mails
+
+Les e-mails sont gérés de façon **asynchrone** via une file d'envoi (`EmailQueue`) :
+
+1. Un e-mail est enregistré en base (`EmailQueue`) avec son template résolu.
+2. Un **BackgroundService** (`EmailQueueBackgroundService`) tente l'envoi périodiquement (toutes les 30 secondes) via SMTP (MailKit).
+3. En cas d'échec, le nombre de tentatives est incrémenté (max 5) et l'envoi est retenté.
+
+Les **templates** sont éditables par l'administrateur via un éditeur WYSIWYG Quill.js (`/EmailTemplates`). Les variables sont substituées dynamiquement (ex. `{{NomComplet}}`, `{{Email}}`, `{{Lien}}`).
+
+Templates livrés par défaut :
+- `ConfirmationEmail` — confirmation d'adresse e-mail à l'inscription
+- `NouvelleInscriptionAdmin` — notification à l'admin lors d'une nouvelle inscription
+- `ResetMotDePasse` — lien de réinitialisation du mot de passe
+- `CompteActive` — notification d'activation de compte
+- `CompteDesactive` — notification de désactivation
+
+---
+
+## API REST (JWT)
+
+Une API REST est disponible pour l'intégration programmatique.
+
+### Authentification
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@scolarite.local",
+  "password": "VotreMotDePasseAdmin!"
+}
+```
+
+**Réponse (200 OK) :**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiration": "2025-01-01T16:00:00Z"
+}
+```
+
+Transmettre le token dans le header `Authorization: Bearer <token>` pour les appels API sécurisés.
 
 ---
 
@@ -412,7 +399,13 @@ Le niveau minimum est configurable dans `appsettings.json` sous la clé `Serilog
 ### Prérequis serveur
 
 1. Installer le **[.NET 10 Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/10.0)** (inclut ASP.NET Core Module V2)
-2. Redémarrer IIS après l'installation : `iisreset`
+2. Redémarrer IIS : `iisreset`
+
+### Publication
+
+```bash
+dotnet publish WebApplicationForSOLID/ProjetScolariteSOLID.csproj -c Release -o ./publish
+```
 
 ### Configuration IIS
 
@@ -420,67 +413,7 @@ Le niveau minimum est configurable dans `appsettings.json` sous la clé `Serilog
 2. Créer un **pool d'application** en mode **No Managed Code**
 3. Donner au compte du pool les droits `db_owner` sur la base SQL Server
 
-### Publier via CLI
-
-```bash
-dotnet publish ProjetScolariteSOLID/ProjetScolariteSOLID.csproj -c Release -o ./publish
-```
-
 > Le `web.config` inclus configure automatiquement `ASPNETCORE_ENVIRONMENT=Release`.
-
----
-
-## Structure du projet
-
-```
-ProjetScolariteSOLID/
-├── Controllers/                           ← 7 controllers MVC (Etudiants, Enseignants, Matieres,
-│                                            Classes, Inscriptions, Notes, Home)
-├── Middleware/
-│   └── GlobalExceptionMiddleware.cs       ← Gestion centralisée des exceptions
-│                                            (JSON pour AJAX, redirect pour navigation classique)
-├── ViewModels/                            ← ViewModels par section
-├── Views/                                 ← Vues Razor par section (modales AJAX incluses)
-├── wwwroot/js/
-│   ├── ajax-helpers.js                    ← Helpers AJAX mutualisés (modal, soumission, suppression)
-│   └── etudiants.js / enseignants.js / …  ← JS spécifique par section
-├── appsettings.json / Development / Release
-├── web.config                             ← Configuration ASP.NET Core Module V2
-└── Program.cs                             ← Point d'entrée, configuration DI
-
-src/ProjetScolariteSOLID.Domain/
-├── Models/                                ← Entités métier (Etudiant, Enseignant, Matiere,
-│                                            Classe, Inscription, Note, Referentiels…)
-└── Repositories/                          ← Interfaces (IReadRepository<T>, IWriteRepository<T>…)
-
-src/ProjetScolariteSOLID.Application/
-├── Contracts/                             ← IValidator<T>, ValidationResult, interfaces de services
-├── Services/                              ← EtudiantService, EnseignantService, MatiereService,
-│                                            NoteService, InscriptionService
-├── Validators/                            ← EtudiantValidator, EnseignantValidator,
-│                                            MatiereValidator, NoteValidator
-└── CQRS/
-    ├── Behaviors/                         ← LoggingBehavior, ValidationBehavior
-    └── Etudiants|Enseignants|Matieres|Classes|Inscriptions|Notes/
-        └── Commands/ Queries/ Handlers/
-
-src/ProjetScolariteSOLID.Infrastructure/
-├── Data/
-│   ├── ScolariteDbContext.cs              ← DbContext EF Core
-│   ├── Configurations/                    ← IEntityTypeConfiguration<T> par entité
-│   ├── Migrations/                        ← Migrations EF Core
-│   └── DataSeeder.cs                      ← Données initiales (idempotent)
-├── Repositories/                          ← Implémentations EF Core
-└── Notifications/
-    └── DatabaseNotificationService.cs     ← INotificationService (inscriptions + notes)
-
-tests/ProjetScolariteSOLID.Tests/
-├── Fixtures/
-│   └── Builders.cs                        ← EtudiantBuilder, NoteBuilder, EnseignantBuilder,
-│                                            MatiereBuilder
-├── Validators/                            ← Tests sans mock (règles de validation)
-└── Services/                              ← Tests avec Moq (logique métier)
-```
 
 ---
 
@@ -498,87 +431,19 @@ dotnet test tests/ProjetScolariteSOLID.Tests --collect:"XPlat Code Coverage"
 
 | Classe testée | Tests | Stratégie |
 |---|---|---|
-| `EtudiantValidator` | 9 | Instanciation directe |
-| `NoteValidator` | 8 | Instanciation directe (Theory sur les bornes 0/10/20) |
-| `EnseignantValidator` | 8 | Instanciation directe |
-| `MatiereValidator` | 7 | Instanciation directe |
-| `EtudiantService` | 8 | `Mock<IEtudiantRepository>` + `Mock<IValidator<Etudiant>>` |
-| `EnseignantService` | 7 | `Mock<IEnseignantRepository>` |
-| `MatiereService` | 8 | `Mock<IMatiereRepository>` |
-| `NoteService` | 8 | `Mock<INoteRepository>` + `Mock<INotificationService>` |
-| `InscriptionService` | 10 | 6 mocks — cas capacité max + statut absent (`InvalidOperationException`) |
-| **Total** | **75** | |
-
----
-
-## Fonctionnalités
-
-- ✅ Gestion complète des **étudiants** (liste paginée, création, édition, suppression, numéro auto-généré)
-- ✅ Gestion complète des **enseignants** (liste paginée, création, édition, suppression, grades et spécialités)
-- ✅ Gestion complète des **matières** (liste, création, édition, suppression, coefficients, volumes horaires)
-- ✅ Gestion complète des **classes** (liste, création, édition, suppression, capacité max, niveaux, filières)
-- ✅ Gestion des **inscriptions** (inscrire, contrôle de capacité, modification du statut, suppression)
-- ✅ Saisie et gestion des **notes** avec génération de **bulletins** (moyennes pondérées, mentions)
-- ✅ Interactions **AJAX dynamiques** (modales sans rechargement de page)
-- ✅ Pipeline CQRS avec **logging** et **validation automatiques** via MediatR Behaviors
-- ✅ **Migrations** et **seed** automatiques au démarrage
-- ✅ Gestion centralisée des erreurs (`GlobalExceptionMiddleware` : JSON pour AJAX, redirect pour navigation)
-- ✅ Logs structurés persistés en base de données (Serilog → table `Logs`)
-- ✅ Déploiement **IIS** via Web Deploy avec `web.config` pré-configuré
-- ✅ **75 tests unitaires** couvrant Services et Validators de la couche Application
-- ✅ Pattern **Result** (`OperationResult<T>`) : pas d'exceptions métier
-- ✅ Support mode **seed-only** : `dotnet run -- --seed-only`
-
----
-
-## Référentiels de données
-
-L'application utilise des **tables de référence** pour les données de configuration :
-
-| Référentiel | Valeurs initiales (seed) |
-|-------------|--------------------------|
-| **Niveau** | L1, L2, L3, M1, M2, Doctorat |
-| **Filiere** | Informatique, Mathématiques, Physique, Chimie, Biologie, Lettres |
-| **AnneeAcademique** | 2023-2024, 2024-2025, 2025-2026 |
-| **Specialite** | Informatique, Mathématiques, Physique, Chimie, Biologie |
-| **Grade** | Professeur, Maître de conférences, Assistant, Vacataire |
-| **StatutInscription** | Active, Suspendue, Annulée |
-| **TypeEvaluation** | Examen, Contrôle continu, TP, Oral, Projet |
-
-### Calcul du bulletin
-
-```csharp
-public sealed class BulletinEtudiant
-{
-    public Etudiant Etudiant { get; init; }
-    public IReadOnlyList<LigneNote> Lignes { get; init; }
-    public decimal MoyenneGenerale { get; init; }
-
-    public string Mention => MoyenneGenerale switch
-    {
-        >= 16 => "Très bien",
-        >= 14 => "Bien",
-        >= 12 => "Assez bien",
-        >= 10 => "Passable",
-        _ => "Insuffisant"
-    };
-}
-
-public sealed class LigneNote
-{
-    public string IntituleMatiere { get; init; }
-    public int Coefficient { get; init; }
-    public decimal MoyenneMatiere { get; init; }
-    public decimal MoyennePonderee => MoyenneMatiere * Coefficient;
-}
-```
+| `EtudiantValidator` | ✔ | Instanciation directe, règles de validation |
+| `NoteValidator` | ✔ | Theory sur les bornes 0 / 20 |
+| `EnseignantValidator` | ✔ | Instanciation directe |
+| `MatiereValidator` | ✔ | Instanciation directe |
+| `EtudiantService` | ✔ | `Mock<IEtudiantRepository>` + `Mock<IValidator<Etudiant>>` |
+| `EnseignantService` | ✔ | `Mock<IEnseignantRepository>` |
+| `MatiereService` | ✔ | `Mock<IMatiereRepository>` |
+| `NoteService` | ✔ | `Mock<INoteRepository>` + `Mock<INotificationService>` |
+| `InscriptionService` | ✔ | 6 mocks — cas capacité max + statut |
+| **Total** | **64** | |
 
 ---
 
 ## Licence
 
-Ce projet est distribué sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-**Développé avec ❤️ pour démontrer les principes SOLID et la Clean Architecture en .NET 10**
+Ce projet est à usage éducatif.

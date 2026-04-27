@@ -1,7 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using ProjetScolariteSOLID.Application.Contracts;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.Domain.Repositories;
+using ProjetScolariteSOLID.Infrastructure.Auth;
+using ProjetScolariteSOLID.Infrastructure.Email;
 using ProjetScolariteSOLID.Infrastructure.Notifications;
 using ProjetScolariteSOLID.Infrastructure.Repositories;
 
@@ -25,6 +32,17 @@ public static class InfrastructureServiceExtensions
                     maxRetryDelay: TimeSpan.FromSeconds(30),
                     errorNumbersToAdd: null)));
 
+        // ── ASP.NET Core Identity ─────────────────────────────────────────────────
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+        {
+            options.Password.RequiredLength         = 8;
+            options.Password.RequireNonAlphanumeric = false;
+            options.User.RequireUniqueEmail         = true;
+            options.SignIn.RequireConfirmedEmail     = true;
+        })
+        .AddEntityFrameworkStores<ScolariteDbContext>()
+        .AddDefaultTokenProviders();
+
         // ── Repositories EF Core (Scoped = même DbContext par requête) ────────────
         services.AddScoped<IEtudiantRepository,    EfEtudiantRepository>();
         services.AddScoped<IEnseignantRepository,  EfEnseignantRepository>();
@@ -45,8 +63,21 @@ public static class InfrastructureServiceExtensions
         // ── Notification — log console + persistance BDD ──────────────────────────
         services.AddScoped<INotificationService, DatabaseNotificationService>();
 
+        // ── Auth / Permissions ────────────────────────────────────────────────────
+        services.AddScoped<IPermissionService, PermissionService>();
+
+        // ── Email Queue ───────────────────────────────────────────────────────────
+        services.AddScoped<IEmailQueueService, EfEmailQueueService>();
+        services.AddScoped<IEmailTemplateService, EfEmailTemplateService>();
+        services.AddScoped<ISmtpEmailSender,   SmtpEmailSender>();
+        services.AddHostedService<EmailQueueBackgroundService>();
+
         // ── Seed ──────────────────────────────────────────────────────────────────
         services.AddScoped<IDataSeeder, DataSeeder>();
+
+        // ── Audit ─────────────────────────────────────────────────────────────────
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAuditLogRepository, EfAuditLogRepository>();
 
         return services;
     }

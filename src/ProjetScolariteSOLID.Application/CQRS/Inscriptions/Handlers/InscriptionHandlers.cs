@@ -9,7 +9,7 @@ public sealed class GetInscriptionsQueryHandler : IRequestHandler<GetInscription
     private readonly IInscriptionService _service;
     public GetInscriptionsQueryHandler(IInscriptionService service) => _service = service;
     public Task<PagedResult<Inscription>> Handle(GetInscriptionsQuery request, CancellationToken ct)
-        => _service.GetInscriptionsAsync(request.Page, request.PageSize, ct);
+        => _service.GetInscriptionsAsync(request.Page, request.PageSize, request.Search, request.SortCol, request.SortDir, ct);
 }
 
 public sealed class GetInscriptionByIdQueryHandler : IRequestHandler<GetInscriptionByIdQuery, Inscription?>

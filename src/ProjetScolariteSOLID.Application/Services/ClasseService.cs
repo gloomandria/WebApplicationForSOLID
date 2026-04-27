@@ -14,6 +14,9 @@ public sealed class ClasseService : IClasseService
     public Task<IReadOnlyList<Classe>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllAsync(ct);
 
+    public Task<PagedResult<Classe>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
+
     public Task<Classe?> GetByIdAsync(int id, CancellationToken ct = default)
         => _repository.GetByIdAsync(id, ct);
 

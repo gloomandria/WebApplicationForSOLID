@@ -12,6 +12,14 @@ public sealed class GetAllClassesQueryHandler : IRequestHandler<GetAllClassesQue
         => _service.GetAllAsync(ct);
 }
 
+public sealed class GetClassesPagedQueryHandler : IRequestHandler<GetClassesPagedQuery, PagedResult<Classe>>
+{
+    private readonly IClasseService _service;
+    public GetClassesPagedQueryHandler(IClasseService service) => _service = service;
+    public Task<PagedResult<Classe>> Handle(GetClassesPagedQuery request, CancellationToken ct)
+        => _service.GetPagedAsync(request.Page, request.PageSize, request.Search, request.SortCol, request.SortDir, ct);
+}
+
 public sealed class GetClasseByIdQueryHandler : IRequestHandler<GetClasseByIdQuery, Classe?>
 {
     private readonly IClasseService _service;

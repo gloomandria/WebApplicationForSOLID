@@ -1,0 +1,30 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.AssignRoleViewModel
+
+<input type="hidden" name="userId"      value="@Model.UserId" />
+<input type="hidden" name="roleActuel"  value="@Model.RoleActuel" />
+
+<div class="mb-2">
+    <p class="mb-1"><strong>Utilisateur :</strong> @Model.NomComplet</p>
+    <p class="mb-1"><strong>Email :</strong> <span class="text-muted">@Model.Email</span></p>
+    <p class="mb-3"><strong>Rôle actuel :</strong>
+        <span class="badge bg-secondary">@(string.IsNullOrEmpty(Model.RoleActuel) ? "Aucun" : Model.RoleActuel)</span>
+    </p>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-bold">Nouveau rôle</label>
+    <select name="nouveauRole" class="form-select" required>
+        <option value="">-- Choisir --</option>
+        @foreach (var r in Model.RolesDisponibles)
+        {
+            if (r == Model.RoleActuel)
+            {
+                <option value="@r" selected>@r</option>
+            }
+            else
+            {
+                <option value="@r">@r</option>
+            }
+        }
+    </select>
+</div>

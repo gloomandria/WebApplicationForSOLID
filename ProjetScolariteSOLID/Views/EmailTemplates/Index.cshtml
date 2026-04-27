@@ -1,0 +1,127 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.EmailTemplateListViewModel
+@{
+    ViewData["Title"] = "Templates Email";
+}
+
+<div id="app-data" data-controller="EmailTemplates"></div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">📝 Templates Email</h2>
+        <small class="text-muted">Gérez les modèles d'emails envoyés par l'application</small>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-success" id="btn-open-create">
+            <i class="bi bi-plus-lg"></i> Nouveau template
+        </button>
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">← Back-office</a>
+    </div>
+</div>
+
+<div id="alert-zone"></div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="dt-emailtemplates">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3">Code</th>
+                        <th>Nom</th>
+                        <th>Sujet</th>
+                        <th class="text-center">Statut</th>
+                        <th>Description</th>
+                        <th class="text-end pe-3 nosort">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Créer ──────────────────────────────────────────────────── -->
+<div class="modal fade" id="modal-create" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success bg-opacity-10 border-bottom">
+                <h5 class="modal-title">
+                    <span class="badge bg-success me-2">+</span> Nouveau template email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-create">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4" id="modal-create-body">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <div class="mt-2 text-muted small">Chargement…</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <div id="modal-create-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success px-4">💾 Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Éditer ─────────────────────────────────────────────────── -->
+<div class="modal fade" id="modal-edit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10 border-bottom">
+                <h5 class="modal-title">
+                    <span class="badge bg-warning text-dark me-2">✏️</span> Modifier le template
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-edit">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4" id="modal-edit-body">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-warning" role="status"></div>
+                        <div class="mt-2 text-muted small">Chargement…</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <div id="modal-edit-alert" class="text-danger me-auto small"></div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning px-4">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal : Supprimer ──────────────────────────────────────────────── -->
+<div class="modal fade" id="modal-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger bg-opacity-10 border-bottom">
+                <h5 class="modal-title text-danger">🗑️ Supprimer le template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-delete">
+                @Html.AntiForgeryToken()
+                <div class="modal-body text-center py-4">
+                    <div class="fs-1 mb-2">⚠️</div>
+                    <p class="mb-1">Êtes-vous sûr de vouloir supprimer ce template ?</p>
+                    <small class="text-muted">Cette action est irréversible.</small>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger px-4">🗑️ Supprimer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+    <script src="~/js/emailtemplates.js" asp-append-version="true"></script>
+}

@@ -12,8 +12,8 @@ else
             <td><span class="badge bg-secondary">@e.Matricule</span></td>
             <td>@e.NomComplet</td>
             <td>@e.Email</td>
-            <td>@e.Specialite</td>
-            <td><span class="badge bg-info text-dark">@e.Grade</span></td>
+            <td>@e.Specialite?.Libelle</td>
+            <td><span class="badge bg-info text-dark">@e.Grade?.Libelle</span></td>
             <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@e.Id">Éditer</button>
                 <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@e.Id">Supprimer</button>

@@ -15,7 +15,7 @@
 <div id="alert-zone"></div>
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle" id="dt-etudiants">
         <thead class="table-primary">
             <tr>
                 <th>N° Étudiant</th>
@@ -23,35 +23,11 @@
                 <th>Email</th>
                 <th>Téléphone</th>
                 <th>Date naissance</th>
-                <th class="text-end">Actions</th>
+                <th class="text-end nosort">Actions</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-            @await Html.PartialAsync("_EtudiantsTable", Model)
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
-</div>
-
-<div class="d-flex justify-content-between align-items-center">
-    <small class="text-muted">@Model.Etudiants.TotalCount étudiant(s) — Page @Model.Etudiants.Page / @Model.Etudiants.TotalPages</small>
-    <nav>
-        <ul class="pagination mb-0" id="pagination-links">
-            @if (Model.Etudiants.HasPreviousPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage - 1)">‹</a></li>
-            }
-            @for (int i = 1; i <= Model.Etudiants.TotalPages; i++)
-            {
-                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                    <a class="page-link ajax-page" href="#" data-page="@i">@i</a>
-                </li>
-            }
-            @if (Model.Etudiants.HasNextPage)
-            {
-                <li class="page-item"><a class="page-link ajax-page" href="#" data-page="@(Model.CurrentPage + 1)">›</a></li>
-            }
-        </ul>
-    </nav>
 </div>
 
 <!-- Modal : Créer -->
@@ -119,7 +95,5 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/js/ajax-helpers.js" asp-append-version="true"></script>
-    <script src="~/js/etudiants.js" asp-append-version="true"></script>
+@section Scripts {    <script src="~/js/etudiants.js" asp-append-version="true"></script>
 }

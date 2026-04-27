@@ -20,8 +20,8 @@ public sealed class EtudiantService : IEtudiantService
         _logger = logger;
     }
 
-    public Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, CancellationToken ct = default)
-        => _repository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<IReadOnlyList<Etudiant>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllAsync(ct);
@@ -34,9 +34,6 @@ public sealed class EtudiantService : IEtudiantService
         var validation = _validator.Validate(etudiant);
         if (!validation.IsValid)
             return OperationResult<Etudiant>.Failure(string.Join(" | ", validation.Errors));
-
-        if (await _repository.EmailExistsAsync(etudiant.Email, ct: ct))
-            return OperationResult<Etudiant>.Failure("Cet email est déjà utilisé par un autre étudiant.");
 
         var created = await _repository.AddAsync(etudiant, ct);
         _logger.LogInformation("Étudiant créé : {Id} — {NomComplet}", created.Id, created.NomComplet);
@@ -51,9 +48,6 @@ public sealed class EtudiantService : IEtudiantService
 
         if (!await _repository.ExistsAsync(etudiant.Id, ct))
             return OperationResult.Failure($"Étudiant introuvable (Id={etudiant.Id}).");
-
-        if (await _repository.EmailExistsAsync(etudiant.Email, etudiant.Id, ct))
-            return OperationResult.Failure("Cet email est déjà utilisé par un autre étudiant.");
 
         await _repository.UpdateAsync(etudiant, ct);
         _logger.LogInformation("Étudiant mis à jour : {Id}", etudiant.Id);

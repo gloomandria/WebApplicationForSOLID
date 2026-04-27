@@ -8,5 +8,5 @@ public interface INoteRepository : IReadRepository<Note>, IWriteRepository<Note>
     Task<IReadOnlyList<Note>> GetByMatiereAsync(int matiereId, CancellationToken ct = default);
     Task<IReadOnlyList<Note>> GetByEtudiantAndMatiereAsync(int etudiantId, int matiereId, CancellationToken ct = default);
     Task<bool> ExistsAsync(int id, CancellationToken ct = default);
-    Task<PagedResult<Note>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<PagedResult<Note>> GetPagedAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default);
 }

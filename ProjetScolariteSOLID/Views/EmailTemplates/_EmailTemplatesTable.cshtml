@@ -1,0 +1,28 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.EmailTemplateListViewModel
+
+@if (!Model.Templates.Any())
+{
+    <tr><td colspan="6"><div class="alert alert-info mb-0">Aucun template email enregistré.</div></td></tr>
+}
+else
+{
+    @foreach (var t in Model.Templates)
+    {
+        <tr>
+            <td><span class="badge bg-secondary">@t.Code</span></td>
+            <td>@t.Nom</td>
+            <td>@t.Sujet</td>
+            <td>
+                @if (t.EstActif)
+                { <span class="badge bg-success">Actif</span> }
+                else
+                { <span class="badge bg-danger">Inactif</span> }
+            </td>
+            <td><small class="text-muted">@t.Description</small></td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="@t.Id">Éditer</button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@t.Id">Supprimer</button>
+            </td>
+        </tr>
+    }
+}

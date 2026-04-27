@@ -4,7 +4,7 @@ namespace ProjetScolariteSOLID.Application.Contracts;
 
 public interface INoteService
 {
-    Task<PagedResult<Note>> GetNotesAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<PagedResult<Note>> GetNotesAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default);
     Task<Note?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<OperationResult<Note>> AjouterNoteAsync(Note note, CancellationToken ct = default);
     Task<OperationResult> ModifierNoteAsync(Note note, CancellationToken ct = default);

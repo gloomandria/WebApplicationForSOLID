@@ -1,31 +1,62 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjetScolariteSOLID.Application.CQRS.Etudiants.Commands;
 using ProjetScolariteSOLID.Application.CQRS.Etudiants.Queries;
 using ProjetScolariteSOLID.Domain.Models;
+using ProjetScolariteSOLID.Domain.Models.Auth;
 using ProjetScolariteSOLID.ViewModels;
 
 namespace ProjetScolariteSOLID.Controllers;
 
+[Authorize(Roles = $"{ApplicationRole.Administrateur},{ApplicationRole.Enseignant},{ApplicationRole.Etudiant}")]
 public sealed class EtudiantsController : Controller
 {
     private readonly IMediator _mediator;
-    private const int PageSize = 8;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IConfiguration _configuration;
+    private const int DefaultPageSize = 10;
 
-    public EtudiantsController(IMediator mediator) => _mediator = mediator;
-
-    public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
+    public EtudiantsController(IMediator mediator, UserManager<ApplicationUser> userManager, IConfiguration configuration)
     {
-        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, PageSize), ct);
-        return View(new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page });
+        _mediator      = mediator;
+        _userManager   = userManager;
+        _configuration = configuration;
+    }
+
+    public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize, CancellationToken ct = default)
+    {
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, pageSize), ct);
+        return View(new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page, PageSize = pageSize });
     }
 
     [HttpGet]
-    public async Task<IActionResult> Table(int page, CancellationToken ct)
+    public async Task<IActionResult> Table(int page, int pageSize = DefaultPageSize, CancellationToken ct = default)
     {
-        page = page < 1 ? 1 : page;
-        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, PageSize), ct);
-        return PartialView("_EtudiantsTable", new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page });
+        page     = page < 1 ? 1 : page;
+        pageSize = pageSize is 10 or 20 or 30 or 50 ? pageSize : DefaultPageSize;
+        var etudiants = await _mediator.Send(new GetEtudiantsQuery(page, pageSize), ct);
+        return PartialView("_EtudiantsTable", new EtudiantsViewModel { Etudiants = etudiants, CurrentPage = page, PageSize = pageSize });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DataJson(int draw, int start, int length, string searchValue = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+    {
+        length = length is 10 or 20 or 30 or 50 ? length : DefaultPageSize;
+        int page = (start / length) + 1;
+        var result = await _mediator.Send(new GetEtudiantsQuery(page, length, searchValue, sortCol, sortDir), ct);
+        var data = result.Items.Select(e => new
+        {
+            id            = e.Id,
+            numeroEtudiant = e.NumeroEtudiant,
+            nomComplet    = e.NomComplet,
+            email         = e.Email,
+            telephone     = e.Telephone,
+            dateNaissance = e.DateNaissance.ToString("dd/MM/yyyy")
+        });
+        return Json(new { draw, recordsTotal = result.TotalCount, recordsFiltered = result.TotalCount, data });
     }
 
     [HttpGet]
@@ -36,10 +67,26 @@ public sealed class EtudiantsController : Controller
     public async Task<IActionResult> FormEdit(int id, CancellationToken ct)
     {
         var etudiant = await _mediator.Send(new GetEtudiantByIdQuery(id), ct);
+        EtudiantFormModel form = new();
+        if (etudiant is not null)
+        {
+            form = new EtudiantFormModel
+            {
+                Id             = etudiant.Id,
+                NumeroEtudiant = etudiant.NumeroEtudiant,
+                Nom            = etudiant.Nom,
+                Prenom         = etudiant.Prenom,
+                Email          = etudiant.Email,
+                Telephone      = etudiant.Telephone,
+                Adresse        = etudiant.Adresse,
+                DateNaissance  = etudiant.DateNaissance,
+                DateInscription = etudiant.DateInscription
+            };
+        }
         return PartialView("_FormEdit", new EtudiantsViewModel
         {
             SelectedEtudiant = etudiant,
-            Etudiant = etudiant ?? new Etudiant()
+            Etudiant = form
         });
     }
 
@@ -68,30 +115,93 @@ public sealed class EtudiantsController : Controller
         });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAjax([FromForm] Etudiant Etudiant, CancellationToken ct)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateAjax([FromForm] EtudiantFormModel form, CancellationToken ct)
     {
-        var result = await _mediator.Send(new CreateEtudiantCommand(Etudiant), ct);
-        if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
-        return Json(new { success = true, message = $"Étudiant {result.Value!.NomComplet} créé avec succès." });
+        // 1. Créer le compte Identity (EstActif=false, en attente validation admin)
+        var user = new ApplicationUser
+        {
+            UserName       = form.Email,
+            Email          = form.Email,
+            Prenom         = form.Prenom,
+            Nom            = form.Nom,
+            PhoneNumber    = form.Telephone,
+            EmailConfirmed = true,
+            EstActif       = false
+        };
+        var defaultPassword = _configuration["Identity:DefaultPassword"] ?? "Changeme@1234!";
+        var identityResult = await _userManager.CreateAsync(user, defaultPassword);
+        if (!identityResult.Succeeded)
+        {
+            var errors = string.Join(" | ", identityResult.Errors.Select(e => e.Description));
+            return Json(new { success = false, message = errors });
+        }
+        await _userManager.AddToRoleAsync(user, ApplicationRole.Etudiant);
+
+        // 2. Créer la fiche étudiant liée
+        var etudiant = new Etudiant
+        {
+            UserId        = user.Id,
+            DateNaissance = form.DateNaissance,
+            Adresse       = form.Adresse
+        };
+        var result = await _mediator.Send(new CreateEtudiantCommand(etudiant), ct);
+        if (!result.IsSuccess)
+        {
+            await _userManager.DeleteAsync(user);
+            return Json(new { success = false, message = result.ErrorMessage });
+        }
+
+        // 3. Mettre à jour le lien EtudiantId dans AspNetUsers
+        user.EtudiantId = result.Value!.Id;
+        await _userManager.UpdateAsync(user);
+
+        return Json(new { success = true, message = $"Étudiant {user.Prenom} {user.Nom} créé avec succès." });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditAjax([FromForm] Etudiant Etudiant, CancellationToken ct)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAjax([FromForm] EtudiantFormModel form, CancellationToken ct)
     {
-        var result = await _mediator.Send(new UpdateEtudiantCommand(Etudiant), ct);
+        var etudiant = await _mediator.Send(new GetEtudiantByIdQuery(form.Id), ct);
+        if (etudiant is null)
+            return Json(new { success = false, message = "Étudiant introuvable." });
+
+        // Mettre à jour le compte Identity
+        var user = await _userManager.FindByIdAsync(etudiant.UserId);
+        if (user is not null)
+        {
+            user.Prenom      = form.Prenom;
+            user.Nom         = form.Nom;
+            user.PhoneNumber = form.Telephone;
+            await _userManager.UpdateAsync(user);
+            if (!string.Equals(user.Email, form.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                await _userManager.SetEmailAsync(user, form.Email);
+                await _userManager.SetUserNameAsync(user, form.Email);
+            }
+        }
+
+        // Mettre à jour la fiche étudiant
+        etudiant.DateNaissance = form.DateNaissance;
+        etudiant.Adresse       = form.Adresse;
+
+        var result = await _mediator.Send(new UpdateEtudiantCommand(etudiant), ct);
         if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
         return Json(new { success = true, message = "Étudiant mis à jour avec succès." });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAjax([FromForm] int EtudiantId, CancellationToken ct)
     {
+        var etudiant = await _mediator.Send(new GetEtudiantByIdQuery(EtudiantId), ct);
         var result = await _mediator.Send(new DeleteEtudiantCommand(EtudiantId), ct);
         if (!result.IsSuccess) return Json(new { success = false, message = result.ErrorMessage });
+
+        if (etudiant is not null)
+        {
+            var user = await _userManager.FindByIdAsync(etudiant.UserId);
+            if (user is not null) await _userManager.DeleteAsync(user);
+        }
         return Json(new { success = true, message = "Étudiant supprimé avec succès." });
     }
 }

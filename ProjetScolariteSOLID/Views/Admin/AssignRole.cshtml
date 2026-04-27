@@ -1,0 +1,41 @@
+@model ProjetScolariteSOLID.ViewModels.Admin.AssignRoleViewModel
+@{
+    ViewData["Title"] = "Assigner un rôle";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>🏷️ Assigner un rôle</h2>
+    <a asp-action="Users" class="btn btn-outline-secondary btn-sm">← Utilisateurs</a>
+</div>
+
+<div class="card shadow-sm" style="max-width:500px">
+    <div class="card-body">
+        <p><strong>Utilisateur :</strong> @Model.NomComplet</p>
+        <p><strong>Email :</strong> @Model.Email</p>
+        <p><strong>Rôle actuel :</strong>
+            <span class="badge bg-secondary">@(string.IsNullOrEmpty(Model.RoleActuel) ? "Aucun" : Model.RoleActuel)</span>
+        </p>
+        <form asp-action="AssignRole" method="post">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="NomComplet" />
+            <input type="hidden" asp-for="Email" />
+            <input type="hidden" asp-for="RoleActuel" />
+            <div class="mb-3">
+                <label asp-for="NouveauRole" class="form-label fw-bold">Nouveau rôle</label>
+                <select asp-for="NouveauRole" class="form-select">
+                    <option value="">-- Choisir --</option>
+                    @foreach (var r in Model.RolesDisponibles)
+                    {
+                        <option value="@r" selected="@(r == Model.RoleActuel)">@r</option>
+                    }
+                </select>
+                <span asp-validation-for="NouveauRole" class="text-danger small"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

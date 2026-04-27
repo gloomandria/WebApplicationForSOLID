@@ -1,0 +1,9 @@
+@model ProjetScolariteSOLID.ViewModels.ReferentielViewModel
+@{
+    var type = ViewData["Type"] as string ?? string.Empty;
+}
+
+<input type="hidden" name="type" value="@type" />
+<input type="hidden" name="itemId" value="@Model.ItemId" />
+<p>Voulez-vous supprimer l'élément <strong>«&nbsp;@Model.SelectedItem?.Libelle&nbsp;»</strong> ?</p>
+<p class="text-muted small">Cette action est irréversible.</p>

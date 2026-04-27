@@ -7,7 +7,7 @@ namespace ProjetScolariteSOLID.Application.Contracts;
 /// </summary>
 public interface IEtudiantService
 {
-    Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<PagedResult<Etudiant>> GetEtudiantsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default);
     Task<Etudiant?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<OperationResult<Etudiant>> CreateAsync(Etudiant etudiant, CancellationToken ct = default);
     Task<OperationResult> UpdateAsync(Etudiant etudiant, CancellationToken ct = default);

@@ -13,7 +13,8 @@
     </div>
     <div class="col-12">
         <label class="form-label">Description</label>
-        <textarea name="Matiere.Description" class="form-control" rows="2">@Model.Matiere.Description</textarea>
+        <div id="quill-description" style="height:120px; background:#fff;"></div>
+        <input type="hidden" name="Matiere.Description" value="@Model.Matiere.Description" />
     </div>
     <div class="col-md-4">
         <label class="form-label">Coefficient</label>

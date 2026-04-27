@@ -16,8 +16,8 @@ public sealed class EnseignantService : IEnseignantService
         _logger = logger;
     }
 
-    public Task<PagedResult<Enseignant>> GetEnseignantsAsync(int page, int pageSize, CancellationToken ct = default)
-        => _repository.GetPagedAsync(page, pageSize, ct);
+    public Task<PagedResult<Enseignant>> GetEnseignantsAsync(int page, int pageSize, string search = "", int sortCol = 0, string sortDir = "asc", CancellationToken ct = default)
+        => _repository.GetPagedAsync(page, pageSize, search, sortCol, sortDir, ct);
 
     public Task<IReadOnlyList<Enseignant>> GetAllAsync(CancellationToken ct = default)
         => _repository.GetAllAsync(ct);
@@ -30,9 +30,6 @@ public sealed class EnseignantService : IEnseignantService
         var validation = _validator.Validate(enseignant);
         if (!validation.IsValid)
             return OperationResult<Enseignant>.Failure(string.Join(" | ", validation.Errors));
-
-        if (await _repository.EmailExistsAsync(enseignant.Email, ct: ct))
-            return OperationResult<Enseignant>.Failure("Cet email est déjà utilisé.");
 
         var created = await _repository.AddAsync(enseignant, ct);
         _logger.LogInformation("Enseignant créé : {Id} — {NomComplet}", created.Id, created.NomComplet);
@@ -47,9 +44,6 @@ public sealed class EnseignantService : IEnseignantService
 
         if (!await _repository.ExistsAsync(enseignant.Id, ct))
             return OperationResult.Failure($"Enseignant introuvable (Id={enseignant.Id}).");
-
-        if (await _repository.EmailExistsAsync(enseignant.Email, enseignant.Id, ct))
-            return OperationResult.Failure("Cet email est déjà utilisé.");
 
         await _repository.UpdateAsync(enseignant, ct);
         _logger.LogInformation("Enseignant mis à jour : {Id}", enseignant.Id);

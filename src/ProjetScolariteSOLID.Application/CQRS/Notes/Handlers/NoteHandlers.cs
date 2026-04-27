@@ -9,7 +9,7 @@ public sealed class GetNotesQueryHandler : IRequestHandler<GetNotesQuery, PagedR
     private readonly INoteService _service;
     public GetNotesQueryHandler(INoteService service) => _service = service;
     public Task<PagedResult<Note>> Handle(GetNotesQuery request, CancellationToken ct)
-        => _service.GetNotesAsync(request.Page, request.PageSize, ct);
+        => _service.GetNotesAsync(request.Page, request.PageSize, request.Search, request.SortCol, request.SortDir, ct);
 }
 
 public sealed class GetNoteByIdQueryHandler : IRequestHandler<GetNoteByIdQuery, Note?>

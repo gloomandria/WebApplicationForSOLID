@@ -1,8 +1,8 @@
 @model ProjetScolariteSOLID.ViewModels.EtudiantsViewModel
 
-<input type="hidden" name="Etudiant.Id" value="@Model.Etudiant.Id" />
-<input type="hidden" name="Etudiant.NumeroEtudiant" value="@Model.Etudiant.NumeroEtudiant" />
-<input type="hidden" name="Etudiant.DateInscription" value="@Model.Etudiant.DateInscription.ToString("yyyy-MM-dd")" />
+<input type="hidden" name="Id" value="@Model.Etudiant.Id" />
+<input type="hidden" name="NumeroEtudiant" value="@Model.Etudiant.NumeroEtudiant" />
+<input type="hidden" name="DateInscription" value="@Model.Etudiant.DateInscription.ToString("yyyy-MM-dd")" />
 
 <div class="row g-3">
     <div class="col-md-4">
@@ -11,26 +11,26 @@
     </div>
     <div class="col-md-4">
         <label class="form-label">Nom</label>
-        <input name="Etudiant.Nom" value="@Model.Etudiant.Nom" class="form-control" required />
+        <input name="Nom" value="@Model.Etudiant.Nom" class="form-control" required />
     </div>
     <div class="col-md-4">
         <label class="form-label">Prénom</label>
-        <input name="Etudiant.Prenom" value="@Model.Etudiant.Prenom" class="form-control" required />
+        <input name="Prenom" value="@Model.Etudiant.Prenom" class="form-control" required />
     </div>
     <div class="col-md-8">
         <label class="form-label">Email</label>
-        <input name="Etudiant.Email" value="@Model.Etudiant.Email" class="form-control" type="email" required />
+        <input name="Email" value="@Model.Etudiant.Email" class="form-control" type="email" required />
     </div>
     <div class="col-md-4">
         <label class="form-label">Téléphone</label>
-        <input name="Etudiant.Telephone" value="@Model.Etudiant.Telephone" class="form-control" />
+        <input name="Telephone" value="@Model.Etudiant.Telephone" class="form-control" />
     </div>
     <div class="col-md-6">
         <label class="form-label">Date de naissance</label>
-        <input name="Etudiant.DateNaissance" value="@Model.Etudiant.DateNaissance.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
+        <input name="DateNaissance" value="@Model.Etudiant.DateNaissance.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
     </div>
     <div class="col-12">
         <label class="form-label">Adresse</label>
-        <input name="Etudiant.Adresse" value="@Model.Etudiant.Adresse" class="form-control" />
+        <input name="Adresse" value="@Model.Etudiant.Adresse" class="form-control" />
     </div>
 </div>

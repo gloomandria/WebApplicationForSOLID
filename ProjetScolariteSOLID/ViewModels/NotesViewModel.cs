@@ -7,6 +7,7 @@ public sealed class NotesViewModel
 {
     public PagedResult<Note> Notes          { get; init; } = new();
     public int               CurrentPage   { get; init; } = 1;
+    public int               PageSize      { get; init; } = 10;
     public Note              Note          { get; init; } = new();
     public int               NoteId        { get; init; }
     public Note?             SelectedNote  { get; init; }
