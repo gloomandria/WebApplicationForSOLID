@@ -14,13 +14,13 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
     {
         var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-        // Chercher le dossier WebApplicationForSOLID contenant appsettings.json
+        // Chercher le dossier ProjetScolariteSOLID contenant appsettings.json
         string? webAppDir = null;
         var candidates = new[]
         {
-            Path.Combine(Directory.GetCurrentDirectory(), "WebApplicationForSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "WebApplicationForSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "ProjetScolariteSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "ProjetScolariteSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "ProjetScolariteSOLID"),
         };
         foreach (var c in candidates)
         {
