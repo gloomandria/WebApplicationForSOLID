@@ -17,9 +17,9 @@ public sealed class ScolariteDbContextFactory : IDesignTimeDbContextFactory<Scol
         string? webAppDir = null;
         var candidates = new[]
         {
-            Path.Combine(Directory.GetCurrentDirectory(), "WebApplicationForSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "WebApplicationForSOLID"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "WebApplicationForSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "ProjetScolariteSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "ProjetScolariteSOLID"),
+            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "ProjetScolariteSOLID"),
         };
         foreach (var c in candidates)
         {

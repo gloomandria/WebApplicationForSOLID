@@ -24,8 +24,8 @@
 
   <!-- Web dépend de Application + Infrastructure (DIP) -->
   <ItemGroup>
-    <ProjectReference Include="..\src\WebApplicationForSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
-    <ProjectReference Include="..\src\WebApplicationForSOLID.Infrastructure\ProjetScolariteSOLID.Infrastructure.csproj" />
+    <ProjectReference Include="..\src\ProjetScolariteSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
+    <ProjectReference Include="..\src\ProjetScolariteSOLID.Infrastructure\ProjetScolariteSOLID.Infrastructure.csproj" />
   </ItemGroup>
 
   <!-- Injecter ASPNETCORE_ENVIRONMENT=Release dans web.config lors d'un publish Release -->

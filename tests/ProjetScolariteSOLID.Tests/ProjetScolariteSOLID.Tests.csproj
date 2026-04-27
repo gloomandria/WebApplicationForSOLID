@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebApplicationForSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
-    <ProjectReference Include="..\..\src\WebApplicationForSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
+    <ProjectReference Include="..\..\src\ProjetScolariteSOLID.Application\ProjetScolariteSOLID.Application.csproj" />
+    <ProjectReference Include="..\..\src\ProjetScolariteSOLID.Domain\ProjetScolariteSOLID.Domain.csproj" />
   </ItemGroup>
 
 </Project>
